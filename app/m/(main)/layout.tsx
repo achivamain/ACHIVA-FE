@@ -1,6 +1,7 @@
 import getAuthStatus from "@/lib/getAuthStatus";
 import AuthHydrator from "@/features/auth/AuthHydrator";
 import MobileSidebar from "@/components/MobileSidebar";
+import { signOut } from "@/auth";
 
 export default async function Layout({
   children,
@@ -23,6 +24,7 @@ export default async function Layout({
     case "error":
     default:
       console.error("로그인 확인 에러", auth.error);
+      await signOut({ redirect: false });
       return (
         <div>
           {children}
