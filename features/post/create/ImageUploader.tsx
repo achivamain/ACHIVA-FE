@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import useImageUploader from "@/hooks/useImageUploader";
 import Cropper from "react-easy-crop";
 import { NextStepButton } from "./Buttons";
@@ -90,14 +90,34 @@ export default function ImageUploader() {
           isLoading={isUploading}
           onClick={() => {
             if (!imageSrc) {
-              // RN 환경에서는 카메라 요청, 아니면 파일인풋 클릭
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(
-                  JSON.stringify({ type: "REQUEST_CAMERA" })
+              let attempts = 0;
+              const maxAttempts = 20;
+              const start = performance.now();
+              const interval = setInterval(() => {
+                attempts++;
+                console.log("window: ", window);
+                console.log(
+                  "window.ReactNativeWebView:",
+                  window.ReactNativeWebView
                 );
-              } else {
-                input.current?.click();
-              }
+
+                if (window.ReactNativeWebView) {
+                  console.log(
+                    `✅ ReactNativeWebView ready at ${(
+                      performance.now() - start
+                    ).toFixed(1)}ms`
+                  );
+                  window.ReactNativeWebView.postMessage(
+                    JSON.stringify({ type: "REQUEST_CAMERA" })
+                  );
+                  clearInterval(interval);
+                } else if (attempts >= maxAttempts) {
+                  console.log("⏰ Timed out waiting for ReactNativeWebView");
+                  clearInterval(interval);
+                  // fallback: 일반 input 클릭
+                  input.current?.click();
+                }
+              }, 200);
             } else {
               onUpload();
             }
