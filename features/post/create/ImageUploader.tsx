@@ -91,7 +91,7 @@ export default function ImageUploader() {
           onClick={() => {
             if (!imageSrc) {
               let attempts = 0;
-              const maxAttempts = 20;
+              const maxAttempts = 10;
               const start = performance.now();
               const interval = setInterval(() => {
                 attempts++;
@@ -107,12 +107,20 @@ export default function ImageUploader() {
                       performance.now() - start
                     ).toFixed(1)}ms`
                   );
+                  alert(
+                    `✅ ReactNativeWebView ready at ${(
+                      performance.now() - start
+                    ).toFixed(1)}ms`
+                  );
                   window.ReactNativeWebView.postMessage(
                     JSON.stringify({ type: "REQUEST_CAMERA" })
                   );
                   clearInterval(interval);
                 } else if (attempts >= maxAttempts) {
                   console.log("⏰ Timed out waiting for ReactNativeWebView");
+                  alert(
+                    `window: ${window} window.ReactNativeWebView: ${window.ReactNativeWebView} ⏰ Timed out waiting for ReactNativeWebView`
+                  );
                   clearInterval(interval);
                   // fallback: 일반 input 클릭
                   input.current?.click();
