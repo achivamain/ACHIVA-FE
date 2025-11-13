@@ -1,7 +1,8 @@
 // 모달로 겹쳐지는 페이지
 import Modal from "@/components/Modal";
 import Friends from "@/features/friends/Friends";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 
 export default async function Page({
   params,
@@ -9,7 +10,11 @@ export default async function Page({
   params: Promise<{ nickName: string }>;
 }) {
   const { nickName } = await params;
-  const currentUser = (await getAuthStatus()).user;
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
+  }
+  const currentUser = session!.user;
 
   return (
     <Modal title={<h1 className="text-center">친구</h1>}>

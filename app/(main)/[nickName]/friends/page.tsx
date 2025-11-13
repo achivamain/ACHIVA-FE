@@ -1,7 +1,8 @@
 import Friends from "@/features/friends/Friends";
 import { Suspense } from "react";
 import FriendsSkeleton from "@/features/friends/FriendsSkeleton";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 
 export default async function Page({
   params,
@@ -9,7 +10,11 @@ export default async function Page({
   params: Promise<{ nickName: string }>;
 }) {
   const { nickName } = await params;
-  const currentUser = (await getAuthStatus()).user;
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
+  }
+  const currentUser = session!.user;
   return (
     <div className="flex justify-center">
       <div className="w-xl py-10">

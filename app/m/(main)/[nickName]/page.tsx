@@ -1,13 +1,13 @@
-import { auth } from "@/auth";
 import MobileProfile from "@/features/user/Profile";
 import type { User } from "@/types/User";
 import type { FriendData } from "@/types/Friends";
 import Footer from "@/components/Footer";
 import PointSection from "@/features/user/Point";
 import Posts from "@/features/user/Posts";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export default async function Page({
   params,
@@ -16,14 +16,12 @@ export default async function Page({
 }) {
   try {
     const { nickName } = await params; // 이 페이지 유저 닉네임
-    const currentUser = (await getAuthStatus()).user; // 로그인 한 유저
-
-    if (!currentUser) {
-      redirect("/");
-    }
-
     const session = await auth();
+    if (session?.error) {
+      return <Logout />;
+    }
     const token = session?.access_token;
+    const currentUser = session!.user;
 
     async function getUser() {
       // 유저 데이터 가져오기
@@ -95,7 +93,7 @@ export default async function Page({
         <div className="flex-1 flex flex-col mx-auto w-full max-w-160">
           <MobileProfile
             user={user}
-            currentUser={currentUser}
+            currentUserId={currentUser!.id!}
             currentUserFriends={myAllFriends}
           />
           <div className="flex gap-5 my-5 sm:my-10">

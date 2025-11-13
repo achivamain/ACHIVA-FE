@@ -7,7 +7,7 @@ import {
   CloverCheerIcon,
 } from "@/components/Icons";
 import type { Cheering } from "@/types/responses";
-import { useCurrentUserInfoStore } from "@/store/userStore";
+import { useSession } from "next-auth/react";
 import { useState, useEffect, useMemo } from "react";
 import { useAnimate } from "motion/react";
 
@@ -19,7 +19,8 @@ export default function CheerBtns({
   cheerings?: Cheering[];
 }) {
   const [scope, animate] = useAnimate();
-  const currentUserId = useCurrentUserInfoStore.use.user()?.id;
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
 
   const labels = useMemo(
     () => ["최고예요", "수고했어요", "응원해요", "동기부여"],
