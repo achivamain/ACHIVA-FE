@@ -1,5 +1,6 @@
 "use client";
 
+import { User } from "@/types/User";
 import { useState } from "react";
 import type { PostRes } from "@/types/Post";
 import dateFormatter from "@/lib/dateFormatter";
@@ -8,10 +9,25 @@ import ProfileImg from "@/components/ProfileImg";
 import Link from "next/link";
 import CheerBtns from "../post/CheerBtns";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
-import { useCurrentUserInfoStore } from "@/store/userStore";
+import { useQuery } from "@tanstack/react-query";
 
 export default function HomePost({ post }: { post: PostRes }) {
-  const currentUser = useCurrentUserInfoStore.use.user();
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser", "token"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <>

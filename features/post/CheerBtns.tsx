@@ -7,7 +7,8 @@ import {
   CloverCheerIcon,
 } from "@/components/Icons";
 import type { Cheering } from "@/types/responses";
-import { useCurrentUserInfoStore } from "@/store/userStore";
+import { User } from "@/types/User";
+import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 import { useAnimate } from "motion/react";
 
@@ -19,7 +20,22 @@ export default function CheerBtns({
   cheerings?: Cheering[];
 }) {
   const [scope, animate] = useAnimate();
-  const currentUserId = useCurrentUserInfoStore.use.user()?.id;
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser", "token"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
+  const currentUserId = currentUser?.id;
 
   const labels = useMemo(
     () => ["최고예요", "수고했어요", "응원해요", "동기부여"],

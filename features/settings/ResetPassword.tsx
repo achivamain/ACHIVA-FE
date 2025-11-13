@@ -2,12 +2,28 @@
 // 나중에 백엔드 연동필요!!
 import { z } from "zod";
 import { UserSchema } from "../auth/schima";
-import { useCurrentUserInfoStore } from "@/store/userStore";
+import { User } from "@/types/User";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { NextStepButton } from "../post/create/Buttons";
 
 export default function ResetPassword() {
-  const email = useCurrentUserInfoStore.use.user()?.email;
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser", "token"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
+  const email = currentUser?.email;
   const [currentStep, setCurrentStep] = useState(0);
 
   const [enteredValues, setEnteredValues] = useState({
