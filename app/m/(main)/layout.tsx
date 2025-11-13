@@ -1,7 +1,6 @@
-import getAuthStatus from "@/lib/getAuthStatus";
-import AuthHydrator from "@/features/auth/AuthHydrator";
 import MobileSidebar from "@/components/MobileSidebar";
-import { signOut } from "@/auth";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 
 export default async function Layout({
   children,
@@ -10,26 +9,16 @@ export default async function Layout({
   children: React.ReactNode;
   modal: React.ReactNode;
 }>) {
-  const auth = await getAuthStatus();
-  switch (auth.status) {
-    case "authenticated":
-      return (
-        <>
-          <AuthHydrator user={auth.user!} />
-          <MobileSidebar user={auth.user!} />
-          <div className="min-h-dvh flex flex-col">{children}</div>
-          {modal}
-        </>
-      );
-    case "error":
-    default:
-      console.error("로그인 확인 에러", auth.error);
-      await signOut({ redirect: false });
-      return (
-        <div>
-          {children}
-          {modal}
-        </div>
-      );
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
   }
+
+  return (
+    <>
+      <MobileSidebar />
+      <div className="min-h-dvh flex flex-col">{children}</div>
+      {modal}
+    </>
+  );
 }

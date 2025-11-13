@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
+import { jwtDecode } from "jwt-decode";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -19,8 +20,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
+        const decoded = jwtDecode(account.access_token!) as any;
         return {
           ...token,
+          id: decoded.sub,
+          nickName: decoded.username,
           access_token: account.access_token,
           refresh_token: account.refresh_token,
           id_token: account.id_token,
@@ -73,6 +77,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
     },
     async session({ session, token }) {
+      session.user.id = token.id as string;
+      session.user.nickName = token.nickName as string;
       session.access_token = token.access_token;
       session.error = token.error;
       return session;

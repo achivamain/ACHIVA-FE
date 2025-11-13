@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import type { User } from "@/types/User";
+import { useQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { TextLogo, Logo } from "./Logo";
 import {
@@ -15,7 +16,26 @@ import { useState } from "react";
 import Drawer from "./Drawer";
 import Notifications from "@/features/user/Notifications";
 
-export default function Sidebar({ user }: { user: User }) {
+export default function Sidebar() {
+  // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
+  // static한 세션 정보를 사용하지 않고 api 호출해서 사용
+  // tanstack query 사용해서 캐싱되게 하여서 체감 로딩 속도 문제 최소화
+  const { data: user } = useQuery({
+    queryKey: ["currentUser", "token"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
+
   const [openedDrawer, setOpenedDrawer] = useState<"응원" | null>(null);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -43,11 +63,11 @@ export default function Sidebar({ user }: { user: User }) {
   let selected;
   if (openedDrawer === "응원" || isClosing) {
     selected = "응원";
-  } else if (pathname === `/${user.nickName}/home`) {
+  } else if (pathname === `/${user?.nickName}/home`) {
     selected = "홈";
-  } else if (pathname.startsWith(`/${user.nickName}/goals`)) {
+  } else if (pathname.startsWith(`/${user?.nickName}/goals`)) {
     selected = "목표";
-  } else if (pathname === `/${user.nickName}`) {
+  } else if (pathname === `/${user?.nickName}`) {
     selected = "MY";
     // 사이드바에서 설정 버튼 빠짐 -> 임시로 MY로 처리
   } else if (pathname.startsWith("/settings")) {
@@ -85,7 +105,7 @@ export default function Sidebar({ user }: { user: User }) {
           </Link>
         </div>
         <ul className="flex-1 flex flex-col w-full justify-around gap-5">
-          <Link href={`/${user.nickName}/home`}>
+          <Link href={`/${user?.nickName}/home`}>
             <ListItem
               isNavFolded={!!openedDrawer}
               label="홈"
@@ -93,7 +113,7 @@ export default function Sidebar({ user }: { user: User }) {
               selected={selected === "홈"}
             />
           </Link>
-          <Link href={`/${user.nickName}/goals`}>
+          <Link href={`/${user?.nickName}/goals`}>
             <ListItem
               isNavFolded={!!openedDrawer}
               label="목표"
@@ -117,7 +137,7 @@ export default function Sidebar({ user }: { user: User }) {
               selected={selected === "응원"}
             />
           </button>
-          <Link href={`/${user.nickName}`} className="mb-auto">
+          <Link href={`/${user?.nickName}`} className="mb-auto">
             <ListItem
               isNavFolded={!!openedDrawer}
               label="MY"

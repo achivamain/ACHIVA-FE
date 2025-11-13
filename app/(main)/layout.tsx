@@ -1,4 +1,3 @@
-import AuthHydrator from "@/features/auth/AuthHydrator";
 import Sidebar from "@/components/Sidebar";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
@@ -14,11 +13,10 @@ export default async function Layout({
   if (session?.error) {
     return <Logout />;
   }
-  console.log(session);
+
   return (
     <>
-      <AuthHydrator user={auth.user!} />
-      <Sidebar user={auth.user!} />
+      <Sidebar />
       <div className="flex flex-col sm:ml-20 lg:ml-60 min-h-dvh">
         {children}
         {/* <Footer /> */}

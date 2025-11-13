@@ -7,19 +7,19 @@ import { FriendData } from "@/types/Friends";
 
 type Props = {
   user: User;
-  currentUser: User;
+  currentUserId: string;
   currentUserFriends: FriendData[];
 };
 
 // PC전용
-export function Profile({ user, currentUser, currentUserFriends }: Props) {
+export function Profile({ user, currentUserId, currentUserFriends }: Props) {
   return (
     <div className="w-full flex gap-12">
       <ProfileImg url={user.profileImageUrl!} size={160} />
       <div className="flex-1 flex flex-col items-start justify-center gap-3">
         <div className="w-full flex items-center gap-10">
           <h1 className="font-semibold text-2xl">{user.nickName}</h1>
-          {user.nickName === currentUser.nickName ? (
+          {user.id === currentUserId ? (
             <Link
               href="/accounts/edit"
               className="bg-theme rounded-sm text-white font-semibold text-sm px-2.5 py-1.5"
@@ -37,7 +37,7 @@ export function Profile({ user, currentUser, currentUserFriends }: Props) {
             <Link href={`/${user.nickName}/friends`}>
               <FollowerIcon />
             </Link>
-            {user.nickName === currentUser.nickName && (
+            {user.id === currentUserId && (
               <Link href={`/settings/accounts/password`}>
                 <SettingIcon />
               </Link>
@@ -66,7 +66,7 @@ export function Profile({ user, currentUser, currentUserFriends }: Props) {
 // 모바일 전용
 export default function MobileProfile({
   user,
-  currentUser,
+  currentUserId,
   currentUserFriends,
 }: Props) {
   return (
@@ -75,7 +75,7 @@ export default function MobileProfile({
         <Link href={`/${user.nickName}/friends`}>
           <FollowerIcon />
         </Link>
-        {user.nickName === currentUser.nickName && (
+        {user.id === currentUserId && (
           <Link href={`/settings`}>
             <SettingIcon />
           </Link>
@@ -88,7 +88,7 @@ export default function MobileProfile({
         <div className="flex flex-col justify-center">
           <h1 className="font-semibold text-2xl">{user.nickName}</h1>
           <p className="text-[#7F7F7F]">{user.description}</p>
-          {user.nickName === currentUser.nickName ? (
+          {user.id === currentUserId ? (
             <Link
               href="/accounts/edit"
               className="self-start bg-theme rounded-sm text-white font-semibold text-sm px-2.5 py-1.5 mt-2"

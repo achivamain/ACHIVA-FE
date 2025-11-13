@@ -1,5 +1,5 @@
 "use client";
-
+import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import type { User } from "@/types/User";
 import ProfileImg from "@/components/ProfileImg";
@@ -9,13 +9,28 @@ import ImageUploader from "./ImageUploader";
 import { PencilIcon, XIcon } from "@/components/Icons";
 import { categories as allCategories } from "@/types/Categories";
 
-type Props = {
-  user: User;
-};
+export default function EditProfile() {
+  // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
+  // static한 세션 정보를 사용하지 않고 api 호출해서 사용
+  // tanstack query 사용해서 캐싱되게 하여서 체감 로딩 속도 문제 최소화
+  const { data: user } = useQuery({
+    queryKey: ["currentUser", "token"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
 
-export default function EditProfile({ user }: Props) {
-  const [profileImageUrl, setProfileImageUrl] = useState(user.profileImageUrl);
-  const [nickName, setNickName] = useState(user.nickName);
+  const [profileImageUrl, setProfileImageUrl] = useState(user?.profileImageUrl);
+  const [nickName, setNickName] = useState(user?.nickName);
   const [isNickNameOk, setIsNickNameOk] = useState(true);
   const [isNickNameCheckLoading, setIsNickNameCheckLoding] = useState(false);
   const [nickNameError, setNickNameError] = useState("");
@@ -25,7 +40,7 @@ export default function EditProfile({ user }: Props) {
     bio: false,
   });
 
-  const [categories, setCategories] = useState(user.categories);
+  const [categories, setCategories] = useState(user?.categories || []);
   const remainingCategories = allCategories.filter(
     (category) => !categories.includes(category)
   );
@@ -34,7 +49,7 @@ export default function EditProfile({ user }: Props) {
       ? "카테고리는 1개 이상 5개 이하로 선택할 수 있습니다"
       : "";
   const categoryRef = useRef<HTMLDivElement | null>(null);
-  const [bio, setBio] = useState(user.description);
+  const [bio, setBio] = useState(user?.description);
 
   // 카테고리 인풋 용도
   useEffect(() => {
@@ -155,7 +170,7 @@ export default function EditProfile({ user }: Props) {
             onBlur={() => {
               setIsEditing((prev) => ({ ...prev, nickName: false }));
               handleNickNameBlur();
-              if (nickName !== user.nickName) {
+              if (nickName !== user?.nickName) {
                 handleCheckNickName();
               }
             }}
