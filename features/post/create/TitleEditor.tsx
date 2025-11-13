@@ -13,7 +13,7 @@ export default function TitleEditor() {
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const draft = useDraftPostStore.use.post();
   const { data: currentUser } = useQuery({
-    queryKey: ["currentUser", "token"],
+    queryKey: ["user"],
     queryFn: async () => {
       const res = await fetch(`/api/members/me`, {
         method: "GET",

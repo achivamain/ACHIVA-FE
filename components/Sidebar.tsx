@@ -21,7 +21,7 @@ export default function Sidebar() {
   // static한 세션 정보를 사용하지 않고 api 호출해서 사용
   // tanstack query 사용해서 캐싱되게 하여서 체감 로딩 속도 문제 최소화
   const { data: user } = useQuery({
-    queryKey: ["currentUser", "token"],
+    queryKey: ["user"],
     queryFn: async () => {
       const res = await fetch(`/api/members/me`, {
         method: "GET",

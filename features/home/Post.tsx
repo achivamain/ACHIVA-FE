@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function HomePost({ post }: { post: PostRes }) {
   const { data: currentUser } = useQuery({
-    queryKey: ["currentUser", "token"],
+    queryKey: ["user"],
     queryFn: async () => {
       const res = await fetch(`/api/members/me`, {
         method: "GET",
