@@ -7,63 +7,27 @@ import {
   useCreatePostStepStore,
   useDraftPostStore,
 } from "@/store/CreatePostStore";
-import type { CategoryCount } from "@/types/Post";
 import { useEffect, useState } from "react";
 import BgColorSelector from "./BgColorSelector";
 import { MobileWriting } from "./Writing";
 // import BgImageSelector from "./BgImageSelector";
 import ImageUploader from "./ImageUploader";
 import TitleEditor from "./TitleEditor";
+
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useRouter } from "next/navigation";
 import MobileHeader from "@/components/MobileHeader";
 import MobileCreateBookPage from "./MobileCreateBookPage";
 import MobileBookSelector from "./MobileBookSelector";
-import { Book } from "@/types/Book";
 import { CloseIcon } from "@/components/Icons";
 
-export default function MobileCreatePostPage({
-  categoryCounts,
-}: {
-  categoryCounts: CategoryCount[];
-}) {
+export default function MobileCreatePostPage() {
   const router = useRouter();
   const currentStep = useCreatePostStepStore.use.currentStep();
   const handlePrevStep = useCreatePostStepStore.use.handlePrevStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
   const resetPost = useDraftPostStore.use.resetPost();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
-
-  const books: Book[] = [
-    {
-      id: 1,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-    {
-      id: 2,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-    {
-      id: 3,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-    {
-      id: 4,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-  ];
 
   // 글쓰기 버튼 클릭 시 작성상태 리셋
   useEffect(() => {
@@ -79,7 +43,7 @@ export default function MobileCreatePostPage({
       title = "작성할 이야기를 선택해주세요";
       content = (
         <div>
-          <MobileBookSelector books={books} categoryCounts={categoryCounts} />
+          <MobileBookSelector />
         </div>
       );
       break;
@@ -87,7 +51,7 @@ export default function MobileCreatePostPage({
       title = "원하는 성취 카테고리를 선택해주세요";
       content = (
         <div>
-          <CategorySelector categoryCounts={categoryCounts} />
+          <CategorySelector />
         </div>
       );
       break;
@@ -138,15 +102,20 @@ export default function MobileCreatePostPage({
     <div className="h-full flex-1 flex flex-col">
       {currentStep > 2 ? (
         <>
+        <div className="flex-shrink-0">
           <MobileHeader onClick={handlePrevStep}>
             {headerTitle ?? null}
           </MobileHeader>
+          </div>
           <div className="w-full flex-1 flex flex-col px-5 pb-15">
-            {title && <h1 className="text-xl font-semibold mb-5">{title}</h1>}
+            {title && <h1 className="text-xl font-semibold mb-5 flex-shrink-0">{title}</h1>}
             {content}
           </div>
         </>
-      ) : currentStep === 1? (<>{content}</>):(<>
+      ) : currentStep === 1 ? (
+        <>{content}</>
+      ) : (
+        <>
           <div className="relative bg-white w-full h-14 mb-5 flex items-center justify-center z-50">
             <div className="flex items-center justify-center relative w-full">
               <button
@@ -161,9 +130,8 @@ export default function MobileCreatePostPage({
             {title && <h1 className="text-xl font-semibold mb-5">{title}</h1>}
             <div className="flex-1 flex flex-col">{content}</div>
           </div>
-        </>)
-        
-      }
+        </>
+      )}
 
       {isCloseModalOpen && (
         <ModalWithoutCloseBtn

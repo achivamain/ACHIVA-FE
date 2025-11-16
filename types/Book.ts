@@ -1,9 +1,19 @@
 import type { Category } from "./Categories";
+import type { BookCoverImage } from "./BookCoverImages";
+import { PostRes } from "./Post";
 
 export type Book = {
-  id: number;
+  id: string;
   title: string;
   category: Category | undefined;
   count: number;
-  color: string;
+  coverColor: string;
+  coverImage: BookCoverImage;
+};
+export type BookRes = {
+  id: string;
+  title: string;
+  description: string;
+  mainArticle: PostRes;
+  articles: PostRes[];
 };

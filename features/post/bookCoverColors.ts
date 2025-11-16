@@ -5,5 +5,6 @@ export const bookCoverColors: string[] = [
   "#77B5C1",
   "#525D49",
   "#4B5373",
+  "#734B66",
   "#F9F9F9",
 ];

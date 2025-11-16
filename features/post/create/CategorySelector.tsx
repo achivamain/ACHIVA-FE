@@ -1,4 +1,4 @@
-import type { CategoryCount } from "@/types/Post";
+import { categories } from "@/types/Categories";
 import {
   useCreatePostStepStore,
   useDraftPostStore,
@@ -6,11 +6,7 @@ import {
 import { CategoryButton } from "@/components/Buttons";
 import { NextStepButton } from "./Buttons";
 
-export default function CategorySelector({
-  categoryCounts,
-}: {
-  categoryCounts: CategoryCount[];
-}) {
+export default function CategorySelector() {
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
@@ -29,16 +25,15 @@ export default function CategorySelector({
     <div className="h-full flex-1 flex flex-col justify-between">
       <div>
         <div className="flex gap-3 flex-wrap">
-          {categoryCounts.map((category) => (
+          {categories.map((category) => (
             <CategoryButton
-              key={category.category}
-              isSelected={draft.category === category.category}
+              key={category}
+              isSelected={draft.category === category}
               onClick={() => {
-                setPost({ category: category.category });
-                setPost({ categoryCount: category.count });
+                setPost({ category: category });
               }}
             >
-              {category.category}
+              {category}
             </CategoryButton>
           ))}
         </div>
