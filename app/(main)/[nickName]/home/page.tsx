@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 import GoalSummary from "@/features/user/goals/GoalSummary";
 import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
@@ -11,10 +12,9 @@ export default async function HomePage({
 }: {
   params: Promise<{ nickName: string }>;
 }) {
-  const currentUserData = await getAuthStatus();
-  const currentUser = currentUserData.user; // 로그인 한 유저
-  if (!currentUser) {
-    redirect("/");
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
   }
 
   const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해

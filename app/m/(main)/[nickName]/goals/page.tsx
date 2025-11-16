@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 import useGoalStore from "@/store/GoalStore";
 import MobileGoalWrapper from "@/features/user/goals/MobileGoalWrapper";
 
@@ -8,14 +9,14 @@ export default async function MobileGoalsPage({
 }: {
   params: Promise<{ nickName: string }>;
 }) {
-  const currentUserData = await getAuthStatus();
-  const currentUser = currentUserData.user;
-  if (!currentUser) {
-    redirect("/");
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
   }
+  const currentUser = session!.user;
 
   const { nickName } = await params;
-  const isOwner = currentUser.nickName === nickName;
+  const isOwner = currentUser!.nickName === nickName;
 
   if (!isOwner) {
     redirect(`/${nickName}`);

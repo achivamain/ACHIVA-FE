@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 import GoalSummary from "@/features/user/goals/GoalSummary";
 import { CaretRight24pxIcon } from "@/components/Icons";
 
@@ -9,14 +9,14 @@ export default async function MobileHomePageRoute({
 }: {
   params: Promise<{ nickName: string }>;
 }) {
-  const currentUserData = await getAuthStatus();
-  const currentUser = currentUserData.user;
-  if (!currentUser) {
-    redirect("/");
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
   }
+  const currentUser = session!.user;
 
   const { nickName } = await params;
-  const isOwner = currentUser.nickName === nickName;
+  const isOwner = currentUser!.nickName === nickName;
 
   const mySummaryData = {
     letters: 20,

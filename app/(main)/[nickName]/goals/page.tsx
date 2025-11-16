@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 import useGoalStore from "@/store/GoalStore";
 import GoalWrapper from "@/features/user/goals/GoalWrapper";
 import Banner from "@/features/event/Banner";
@@ -9,14 +10,14 @@ export default async function GoalsPage({
 }: {
   params: Promise<{ nickName: string }>;
 }) {
-  const currentUserData = await getAuthStatus();
-  const currentUser = currentUserData.user; // 로그인 한 유저
-  if (!currentUser) {
-    redirect("/");
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
   }
+  const currentUser = session!.user;
 
   const { nickName } = await params; // 이 페이지 유저 닉네임
-  const isOwner = currentUser.nickName === nickName; // Goal 클릭 가능여부 확인용
+  const isOwner = currentUser!.nickName === nickName; // Goal 클릭 가능여부 확인용
 
   if (!isOwner) {
     redirect(`/${nickName}`);

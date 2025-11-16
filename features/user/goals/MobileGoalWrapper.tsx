@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import MobileGoalCard from "@/features/user/goals/MobileGoalCard";
 import { GoalEditIcon, GoalArchiveIcon } from "@/components/Icons";
 import useGoalStore from "@/store/GoalStore";
-import { useCurrentUserInfoStore } from "@/store/userStore";
 import type { Mission, Mindset, Vision } from "@/types/Goal";
+import { useQuery } from "@tanstack/react-query";
+import type { User } from "@/types/User";
 
 interface MobileGoalWrapperProps {
   initialData: {
@@ -21,7 +22,21 @@ const MobileGoalWrapper: React.FC<MobileGoalWrapperProps> = ({
 }) => {
   const router = useRouter();
   const { setInitialData } = useGoalStore();
-  const user = useCurrentUserInfoStore.use.user();
+  const { data: user } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
 
   useEffect(() => {
     setInitialData(initialData);
