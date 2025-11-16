@@ -1,3 +1,5 @@
+import { MobileBookSection } from "@/features/home/MobileBookSection";
+
 export default function Page() {
-  return <div className="p-3">Sample Home Page</div>;
+  return <div><MobileBookSection/></div>;
 }
