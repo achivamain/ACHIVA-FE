@@ -29,6 +29,7 @@ export default async function MobileHomePageRoute({
       <div className="flex-1" />
 
       <MobileGoalSummary summaryData={mySummaryData} />
+      <div className="h-6" />
 
       <div className="flex justify-center pb-[22px]">
         <Link
