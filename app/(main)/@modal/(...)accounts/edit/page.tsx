@@ -1,18 +1,19 @@
 // 모달로 겹쳐지는 페이지
 import Modal from "@/components/Modal";
 import EditProfile from "@/features/user/EditProfile";
-import getAuthStatus from "@/lib/getAuthStatus";
-import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 
 export default async function Page() {
-  const user = (await getAuthStatus()).user;
-  if (!user) {
-    redirect("/");
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
   }
+
   return (
     <Modal title={<h1 className="text-center">프로필 수정</h1>}>
       <div className="my-7 sm:w-2xl lg:w-3xl flex justify-center">
-        <EditProfile user={user} />
+        <EditProfile />
       </div>
     </Modal>
   );
