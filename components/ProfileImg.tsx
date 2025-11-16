@@ -4,7 +4,7 @@ import { useState } from "react";
 import { defaultProfileImg } from "@/features/user/defaultProfileImg";
 
 type ProfileImgProps = {
-  url: string;
+  url?: string;
   size: number;
 };
 // 나중에 수정 수정 필요
@@ -15,19 +15,21 @@ export default function ProfileImg({ url, size }: ProfileImgProps) {
       style={{ width: size, height: size }}
       className={`aspect-square rounded-full overflow-hidden relative`}
     >
-      {!loaded && (
+      {(!loaded || !url) && (
         <div>
           <div className="bg-loading absolute inset-0 animate-pulse"></div>
         </div>
       )}
-      <Image
-        className={`w-full h-full object-cover ${loaded ? "" : "opacity-0"}`}
-        src={url || defaultProfileImg}
-        alt="profile image"
-        width={size}
-        height={size}
-        onLoad={() => setLoaded(true)}
-      ></Image>
+      {url && (
+        <Image
+          className={`w-full h-full object-cover ${loaded ? "" : "opacity-0"}`}
+          src={url || defaultProfileImg}
+          alt="profile image"
+          width={size}
+          height={size}
+          onLoad={() => setLoaded(true)}
+        ></Image>
+      )}
     </div>
   );
 }
