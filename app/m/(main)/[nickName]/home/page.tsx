@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import GoalSummary from "@/features/user/goals/GoalSummary";
+import MobileGoalSummary from "@/features/user/goals/GoalSummary";
 import { CaretRight24pxIcon } from "@/components/Icons";
 
 export default async function MobileHomePageRoute({
@@ -28,9 +28,7 @@ export default async function MobileHomePageRoute({
     <div className="min-h-dvh bg-white pt-14 pb-[104px] flex flex-col">
       <div className="flex-1" />
 
-      <GoalSummary summaryData={mySummaryData} />
-
-      <div className="h-6" />
+      <MobileGoalSummary summaryData={mySummaryData} />
 
       <div className="flex justify-center pb-[22px]">
         <Link

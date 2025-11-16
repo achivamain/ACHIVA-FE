@@ -1,8 +1,7 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import GoalSummary from "@/features/user/goals/GoalSummary";
+import WebGoalSummary from "@/features/user/goals/GoalSummary";
 import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
 import { CaretRight24pxIcon } from "@/components/Icons";
@@ -32,7 +31,7 @@ export default async function HomePage({
         <div className="flex-1 flex justify-center items-end">
           <div className="w-full max-w-[844px]">
             {/* 나중에 책 관련 추가될 부분 */}
-            <GoalSummary summaryData={mySummaryData} />
+            <WebGoalSummary summaryData={mySummaryData} />
           </div>
         </div>
 
