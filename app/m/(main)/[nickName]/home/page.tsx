@@ -16,7 +16,7 @@ export default async function MobileHomePageRoute({
   const currentUser = session!.user;
 
   const { nickName } = await params;
-  const isOwner = currentUser!.nickName === nickName;
+  const isOwner = currentUser!.nickName === decodeURIComponent(nickName);
 
   const mySummaryData = {
     letters: 20,

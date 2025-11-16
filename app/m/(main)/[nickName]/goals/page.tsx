@@ -16,7 +16,7 @@ export default async function MobileGoalsPage({
   const currentUser = session!.user;
 
   const { nickName } = await params;
-  const isOwner = currentUser!.nickName === nickName;
+  const isOwner = currentUser!.nickName === decodeURIComponent(nickName);
 
   if (!isOwner) {
     redirect(`/${nickName}`);

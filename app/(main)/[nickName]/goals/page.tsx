@@ -17,7 +17,7 @@ export default async function GoalsPage({
   const currentUser = session!.user;
 
   const { nickName } = await params; // 이 페이지 유저 닉네임
-  const isOwner = currentUser!.nickName === nickName; // Goal 클릭 가능여부 확인용
+  const isOwner = currentUser!.nickName === decodeURIComponent(nickName); // Goal 클릭 가능여부 확인용
 
   if (!isOwner) {
     redirect(`/${nickName}`);
