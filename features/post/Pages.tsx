@@ -10,7 +10,6 @@ type Props = {
 
 export function TitlePage({ size, post }: Props) {
   const date = new Date(post.createdAt);
-  const correctDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
 
   return (
     <div
@@ -29,7 +28,7 @@ export function TitlePage({ size, post }: Props) {
         <PostImg url={post.photoUrl!} filtered />
         <div className="absolute top-[90px] left-[23px]">
           <div className="font-light text-[16px] text-white/70">
-            {format(correctDate, "yyyy.MM.dd")}
+            {format(date, "yyyy.MM.dd")}
           </div>
           <h1 className="font-semibold text-[45px] text-white/80 mb-[24px] leading-[50px]">
             {post.title}
