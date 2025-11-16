@@ -47,6 +47,7 @@ export default function Sidebar() {
     selected = "MY";
   } else {
     selected = "피드";
+    selected = "피드";
   }
 
   const isInvisible =
@@ -55,6 +56,8 @@ export default function Sidebar() {
     /^\/[^/]+\/achievements\/detail$/.test(pathname) || // /[nickName]/achievements/detail
     /^\/[^/]+\/supports$/.test(pathname) || // /[nickName]/supports
     /^\/[^/]+\/supports\/detail$/.test(pathname) || // /[nickName]/supports/detail
+    /^\/[^/]+\/goals\/edit$/.test(pathname) || // /[nickName]/goals/edit
+    /^\/[^/]+\/goals\/archive$/.test(pathname) || // /[nickName]/goals/archive
     pathname === "/post/create" ||
     pathname.startsWith("/settings") ||
     pathname === "/accounts/edit" ||

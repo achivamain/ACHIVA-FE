@@ -37,7 +37,6 @@ export default function Sidebar() {
   });
 
   const [openedDrawer, setOpenedDrawer] = useState<"응원" | null>(null);
-  const [isClosing, setIsClosing] = useState(false);
 
   // flickering 제거 위한 코드
   // 근데도 간헐적으로 발생하긴하네요.. 나중에 더 수정해볼게요
@@ -57,6 +56,7 @@ export default function Sidebar() {
       <Notifications />
     </Drawer>
   );
+  const [isClosing, setIsClosing] = useState(false);
 
   const pathname = decodeURIComponent(usePathname());
 
