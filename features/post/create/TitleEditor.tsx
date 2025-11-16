@@ -57,11 +57,11 @@ export default function TitleEditor() {
             />
             <div className={`text-[32px] font-light text-white leading-[40px]`}>
               <div>
-                <span className="font-bold">{draft.category}</span> 기록
+                <span className="font-bold">{draft.book?.title}</span> 기록
               </div>
               <div>
                 <span className="font-bold">
-                  {(draft.categoryCount ?? 0) + 1}번째
+                  {(draft.book?.count ?? 0) + 1}번째
                 </span>{" "}
                 이야기
               </div>
@@ -94,29 +94,70 @@ export default function TitleEditor() {
           isLoading={isLoading}
           // disabled={!draft.title}
           onClick={async () => {
-            setIsLoading(true);
-            try {
-              const res = await fetch("/api/posts", {
-                method: "POST",
-                body: JSON.stringify({
-                  post: draft,
-                }),
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              });
-              if (!res.ok) {
-                console.log(res);
-                throw new Error("게시글 작성 중 에러");
+            if (draft.book?.id === "") {
+              //새 책 생성시
+              setIsLoading(true);
+              try {
+                //책 생성 및 게시글 게시
+                const res = await fetch("/api/books", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    post: draft,
+                  }),
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                });
+                if (!res.ok) {
+                  console.log(res);
+                  throw new Error("게시글 작성 중 에러");
+                }
+                setIsLoading(false);
+                window.location.href = `/${currentUser?.nickName}`;
+              } catch (err) {
+                console.log(err);
+                alert(
+                  "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                );
+                setIsLoading(false);
               }
-              setIsLoading(false);
-              window.location.href = `/${currentUser?.nickName}`;
-            } catch (err) {
-              console.log(err);
-              alert(
-                "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-              );
-              setIsLoading(false);
+            } else {
+              //게시글 생성
+              setIsLoading(true);
+              try {
+                const res = await fetch("/api/posts", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    post: draft,
+                  }),
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                });
+                if (!res.ok) {
+                  console.log(res);
+                  throw new Error("게시글 작성 중 에러");
+                }
+                const data = await res.json();
+                const bookId = draft.book?.id;
+                const postId: string = data.data.id;
+                //책에 게시글 추가
+                const res2 = await fetch(`/api/books/articles?bookId=${bookId}&postId=${postId}`, {
+                  method: "POST",
+                });
+                if (!res2.ok) {
+                  console.log(res2);
+                  throw new Error("게시글 작성 중 에러");
+                }
+                setIsLoading(false);
+                window.location.href = `/${currentUser?.nickName}`;
+              } catch (err) {
+                console.log(err);
+                alert(
+                  "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                );
+                setIsLoading(false);
+              }
             }
           }}
         >

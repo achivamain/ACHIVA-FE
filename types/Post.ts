@@ -6,13 +6,14 @@ export type Post = {
   titleImageUrl: string;
   title: string;
   category: Category;
-  book: Book;
   backgroundColor: BackgroundColor;
   pages: PostPage[];
-}; //book이 들어가게 수정해야 함.
+};
 
 export type DraftPost = Partial<Post> & {
+  id?: string;
   categoryCount?: number;
+  book?: Book;
 }; // 글쓰기 중 타입
 
 export type PostPage = {

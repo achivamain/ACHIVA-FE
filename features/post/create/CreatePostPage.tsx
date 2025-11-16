@@ -9,8 +9,6 @@ import {
   useCreatePostStepStore,
   useDraftPostStore,
 } from "@/store/CreatePostStore";
-import type { CategoryCount } from "@/types/Post";
-import type { Book } from "@/types/Book";
 import Modal from "@/components/Modal";
 import { useEffect, useState } from "react";
 import BgColorSelector from "./BgColorSelector";
@@ -21,48 +19,13 @@ import TitleEditor from "./TitleEditor";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useRouter } from "next/navigation";
 
-export default function CreatePostPage({
-  categoryCounts,
-}: {
-  categoryCounts: CategoryCount[];
-}) {
+export default function CreatePostPage() {
   const router = useRouter();
   const currentStep = useCreatePostStepStore.use.currentStep();
   const handlePrevStep = useCreatePostStepStore.use.handlePrevStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
   const resetPost = useDraftPostStore.use.resetPost();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
-
-  const books: Book[] = [
-    {
-      id: 1,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-    {
-      id: 2,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-    {
-      id: 3,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-    {
-      id: 4,
-      title: "테스트",
-      category: "공부",
-      count: 1,
-      color: "#77B5C1",
-    },
-  ];
 
   // 글쓰기 버튼 클릭 시 작성상태 리셋
   useEffect(() => {
@@ -81,8 +44,8 @@ export default function CreatePostPage({
     case 2:
       title = "작성할 이야기를 선택해주세요";
       content = (
-        <div>
-          <BookSelector books={books} categoryCounts={categoryCounts} />
+        <div className="flex items-center justify-center mt-8 ml-4">
+          <BookSelector />
         </div>
       );
       size = "w-2xl flex items-center justify-center mt-8";
@@ -91,17 +54,17 @@ export default function CreatePostPage({
     case 0:
       title = "성취 카테고리를 선택해주세요";
       content = (
-        <div>
-          <CategorySelector categoryCounts={categoryCounts} />
+        <div className="w-lg h-[20rem] mt-8 flex">
+          <CategorySelector />
         </div>
       );
-      size = "w-lg h-[20rem] mt-8 flex";
+      size = "w-lg h-[20rem] mt-8 flex"
       break;
 
     case 1:
       title = "표지 미리보기";
       content = (
-        <div className="h-100">
+        <div>
           <CreateBookPage />
         </div>
       );
@@ -160,7 +123,7 @@ export default function CreatePostPage({
           )
         }
       >
-        {currentStep !== 0 && currentStep !== 2 && (
+        {/*currentStep !== 0 && currentStep !== 2 && (
           <button className="absolute top-8 left-8" onClick={handlePrevStep}>
             <svg
               width="12"
@@ -175,9 +138,13 @@ export default function CreatePostPage({
               />
             </svg>
           </button>
-        )}
+        )*/}
 
-        <div className={size !== "" ? size : "w-lg mt-8"}>{content}</div>
+        {size !== "" ? (
+          <div>{content}</div>
+        ) : (
+          <div className="w-lg mt-8">{content}</div>
+        )}
       </Modal>
       {isCloseModalOpen && (
         <ModalWithoutCloseBtn

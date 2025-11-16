@@ -13,7 +13,7 @@ export default async function Page() {
   const session = await auth();
   const token = session?.access_token;
 
-  const response = await fetch(
+  /* const response = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
     {
       method: "GET",
@@ -25,6 +25,6 @@ export default async function Page() {
   );
 
   const { data } = await response.json();
-
-  return <MobileCreatePostPage categoryCounts={data.categoryCounts} />;
+*/
+  return <MobileCreatePostPage />;
 }
