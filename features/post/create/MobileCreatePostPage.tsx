@@ -11,7 +11,6 @@ import type { CategoryCount } from "@/types/Post";
 import { useEffect, useState } from "react";
 import BgColorSelector from "./BgColorSelector";
 import { MobileWriting } from "./Writing";
-// import BgImageSelector from "./BgImageSelector";
 import ImageUploader from "./ImageUploader";
 import TitleEditor from "./TitleEditor";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
@@ -73,7 +72,7 @@ export default function MobileCreatePostPage({
       break;
     case 4:
       headerTitle = "사진 추가";
-      content = <ImageUploader isMobile={true} />;
+      content = <ImageUploader />;
       break;
     case 5:
       headerTitle = "표지 미리보기";

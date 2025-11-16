@@ -4,6 +4,7 @@ import "./globals.css";
 import Wrapper from "@/QueryClientProvider";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 export const metadata: Metadata = {
   title: "ACHIVA",
@@ -43,7 +44,10 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${pretendard.className} antialiased min-h-dvh`}>
-        <Wrapper>{children}</Wrapper>
+        <SessionProviderWrapper>
+          <Wrapper>{children}</Wrapper>
+        </SessionProviderWrapper>
+
         <Analytics />
       </body>
     </html>

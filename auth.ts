@@ -6,7 +6,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Cognito({
       clientId: process.env.AUTH_COGNITO_ID!,
       issuer: process.env.AUTH_COGNITO_ISSUER!,
-      checks: ["pkce", "state"],
+      checks: ["pkce", "state", "nonce"],
       client: { token_endpoint_auth_method: "none" },
       authorization: {
         params: {
