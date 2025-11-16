@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import useGoalStore from "@/store/GoalStore";
 import { CaretRightIcon, ThreeDotsIcon } from "@/components/Icons";
 import TwoElementsButton from "@/components/TwoElementsButton";
@@ -44,6 +44,27 @@ const GoalArchiveContent: React.FC<GoalArchiveContentProps> = ({
     })),
   ];
 
+  // 외부 클릭 감지 - 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        openDropdown &&
+        !target.closest(".dropdown-menu") &&
+        !target.closest("button")
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+
+    if (openDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [openDropdown]);
+
   const toggleDropdown = (
     id: string,
     e: React.MouseEvent<HTMLButtonElement>
@@ -77,7 +98,7 @@ const GoalArchiveContent: React.FC<GoalArchiveContentProps> = ({
       {/* Header */}
       <div
         className={`flex items-center gap-4 mb-8 ${
-          isMobile ? "px-5 pt-[70px] pb-4" : "h-8"
+          isMobile ? "px-5 pt-[20px] pb-4" : "h-8"
         }`}
       >
         <button onClick={onClose} className="w-8 h-8">
@@ -102,7 +123,7 @@ const GoalArchiveContent: React.FC<GoalArchiveContentProps> = ({
       >
         {allArchivedItems.length === 0 ? (
           <div className="text-center py-10 text-[#808080]">
-            보관된 항목이 없습니다
+            보관된 항목이 없습니다.
           </div>
         ) : (
           allArchivedItems.map((item) => (
@@ -139,7 +160,7 @@ const GoalArchiveContent: React.FC<GoalArchiveContentProps> = ({
 
               {openDropdown === `${item.type}-${item.id}` && (
                 <div
-                  className="fixed z-[100]"
+                  className="dropdown-menu fixed z-[100]"
                   style={{
                     top: dropdownPosition.top,
                     bottom: dropdownPosition.bottom,

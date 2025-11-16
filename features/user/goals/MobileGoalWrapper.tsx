@@ -2,9 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import MobileMissionCard from "@/features/user/goals/MobileMissionCard";
-import MobileMindsetCard from "@/features/user/goals/MobileMindsetCard";
-import MobileVisionCard from "@/features/user/goals/MobileVisionCard";
+import MobileGoalCard from "@/features/user/goals/MobileGoalCard";
 import { GoalEditIcon, GoalArchiveIcon } from "@/components/Icons";
 import useGoalStore from "@/store/GoalStore";
 import { useCurrentUserInfoStore } from "@/store/userStore";
@@ -40,7 +38,7 @@ const MobileGoalWrapper: React.FC<MobileGoalWrapperProps> = ({
   return (
     <div className="min-h-dvh bg-[#F9F9F9] pb-[104px]">
       {/* Header */}
-      <div className="px-[19px] pt-[20px] pb-[16px] flex justify-between items-center">
+      <div className="px-[20px] pt-[20px] pb-[16px] flex justify-between items-center">
         <h1 className="text-[34px] font-bold leading-[41px] text-[#412A2A]">
           ACHIVA
         </h1>
@@ -62,9 +60,9 @@ const MobileGoalWrapper: React.FC<MobileGoalWrapperProps> = ({
 
       {/* Content */}
       <div className="px-[19px] space-y-4">
-        <MobileVisionCard />
-        <MobileMissionCard />
-        <MobileMindsetCard />
+        <MobileGoalCard type="vision" title="나의 꿈" emoji="💫" />
+        <MobileGoalCard type="mission" title="나의 미션" emoji="🎯" />
+        <MobileGoalCard type="mindset" title="마음가짐" emoji="🍀" />
       </div>
     </div>
   );

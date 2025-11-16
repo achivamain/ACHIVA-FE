@@ -1,10 +1,12 @@
 "use client";
 
+// API 완성되면 전반적인 수정 필요
+
 import React, { useState, useEffect, useRef } from "react";
 import useGoalStore from "@/store/GoalStore";
 import { CaretRightIcon, ThreeDotsIcon } from "@/components/Icons";
 import TwoElementsButton from "@/components/TwoElementsButton";
-import type { Mission, Mindset, Vision, ModalData } from "@/types/Goal";
+import type { ModalData } from "@/types/Goal";
 
 type PendingAction = {
   type: "archive" | "delete";
@@ -56,7 +58,29 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     setOpenDropdown(null);
   }, [vision, missions, mindsets]);
 
-  // 일반 입력 계열 - 비전
+  // 외부 클릭 감지 - 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      if (
+        openDropdown &&
+        !target.closest(".dropdown-menu") &&
+        !target.closest("button")
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+
+    if (openDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [openDropdown]);
+
+  // 일반 입력 계열 - 비전: 1개만 가질 수 있음
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData((prev) => ({
       ...prev,
@@ -64,7 +88,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     }));
   };
 
-  // 리스트 입력 계열
+  // 리스트 입력 계열 - 미션, 마음가짐
   const handleListItemChange = (
     index: number,
     value: string,
@@ -164,12 +188,82 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     }
   };
 
+  // 미션, 마음가짐 공통
+  const listTypeSection = (
+    type: "missions" | "mindsets",
+    label: string,
+    addButtonText: string
+  ) => {
+    const items = data[type];
+    const singularType = type === "missions" ? "mission" : "mindset";
+
+    return (
+      <div className="flex flex-col gap-2">
+        <label className="text-[14px] leading-[17px] font-semibold text-[#808080]">
+          {label}
+        </label>
+        <div className="flex flex-col gap-2">
+          {items.map((item, index) => (
+            <div
+              key={item.id}
+              className="relative bg-white rounded-[5px] h-[52px] flex items-center px-4"
+            >
+              <input
+                type="text"
+                value={item.text}
+                onChange={(e) =>
+                  handleListItemChange(index, e.target.value, type)
+                }
+                className="w-full bg-transparent outline-none text-[15px] leading-[18px] font-medium text-black pr-8"
+              />
+              <button
+                ref={(el) => {
+                  buttonRefs.current[`${singularType}-${item.id}`] = el;
+                }}
+                className="absolute right-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown(`${singularType}-${item.id}`, e);
+                }}
+              >
+                <ThreeDotsIcon />
+              </button>
+              {openDropdown === `${singularType}-${item.id}` && (
+                <div
+                  className="dropdown-menu fixed z-[100]"
+                  style={{
+                    top: dropdownPosition.top,
+                    bottom: dropdownPosition.bottom,
+                    right: dropdownPosition.right,
+                  }}
+                >
+                  <TwoElementsButton
+                    firstButtonText="보관함으로 이동"
+                    secondButtonText="지우기"
+                    onFirstClick={() => queueArchive(type, item.id)}
+                    onSecondClick={() => queueDelete(type, item.id)}
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+          <button
+            onClick={() => addNewItem(type)}
+            className="bg-white rounded-[5px] h-[52px] flex items-center px-4 text-[15px] leading-[18px] font-medium text-[#B3B3B3]"
+          >
+            {addButtonText}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div onClick={() => setOpenDropdown(null)} className="flex flex-col h-full">
       {/* Header */}
       <div
         className={`flex justify-between items-center ${
-          isMobile ? "px-5 pt-[70px] pb-4 mb-8" : "h-[41px] mb-8"
+          isMobile ? "px-5 pt-[20px] pb-4 mb-8" : "h-[41px] mb-8"
         }`}
       >
         <button onClick={onClose} className="w-8 h-8">
@@ -211,122 +305,10 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
         </div>
 
         {/* 나의 미션 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-[14px] leading-[17px] font-semibold text-[#808080]">
-            {isMobile ? "나의 목표" : "나의 미션"}
-          </label>
-          <div className="flex flex-col gap-2">
-            {data.missions.map((mission, index) => (
-              <div
-                key={mission.id}
-                className="relative bg-white rounded-[5px] h-[52px] flex items-center px-4"
-              >
-                <input
-                  type="text"
-                  value={mission.text}
-                  onChange={(e) =>
-                    handleListItemChange(index, e.target.value, "missions")
-                  }
-                  className="w-full bg-transparent outline-none text-[15px] leading-[18px] font-medium text-black pr-8"
-                />
-                <button
-                  ref={(el) => {
-                    buttonRefs.current[`mission-${mission.id}`] = el;
-                  }}
-                  className="absolute right-4"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown(`mission-${mission.id}`, e);
-                  }}
-                >
-                  <ThreeDotsIcon />
-                </button>
-                {openDropdown === `mission-${mission.id}` && (
-                  <div
-                    className="fixed z-[100]"
-                    style={{
-                      top: dropdownPosition.top,
-                      bottom: dropdownPosition.bottom,
-                      right: dropdownPosition.right,
-                    }}
-                  >
-                    <TwoElementsButton
-                      firstButtonText="보관함으로 이동"
-                      secondButtonText="지우기"
-                      onFirstClick={() => queueArchive("missions", mission.id)}
-                      onSecondClick={() => queueDelete("missions", mission.id)}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-            <button
-              onClick={() => addNewItem("missions")}
-              className="bg-white rounded-[5px] h-[52px] flex items-center px-4 text-[15px] leading-[18px] font-medium text-[#B3B3B3]"
-            >
-              + 새로운 미션 추가하기
-            </button>
-          </div>
-        </div>
+        {listTypeSection("missions", "나의 미션", "+ 새로운 미션 추가하기")}
 
         {/* 마음가짐 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-[14px] leading-[17px] font-semibold text-[#808080]">
-            마음가짐
-          </label>
-          <div className="flex flex-col gap-2">
-            {data.mindsets.map((mindset, index) => (
-              <div
-                key={mindset.id}
-                className="relative bg-white rounded-[5px] h-[52px] flex items-center px-4"
-              >
-                <input
-                  type="text"
-                  value={mindset.text}
-                  onChange={(e) =>
-                    handleListItemChange(index, e.target.value, "mindsets")
-                  }
-                  className="w-full bg-transparent outline-none text-[15px] leading-[18px] font-medium text-black pr-8"
-                />
-                <button
-                  ref={(el) => {
-                    buttonRefs.current[`mindset-${mindset.id}`] = el;
-                  }}
-                  className="absolute right-4"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown(`mindset-${mindset.id}`, e);
-                  }}
-                >
-                  <ThreeDotsIcon />
-                </button>
-                {openDropdown === `mindset-${mindset.id}` && (
-                  <div
-                    className="fixed z-[100]"
-                    style={{
-                      top: dropdownPosition.top,
-                      bottom: dropdownPosition.bottom,
-                      right: dropdownPosition.right,
-                    }}
-                  >
-                    <TwoElementsButton
-                      firstButtonText="보관함으로 이동"
-                      secondButtonText="지우기"
-                      onFirstClick={() => queueArchive("mindsets", mindset.id)}
-                      onSecondClick={() => queueDelete("mindsets", mindset.id)}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-            <button
-              onClick={() => addNewItem("mindsets")}
-              className="bg-white rounded-[5px] h-[52px] flex items-center px-4 text-[15px] leading-[18px] font-medium text-[#B3B3B3]"
-            >
-              + 새로운 마음가짐 추가하기
-            </button>
-          </div>
-        </div>
+        {listTypeSection("mindsets", "마음가짐", "+ 새로운 마음가짐 추가하기")}
       </div>
     </div>
   );

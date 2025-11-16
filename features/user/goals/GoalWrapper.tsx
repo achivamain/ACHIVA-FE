@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import MissionCard from "@/features/user/goals/MissionCard";
-import MindsetCard from "@/features/user/goals/MindsetCard";
-import VisionCard from "@/features/user/goals/VisionCard";
+import GoalCard from "@/features/user/goals/GoalCard";
 import Footer from "@/components/Footer";
 import GoalEditModal from "@/features/user/goals/GoalEditModal";
 import GoalArchiveModal from "@/features/user/goals/GoalArchiveModal";
@@ -44,10 +42,10 @@ const GoalWrapper: React.FC<GoalWrapperProps> = ({ initialData }) => {
           </button>
         </div>
 
-        <VisionCard />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MissionCard />
-          <MindsetCard />
+        <GoalCard type="vision" title="나의 꿈" emoji="💫" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <GoalCard type="mission" title="나의 미션" emoji="🎯" />
+          <GoalCard type="mindset" title="마음가짐" emoji="🍀" />
         </div>
       </div>
       <Footer />

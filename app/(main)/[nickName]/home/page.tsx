@@ -17,8 +17,7 @@ export default async function HomePage({
     redirect("/");
   }
 
-  const { nickName } = await params; // 이 페이지 유저 닉네임
-  const isOwner = currentUser.nickName === nickName; // 본인 아닐 때 어디까지 조회 가능?
+  const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해
 
   // 나중에 API로 받아와야 함
   const mySummaryData = {
@@ -33,9 +32,7 @@ export default async function HomePage({
         <div className="flex-1 flex justify-center items-end">
           <div className="w-full max-w-[844px]">
             {/* 나중에 책 관련 추가될 부분 */}
-            <Link href={`/${nickName}/goals/detail`}>
-              <GoalSummary summaryData={mySummaryData} />
-            </Link>
+            <GoalSummary summaryData={mySummaryData} />
           </div>
         </div>
 

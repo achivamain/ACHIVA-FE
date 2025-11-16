@@ -1,4 +1,4 @@
-import { CaretLeftIcon } from "@/components/Icons";
+// /home 경로에서 사용하는 Summary 컴포넌트 - 추후 위치 변경 예정
 
 type GoalSummaryProps = {
   icon: string;
@@ -36,28 +36,6 @@ const GoalSummaryCard: React.FC<GoalSummaryProps> = ({
             <p className="font-['Pretendard'] font-light text-[13px] md:text-sm md:sm:text-[15px] text-[#808080]">
               {description}
             </p>
-          </div>
-        </div>
-        <div className="flex-shrink-0">
-          {/* 모바일용 SVG */}
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            className="text-[#CCCCCC] md:hidden"
-          >
-            <path
-              d="M7.5 15L12.5 10L7.5 5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {/* 데스크톱용 CaretLeftIcon */}
-          <div className="hidden md:block">
-            <CaretLeftIcon />
           </div>
         </div>
       </div>
