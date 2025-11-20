@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  ThumbUpCheerIcon,
-  FireCheerIcon,
-  HeartCheerIcon,
-  CloverCheerIcon,
-} from "@/components/Icons";
 import type { Cheering } from "@/types/responses";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useMemo } from "react";
 import { useAnimate } from "motion/react";
+import { cheeringMeta } from "./cheeringMeta";
 
 export default function CheerBtns({
   postId,
@@ -22,24 +17,18 @@ export default function CheerBtns({
   const { data: session } = useSession();
   const currentUserId = session?.user?.id;
 
-  const labels = useMemo(
-    () => ["최고예요", "수고했어요", "응원해요", "동기부여"],
+  // useMemo 안쓰면 랜더링 오류 나서 넣음
+  const types = useMemo(
+    () => Object.keys(cheeringMeta) as (keyof typeof cheeringMeta)[],
     []
   );
-  const icons = [
-    ThumbUpCheerIcon,
-    FireCheerIcon,
-    HeartCheerIcon,
-    CloverCheerIcon,
-  ];
-
-  const initialCheeringsState = labels.reduce<
+  const initialCheeringsState = types.reduce<
     Record<
       string,
       { active: boolean; id: number | undefined; isPending: boolean }
     >
-  >((acc, label) => {
-    acc[label] = {
+  >((acc, type) => {
+    acc[type] = {
       active: false,
       id: undefined,
       isPending: true,
@@ -53,18 +42,18 @@ export default function CheerBtns({
     if (!currentUserId) {
       return;
     }
-    const newCheeringsState = labels.reduce<
+    const newCheeringsState = types.reduce<
       Record<
         string,
         { active: boolean; id: number | undefined; isPending: boolean }
       >
-    >((acc, label) => {
+    >((acc, type) => {
       const cheering = cheerings.find(
         (cheering) =>
-          cheering.cheeringCategory === label &&
+          cheering.cheeringCategory === type &&
           cheering.senderId === currentUserId
       );
-      acc[label] = {
+      acc[type] = {
         active: !!cheering,
         id: cheering?.id ?? undefined,
         isPending: false,
@@ -72,28 +61,28 @@ export default function CheerBtns({
       return acc;
     }, {});
     setCheeringsState(newCheeringsState);
-  }, [cheerings, currentUserId, labels]);
+  }, [cheerings, currentUserId, types]);
 
-  // gap-1.5
   return (
     <div
       className="flex gap-1.5 sm:gap-2 items-center justify-center py-3.5"
       ref={scope}
     >
-      {labels.map((label, idx) => {
-        const active = cheeringsState[label].active;
-        const pending = cheeringsState[label].isPending;
-        const Icon = icons[idx];
+      {types.map((type) => {
+        const active = cheeringsState[type].active;
+        const pending = cheeringsState[type].isPending;
+        const Icon = cheeringMeta[type].icon;
+        const color = cheeringMeta[type].color;
         return (
           <button
-            id={label}
+            id={type}
             disabled={pending}
             onClick={async () => {
               setCheeringsState((prev) => ({
                 ...prev,
-                [label]: {
-                  ...prev[label],
-                  active: !prev[label].active,
+                [type]: {
+                  ...prev[type],
+                  active: !prev[type].active,
                   isPending: true,
                 },
               }));
@@ -101,7 +90,7 @@ export default function CheerBtns({
               if (active) {
                 // 이미 눌렀으면 취소
                 await fetch(
-                  `/api/cheerings?postId=${postId}&cheeringId=${cheeringsState[label].id}`,
+                  `/api/cheerings?postId=${postId}&cheeringId=${cheeringsState[type].id}`,
                   {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
@@ -110,7 +99,7 @@ export default function CheerBtns({
               } else {
                 // 누르기
                 animate(
-                  `#${label}`,
+                  `#${type}`,
                   { scale: [1, 1.07, 1.1, 1] },
                   { duration: 0.3 }
                 );
@@ -119,26 +108,27 @@ export default function CheerBtns({
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     postId,
-                    cheeringType: label,
+                    cheeringType: type,
                   }),
                 });
                 const id = (await res.json()).data.id;
                 setCheeringsState((prev) => ({
                   ...prev,
-                  [label]: { ...prev[label], id },
+                  [type]: { ...prev[type], id },
                 }));
               }
               setCheeringsState((prev) => ({
                 ...prev,
-                [label]: { ...prev[label], isPending: false },
+                [type]: { ...prev[type], isPending: false },
               }));
             }}
-            key={label}
-            className={`text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border border-theme px-1.5 sm:px-3 py-1 ${
-              active ? "bg-theme text-white" : ""
+            key={type}
+            style={active ? { backgroundColor: color, borderColor: color } : {}}
+            className={`text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border px-1.5 sm:px-3 py-1 ${
+              active ? "text-white" : "border-theme"
             }`}
           >
-            <p>{label}</p>
+            <p>{type}</p>
             {<Icon active={active} />}
           </button>
         );
