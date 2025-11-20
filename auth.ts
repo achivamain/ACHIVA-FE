@@ -83,5 +83,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.error = token.error;
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // 로그인/회원가입이 끝나고 여기로 리다이렉트
+      return `${baseUrl}/processing`;
+    },
   },
 });
