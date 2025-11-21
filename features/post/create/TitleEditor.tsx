@@ -3,7 +3,8 @@ import { useDraftPostStore } from "@/store/CreatePostStore";
 import { NextStepButton } from "./Buttons";
 import { format } from "date-fns";
 import { useState, useRef, useLayoutEffect } from "react";
-import { useCurrentUserInfoStore } from "@/store/userStore";
+import { User } from "@/types/User";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { AnimatePresence } from "motion/react";
 import { DraftPost } from "@/types/Post";
@@ -12,7 +13,21 @@ export default function TitleEditor() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const draft = useDraftPostStore.use.post();
-  const currentUser = useCurrentUserInfoStore.use.user();
+  const { data: currentUser } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
   const setPost = useDraftPostStore.use.setPost();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);

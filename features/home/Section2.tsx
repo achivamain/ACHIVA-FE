@@ -6,10 +6,11 @@ import { useInfiniteQuery, useIsFetching } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import type { PostsData } from "@/types/responses";
 import HomePost from "@/features/home/Post";
-import { useCurrentUserInfoStore } from "@/store/userStore";
+import { useSession } from "next-auth/react";
 
 export default function HomeSection2() {
-  const currentUserId = useCurrentUserInfoStore.use.user()?.id;
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
 
   // 첫번째 섹션이 우선적으로 로딩되도록
   const isFetchingFirstSection =

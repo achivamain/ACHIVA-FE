@@ -1,6 +1,7 @@
 import MobileHeader from "@/components/MobileHeader";
 import Friends from "@/features/friends/Friends";
-import getAuthStatus from "@/lib/getAuthStatus";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
 
 export default async function Page({
   params,
@@ -8,7 +9,11 @@ export default async function Page({
   params: Promise<{ nickName: string }>;
 }) {
   const { nickName } = await params;
-  const currentUser = (await getAuthStatus()).user;
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
+  }
+  const currentUser = session!.user;
 
   return (
     <div className="flex-1 flex flex-col">

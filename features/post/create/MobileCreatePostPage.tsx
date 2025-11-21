@@ -10,7 +10,6 @@ import {
 import { useEffect, useState } from "react";
 import BgColorSelector from "./BgColorSelector";
 import { MobileWriting } from "./Writing";
-// import BgImageSelector from "./BgImageSelector";
 import ImageUploader from "./ImageUploader";
 import TitleEditor from "./TitleEditor";
 
@@ -88,7 +87,7 @@ export default function MobileCreatePostPage() {
       break;
     case 6:
       headerTitle = "사진 추가";
-      content = <ImageUploader isMobile={true} />;
+      content = <ImageUploader />;
       break;
     case 7:
       headerTitle = "표지 미리보기";

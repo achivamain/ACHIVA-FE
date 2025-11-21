@@ -13,7 +13,6 @@ import Modal from "@/components/Modal";
 import { useEffect, useState } from "react";
 import BgColorSelector from "./BgColorSelector";
 import Writing from "./Writing";
-// import BgImageSelector from "./BgImageSelector";
 import ImageUploader from "./ImageUploader";
 import TitleEditor from "./TitleEditor";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
@@ -99,7 +98,7 @@ export default function CreatePostPage() {
 
     case 6:
       title = "사진 추가";
-      content = <ImageUploader isMobile={false} />;
+      content = <ImageUploader />;
       break;
 
     case 7:

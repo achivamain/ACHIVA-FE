@@ -1,3 +1,38 @@
-export default function Page() {
-  return <div className="p-3">Sample Goals Page</div>;
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
+import Logout from "@/components/Logout";
+import useGoalStore from "@/store/GoalStore";
+import MobileGoalWrapper from "@/features/user/goals/MobileGoalWrapper";
+
+export default async function MobileGoalsPage({
+  params,
+}: {
+  params: Promise<{ nickName: string }>;
+}) {
+  const session = await auth();
+  if (session?.error) {
+    return <Logout />;
+  }
+  const currentUser = session!.user;
+
+  const { nickName } = await params;
+  const isOwner = currentUser!.nickName === decodeURIComponent(nickName);
+
+  if (!isOwner) {
+    redirect(`/${nickName}`);
+  }
+
+  const initialData = useGoalStore.getState();
+
+  if (!initialData) {
+    notFound();
+  }
+
+  const processedInitialData = {
+    vision: initialData.vision,
+    missions: initialData.missions,
+    mindsets: initialData.mindsets,
+  };
+
+  return <MobileGoalWrapper initialData={processedInitialData} />;
 }

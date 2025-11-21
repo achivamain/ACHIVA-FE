@@ -8,9 +8,7 @@ import {
 } from "date-fns";
 
 export default function dateFormatter(dateString: string) {
-  const wrongUtcDate = new Date(dateString); // 왜 시간대가 안맞냐
-  const date = new Date(wrongUtcDate.getTime() + 9 * 60 * 60 * 1000);
-  // const date = new Date(dateString);
+  const date = new Date(dateString);
   const now = new Date();
 
   const diffMinutes = differenceInMinutes(now, date);
