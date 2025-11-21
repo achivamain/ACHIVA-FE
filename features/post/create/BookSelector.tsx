@@ -5,14 +5,8 @@ import {
   useDraftPostStore,
 } from "@/store/CreatePostStore";
 import type { Book } from "@/types/Book";
-import { categories } from "@/types/Categories";
-import type { CategoryCount } from "@/types/Post";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-
-//background: linear-gradient(298.33deg, #79B9C5 13.91%, #7CBCC8 89.44%);
-//background: linear-gradient(270deg, rgba(124, 188, 200, 0) 0%, rgba(24, 109, 125, 0.6) 35.42%, rgba(24, 109, 125, 0.6) 64.06%, rgba(124, 188, 200, 0) 100%);
-//background: linear-gradient(270deg, rgba(124, 188, 200, 0) 0%, #155662 61.46%);
 
 //책이 5개보다 많으면? 스크롤 방향?
 //책의 정렬 순서는?
@@ -36,6 +30,7 @@ export default function BookSelector() {
     return await response.json();
   }
 
+  //로딩 관련
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["books"],
@@ -53,7 +48,7 @@ export default function BookSelector() {
   useEffect(() => {
     const currentElem = loaderRef.current;
     const io = new IntersectionObserver(
-      (entries, observer) => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
           return;
@@ -71,7 +66,10 @@ export default function BookSelector() {
   const books: Book[] = data?.pages.flatMap((page) => page.content) ?? [];
 
   return (
-    <div className="w-xl h-[36rem] flex-1 flex flex-col justify-between overflow-y-auto" id="viewport">
+    <div
+      className="w-xl h-[36rem] flex-1 flex flex-col justify-between overflow-y-auto"
+      id="viewport"
+    >
       <div className="grid grid-cols-3 gap-4">
         {books.length !== 0 &&
           books.map((book) => (
@@ -84,7 +82,7 @@ export default function BookSelector() {
                 handleNextStep();
               }}
             >
-              <BookCard book={book} width={162} />
+              <BookCard book={{ ...book, count: book.count + 1 }} width={162} />
             </div>
           ))}
 

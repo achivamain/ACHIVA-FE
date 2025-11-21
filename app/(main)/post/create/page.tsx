@@ -11,9 +11,6 @@ export default async function Page() {
     redirect("/");
   }
 
-  const session = await auth();
-  const token = session?.access_token;
-
   
   return <CreatePostPage/>;
 }

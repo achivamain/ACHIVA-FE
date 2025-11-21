@@ -97,7 +97,7 @@ export default function MobileCreateBookPage({
                     alt={img}
                     fill
                     className="object-contain"
-                  ></Image>
+                  />
                 </div>
               ))}
             </div>

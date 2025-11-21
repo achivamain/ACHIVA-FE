@@ -30,6 +30,7 @@ export default function BookSelector() {
     return await response.json();
   }
 
+  //자동로딩 관련
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["books"],
@@ -47,7 +48,7 @@ export default function BookSelector() {
   useEffect(() => {
     const currentElem = loaderRef.current;
     const io = new IntersectionObserver(
-      (entries, observer) => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
           return;
@@ -58,9 +59,9 @@ export default function BookSelector() {
     io.observe(currentElem!);
 
     return () => {
-    io.unobserve(currentElem!);
-    io.disconnect();
-  }
+      io.unobserve(currentElem!);
+      io.disconnect();
+    };
   }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
 
   const books: Book[] = data?.pages.flatMap((page) => page.content) ?? [];
@@ -79,7 +80,7 @@ export default function BookSelector() {
                 handleNextStep();
               }}
             >
-              <BookCard book={book} />
+              <BookCard book={{...book, count: book.count + 1}} />
             </div>
           ))}
         <div
