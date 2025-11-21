@@ -1,4 +1,4 @@
-import BookCard from "@/components/BookCard";
+import { BookCard, BookCardSkeleton } from "@/components/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 import {
   useCreatePostStepStore,
@@ -80,7 +80,13 @@ export default function BookSelector() {
                 handleNextStep();
               }}
             >
-              <BookCard book={{...book, count: book.count + 1}} />
+              <BookCard book={{ ...book, count: book.count + 1 }} />
+            </div>
+          ))}
+        {(books.length == 0 || isFetchingNextPage) &&
+          [0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-full flex-1 flex flex-col">
+              <BookCardSkeleton width={162} />
             </div>
           ))}
         <div

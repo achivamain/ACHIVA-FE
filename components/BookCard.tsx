@@ -1,13 +1,7 @@
 import { Book } from "@/types/Book";
 
 //디자인은 수정 예정
-export default function BookCard({
-  book,
-  width,
-}: {
-  book: Book;
-  width?: number;
-}) {
+export function BookCard({ book, width }: { book: Book; width?: number }) {
   const cleanHex = book.coverColor.replace("#", "");
   const r = parseInt(cleanHex.substring(0, 2), 16);
   const g = parseInt(cleanHex.substring(2, 4), 16);
@@ -38,7 +32,7 @@ export default function BookCard({
         }}
       >
         <div
-          className="h-full w-2 absolute left-2"
+          className="h-full w-2 absolute left-[8%]"
           style={{
             background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
           }}
@@ -59,6 +53,23 @@ export default function BookCard({
         <p className="font-light text-[#808080] text-sm mt-0">
           {book.count === 0 ? "첫번째" : `${book.count}번째`} 이야기
         </p>
+      </div>
+    </div>
+  );
+}
+
+export function BookCardSkeleton({ width }: { width?: number }) {
+  return (
+    <div className="h-full flex-1 flex flex-col">
+      <div
+        className={`aspect-[3/4] rounded-md relative animate-pulse bg-gray-200`}
+        style={{
+          width: width,
+        }}
+      ></div>
+      <div className="pl-4 pr-4 h-full flex-1 flex flex-col">
+        <div className="animate-pulse bg-gray-200 h-6 mt-3" />
+        <div className="animate-pulse bg-gray-200 h-4 mt-0" />
       </div>
     </div>
   );
