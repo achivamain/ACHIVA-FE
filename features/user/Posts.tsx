@@ -131,7 +131,7 @@ export default function Posts({ userId }: { userId: string }) {
         </div>
       )}
       <div ref={containerRef} className="grid grid-cols-3 gap-[1px]">
-        {posts?.map((post) => {
+        {posts?.filter((post) => post.bookTitle == false).map((post) => {
           return (
             <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
               <TitlePage size={size} post={post} />
