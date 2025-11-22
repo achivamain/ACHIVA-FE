@@ -5,7 +5,7 @@ import {
   useDraftPostStore,
 } from "@/store/CreatePostStore";
 import { CategoryButton } from "@/components/Buttons";
-import { basicTopics } from "../basicTopics";
+import { basicTopics } from "@/types/Categories";
 import {
   SubtitleCheckIcon,
   SubtitleDragIcon,
@@ -13,13 +13,19 @@ import {
 } from "@/components/Icons";
 import { NextStepButton } from "./Buttons";
 
+type SubtitleItem = {
+  id: string;
+  subtitle: string; // 타입 추론 때문에 에러나서 string으로 명시해줌
+  selected: boolean;
+};
+
 export default function SubtitlesSelector() {
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const category = draft.category!;
   const CategoryCount = draft.categoryCount!;
-  const [subtitles, setSubtitles] = useState(
+  const [subtitles, setSubtitles] = useState<SubtitleItem[]>(
     basicTopics[category].map((subtitle) => ({
       id: crypto.randomUUID(),
       subtitle,
