@@ -10,6 +10,24 @@ export default function PostImg({
   filtered?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
+
+  // URL 유효성 검사
+  // URL이 없거나 빈 문자열이거나 "default"인 경우
+  if (!url || url.trim() === "" || url === "default") {
+    return null;
+  }
+
+  // URL이 올바른 형식인지 확인
+  const isValidUrl =
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("/");
+
+  if (!isValidUrl) {
+    console.error("Invalid URL format:", url);
+    return null;
+  }
+
   return (
     <div className="relative aspect-square w-full h-full">
       {!loaded && (
