@@ -1,26 +1,9 @@
 import { Book } from "@/types/Book";
+import getColorVariants from "@/lib/getColorVariants";
 
 //디자인은 수정 예정
 export function BookCard({ book, width }: { book: Book; width?: number }) {
-  const cleanHex = book.coverColor.replace("#", "");
-  const r = parseInt(cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.substring(4, 6), 16);
-  const color = [r, g, b];
-  const shadecolor = `#${color
-    .map((i) =>
-      Math.floor(i * 0.9)
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("")}`;
-  const tintcolor = `#${color
-    .map((i) =>
-      Math.floor(Math.min(i * 1.1, 255))
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("")}`;
+  const { shadecolor, tintcolor } = getColorVariants(book.coverColor);
 
   return (
     <div className="h-full flex-1 flex flex-col">
@@ -32,14 +15,16 @@ export function BookCard({ book, width }: { book: Book; width?: number }) {
         }}
       >
         <div
-          className="h-full w-2 absolute left-[8%]"
+          className="h-full w-2 absolute left-[5%]"
           style={{
             background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
           }}
         ></div>
         <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
           <img
-            src={`/images/${book.coverImage}.png`}
+            src={`/images/${
+              book.coverImage === "default" ? "default.png" : book.coverImage
+            }`}
             alt={book.coverImage}
             className="w-full h-full object-cover p-2"
           />
@@ -48,8 +33,12 @@ export function BookCard({ book, width }: { book: Book; width?: number }) {
           {book.category}
         </div>
       </div>
-      <div className="pl-4 pr-4 h-full flex-1 flex flex-col">
-        <p className="font-semibold text-lg mt-3">{book.title}</p>
+      <div className="px-4 h-full flex-1 flex flex-col">
+        <p
+          className="font-semibold text-lg mt-3 overflow-hidden text-ellipsis whitespace-nowrap"
+        >
+          {book.title}
+        </p>
         <p className="font-light text-[#808080] text-sm mt-0">
           {book.count === 0 ? "첫번째" : `${book.count}번째`} 이야기
         </p>

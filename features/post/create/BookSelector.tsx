@@ -8,8 +8,6 @@ import type { Book } from "@/types/Book";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
-//책이 5개보다 많으면? 스크롤 방향?
-//책의 정렬 순서는?
 export default function BookSelector() {
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();

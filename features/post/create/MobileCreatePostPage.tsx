@@ -49,7 +49,7 @@ export default function MobileCreatePostPage() {
     case 0:
       title = "원하는 성취 카테고리를 선택해주세요";
       content = (
-        <div>
+        <div className="flex flex-1">
           <CategorySelector />
         </div>
       );
@@ -125,9 +125,9 @@ export default function MobileCreatePostPage() {
               </button>
             </div>
           </div>
-          <div className="w-full h-full flex flex-col px-5 pb-15">
+          <div className="w-full h-full flex flex-1 flex-col px-5 pb-15">
             {title && <h1 className="text-xl font-semibold mb-5">{title}</h1>}
-            <div className="flex-1 flex flex-col">{content}</div>
+            {content}
           </div>
         </>
       )}

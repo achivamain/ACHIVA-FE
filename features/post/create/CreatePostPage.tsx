@@ -57,7 +57,7 @@ export default function CreatePostPage() {
           <CategorySelector />
         </div>
       );
-      size = "w-lg h-[20rem] mt-8 flex"
+      size = "w-lg h-[20rem] mt-8 flex";
       break;
 
     case 1:

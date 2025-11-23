@@ -8,6 +8,7 @@ import { CloseIcon } from "@/components/Icons";
 import { BookCoverImage } from "@/types/BookCoverImages";
 import { bookCoverImages } from "@/types/BookCoverImages";
 import Image from "next/image";
+import getColorVariants from "@/lib/getColorVariants";
 
 export default function MobileCreateBookPage({
   close,
@@ -22,28 +23,10 @@ export default function MobileCreateBookPage({
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const [currentStep, setCurrentStep] = useState("color");
 
-  const cleanHex = coverColor.replace("#", "");
-  const r = parseInt(cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.substring(4, 6), 16);
-  const color = [r, g, b];
-  const shadecolor = `#${color
-    .map((i) =>
-      Math.floor(i * 0.9)
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("")}`;
-  const tintcolor = `#${color
-    .map((i) =>
-      Math.floor(Math.min(i * 1.1, 255))
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("")}`;
+  const { shadecolor, tintcolor } = getColorVariants(coverColor);
 
   let content: React.ReactNode;
-  let next: string;
+  let next: string = "";
   switch (currentStep) {
     case "color":
       content = (
@@ -140,30 +123,32 @@ export default function MobileCreateBookPage({
               }}
               disabled={!title}
             >
-              {currentStep == "fin" ? "완료" : "다음"}
+              {next == "fin" ? "완료" : "다음"}
             </button>
           </div>
         </div>
       </div>
       <div className="w-full h-full flex flex-col pb-15 ">
         <div className="flex-1 flex justify-center items-center px-5 flex-shrink-0">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             {/* 책 표지 */}
             <div
-              className="aspect-[3/4] w-[211px] rounded-md relative shadow-sm bg-gradient-to-tl from-{}-500 to-{}-500"
+              className="aspect-[3/4] w-[211px] rounded-md relative shadow-sm"
               style={{
                 background: `linear-gradient(to bottom right, ${tintcolor}, 10% ,${coverColor}, 90%, ${shadecolor})`,
               }}
             >
               <div
-                className="h-full w-2 absolute left-3"
+                className="h-full w-2 absolute left-[5%]"
                 style={{
                   background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
                 }}
               />
               <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
                 <img
-                  src={`/images/${coverImage}.png`}
+                  src={`/images/${
+                    coverImage === "default" ? "default.png" : coverImage
+                  }`}
                   alt={coverImage}
                   className="w-full h-full object-cover p-2"
                   style={{}}
@@ -177,13 +162,14 @@ export default function MobileCreateBookPage({
               {currentStep == "color" ? (
                 <input
                   type="text"
+                  maxLength={10} //일단 임의로 제한함
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="제목을 작성해주세요"
-                  className="mt-4 font-semibold p-0 focus:outline-none text-[24px]"
+                  className="font-semibold p-0 focus:outline-none text-[24px] overflow-hidden text-ellipsis whitespace-nowrap"
                 />
               ) : (
-                <p className="mt-4 font-semibold p-0 text-[24px]">{title}</p>
+                <p className=" font-semibold p-0 text-[24px]">{title}</p>
               )}
 
               <p className="font-light text-[#808080A3] text-[20px]">
