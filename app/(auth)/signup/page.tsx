@@ -10,9 +10,31 @@ import Terms from "@/features/auth/Terms";
 import CategoryForm from "@/features/auth/CategoryForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
 import OathForm from "@/features/auth/OathForm";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
+
+  // 디버깅용 엔트리 포인트
+  // /signup?step=2
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const stepParam = searchParams.get("step");
+    if (stepParam && process.env.NODE_ENV === "development") {
+      const targetStep = parseInt(stepParam, 10);
+      if (targetStep >= 2 && targetStep <= 5) {
+        const store = useSignupStepStore.getState();
+        while (store.currentStep < targetStep) {
+          store.handleNextStep();
+        }
+        while (store.currentStep > targetStep) {
+          store.handlePrevStep();
+        }
+      }
+    }
+  }, [searchParams]);
+
   let content;
   switch (currentStep) {
     case 2: // 약관
