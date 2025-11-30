@@ -1,4 +1,4 @@
-import { BookCard, BookCardSkeleton } from "@/components/BookCard";
+import { BookCard, BookCardSkeleton } from "@/features/book/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 import {
   useCreatePostStepStore,

@@ -10,7 +10,7 @@ import {
   bookCoverImages,
 } from "@/types/BookCoverImages";
 import getColorVariants from "@/lib/getColorVariants";
-import { BookCoverImage } from "@/components/BookCoverImages";
+import { BookCoverImage } from "@/features/book/BookCoverImages";
 
 export default function MobileCreateBookPage({
   close,

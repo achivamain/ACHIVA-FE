@@ -1,5 +1,5 @@
 import { Book } from "@/types/Book";
-import { BookCoverImage } from "./BookCoverImages";
+import { BookCoverImage } from "@/features/book/BookCoverImages";
 import getColorVariants from "@/lib/getColorVariants";
 
 //디자인은 수정 예정

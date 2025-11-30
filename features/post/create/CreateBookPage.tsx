@@ -7,7 +7,7 @@ import { NextStepButton } from "./Buttons";
 import { bookCoverColors } from "../bookCoverColors";
 import { BookCoverImage as BookCoverImageType, bookCoverImages } from "@/types/BookCoverImages";
 import getColorVariants from "@/lib/getColorVariants";
-import { BookCoverImage } from "@/components/BookCoverImages";
+import { BookCoverImage } from "@/features/book/BookCoverImages";
 
 export default function CreateBookPage() {
   const [coverColor, setCoverColor] = useState("#77B5C1");
