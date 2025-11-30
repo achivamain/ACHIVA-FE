@@ -5,6 +5,7 @@ import WebGoalSummary from "@/features/user/goals/GoalSummary";
 import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
 import { CaretRight24pxIcon } from "@/components/Icons";
+import { BookSection } from "@/features/home/BookSection";
 
 export default async function HomePage({
   params,
@@ -29,8 +30,8 @@ export default async function HomePage({
     <div className="w-full flex-1 flex">
       <div className="flex-1 flex flex-col justify-between">
         <div className="flex-1 flex justify-center items-end">
-          <div className="w-full max-w-[844px]">
-            {/* 나중에 책 관련 추가될 부분 */}
+          <div className="w-full h-full max-w-[844px]">
+            <BookSection/>
             <WebGoalSummary summaryData={mySummaryData} />
           </div>
         </div>

@@ -4,7 +4,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Book } from "@/types/Book";
-import BookCard from "@/components/BookCard";
+import { BookCard } from "@/components/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 
 export function BookSection() {
@@ -82,7 +82,7 @@ export function BookSection() {
   return (
     <div className="relative w-full items-center">
       <h1 className="text-[28px] font-semibold m-10">나의 성취 이야기</h1>
-      <div className="flex flex-row items-center">
+      <div className="flex flex-row items-center justify-between h-[301px]">
         <button
           onClick={() => {
             currentPage.current = Math.max(0, currentPage.current - 1);
@@ -105,10 +105,10 @@ export function BookSection() {
           </svg>
         </button>
 
-        <div
-          className="inline-flex overflow-hidden gap-4"
-          ref={viewportRef}
-        >
+        <div className="inline-flex overflow-hidden gap-4" ref={viewportRef}>
+          {books.length == 0 && (
+            <p className="text-center">여기에 당신의 성취 기록이 담겨요<br/>첫 성취를 기록해보세요</p>
+          )}
           {books.map((book) => (
             <div
               key={book.id}

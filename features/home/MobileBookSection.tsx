@@ -4,7 +4,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Book } from "@/types/Book";
-import BookCard from "@/components/BookCard";
+import { BookCard } from "@/components/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 
 export function MobileBookSection() {
@@ -80,17 +80,25 @@ export function MobileBookSection() {
   });
 
   return (
-    <div className="relative w-full items-center">
-      <h1 className="text-[26px] font-semibold m-4 mb-1">나의 성취 이야기</h1>
-      <div className="flex flex-row items-center">
+    <div className="relative w-full h-[22rem] bg-white items-center flex-col mb-5">
+      <h1 className="pt-4 text-[26px] font-semibold m-4 mb-1">
+        나의 성취 이야기
+      </h1>
+      <div className="h-[276px] flex flex-row items-center justify-between">
         <div
-          className="inline-flex overflow-x-auto"
+          className="inline-flex overflow-x-auto flex-1 "
           style={{
             msOverflowStyle: "none",
             scrollbarWidth: "none",
           }}
           ref={viewportRef}
         >
+          {books.length == 0 && (
+            <p className="text-center ml-[25%]">
+              여기에 당신의 성취 기록이 담겨요
+              <br />첫 성취를 기록해보세요
+            </p>
+          )}
           {books.map((book) => (
             <div
               key={book.id}
