@@ -80,11 +80,9 @@ export default function HomeSection1() {
       )}
       {posts.length === 0 && !isLoading && <HomePost post={getFirstPage()} />}
       <div className="flex flex-col gap-7">
-        {posts
-          ?.filter((post) => post.bookTitle == false)
-          .map((post) => {
-            return <HomePost key={post.id} post={post} />;
-          })}
+        {posts.map((post) => {
+          return <HomePost key={post.id} post={post} />;
+        })}
       </div>
       <div ref={loaderRef}></div>
       {isFetchingNextPage && (

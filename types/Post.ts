@@ -50,14 +50,10 @@ export type PostRes = {
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
   cheerings?: Cheering[];
-<<<<<<< HEAD
   bookArticle: {
     bookId: string;
     bookTitle: string;
   }[];
-=======
-  bookTitle: boolean;
->>>>>>> develop
 };
 
 export type Question = {

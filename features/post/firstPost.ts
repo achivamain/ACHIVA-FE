@@ -61,10 +61,6 @@ export function getFirstPage(): PostRes {
     createdAt: "", // 계정 생성 시각
     updatedAt: "",
     cheerings: [],
-<<<<<<< HEAD
     bookArticle: [],
-=======
-    bookTitle: false,
->>>>>>> develop
   };
 }
