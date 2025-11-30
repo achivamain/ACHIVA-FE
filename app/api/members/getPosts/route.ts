@@ -23,5 +23,6 @@ export async function GET(req: NextRequest) {
       },
     }
   );
+  console.log(res)
   return res;
 }

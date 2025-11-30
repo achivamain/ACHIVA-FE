@@ -5,13 +5,14 @@ import {
 import { useState } from "react";
 import { NextStepButton } from "./Buttons";
 import { bookCoverColors } from "../bookCoverColors";
-import { BookCoverImage, bookCoverImages } from "@/types/BookCoverImages";
+import { BookCoverImage as BookCoverImageType, bookCoverImages } from "@/types/BookCoverImages";
 import Image from "next/image";
 import getColorVariants from "@/lib/getColorVariants";
+import { BookCoverImage } from "@/components/BookCoverImages";
 
 export default function CreateBookPage() {
   const [coverColor, setCoverColor] = useState("#77B5C1");
-  const [coverImage, setCoverImage] = useState<BookCoverImage>("default");
+  const [coverImage, setCoverImage] = useState<BookCoverImageType>("default");
   const [title, setTitle] = useState("");
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
@@ -36,11 +37,9 @@ export default function CreateBookPage() {
             }}
           />
           <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
-            <img
-              src={`/images/${
-                coverImage === "default" ? "default.png" : coverImage
-              }`}
-              alt={coverImage}
+            <BookCoverImage
+              name={coverImage}
+              color={coverColor}
               className="w-full h-full object-cover p-2"
             />
           </div>
@@ -146,7 +145,7 @@ export default function CreateBookPage() {
                   onClick={() => setCoverImage(img)}
                 >
                   <Image
-                    src={`/images/${img}.png`}
+                    src={`/images/${img}.svg`}
                     alt={img}
                     fill
                     className="object-contain"

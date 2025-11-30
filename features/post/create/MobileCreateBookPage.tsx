@@ -5,10 +5,13 @@ import {
 import { useState } from "react";
 import { bookCoverColors } from "../bookCoverColors";
 import { CloseIcon } from "@/components/Icons";
-import { BookCoverImage } from "@/types/BookCoverImages";
-import { bookCoverImages } from "@/types/BookCoverImages";
+import {
+  BookCoverImage as BookCoverImageType,
+  bookCoverImages,
+} from "@/types/BookCoverImages";
 import Image from "next/image";
 import getColorVariants from "@/lib/getColorVariants";
+import { BookCoverImage } from "@/components/BookCoverImages";
 
 export default function MobileCreateBookPage({
   close,
@@ -16,7 +19,7 @@ export default function MobileCreateBookPage({
   close: (value: boolean) => void;
 }) {
   const [coverColor, setCoverColor] = useState("#77B5C1");
-  const [coverImage, setCoverImage] = useState<BookCoverImage>("default");
+  const [coverImage, setCoverImage] = useState<BookCoverImageType>("default");
   const [title, setTitle] = useState("");
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
@@ -76,7 +79,7 @@ export default function MobileCreateBookPage({
                   onClick={() => setCoverImage(img)}
                 >
                   <Image
-                    src={`/images/${img}.png`}
+                    src={`/images/${img}.svg`}
                     alt={img}
                     fill
                     className="object-contain"
@@ -145,13 +148,10 @@ export default function MobileCreateBookPage({
                 }}
               />
               <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
-                <img
-                  src={`/images/${
-                    coverImage === "default" ? "default.png" : coverImage
-                  }`}
-                  alt={coverImage}
+                <BookCoverImage
+                  name={coverImage}
+                  color={coverColor}
                   className="w-full h-full object-cover p-2"
-                  style={{}}
                 />
               </div>
               <div className="absolute top-2 right-2 px-[11px] py-[2px] gap-2 text-xl text-[#412A2A] bg-white border border-[#D9D9D9] rounded-md font-semibold">
