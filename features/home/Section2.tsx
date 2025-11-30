@@ -86,7 +86,7 @@ export default function HomeSection2() {
         </div>
       )}
       <div className="flex flex-col gap-7">
-        {posts?.filter((post) => post.bookTitle == false).map((post) => {
+        {posts.map((post) => {
           return <HomePost key={post.id} post={post} />;
         })}
       </div>
