@@ -9,7 +9,6 @@ import {
   BookCoverImage as BookCoverImageType,
   bookCoverImages,
 } from "@/types/BookCoverImages";
-import Image from "next/image";
 import getColorVariants from "@/lib/getColorVariants";
 import { BookCoverImage } from "@/components/BookCoverImages";
 
