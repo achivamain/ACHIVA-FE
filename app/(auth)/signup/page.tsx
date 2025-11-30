@@ -10,11 +10,23 @@ import Terms from "@/features/auth/Terms";
 import CategoryForm from "@/features/auth/CategoryForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
 import OathForm from "@/features/auth/OathForm";
+import NicknameForm from "@/features/auth/NicknameForm";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
   let content;
   switch (currentStep) {
+    case 1: // 닉네임
+      console.log("!!");
+      content = (
+        <>
+          <div className="hidden sm:block mb-10">
+            <TextLogo />
+          </div>
+          <NicknameForm />
+        </>
+      );
+      break;
     case 2: // 약관
       content = (
         <>
@@ -60,12 +72,12 @@ export default function Page() {
     <>
       <div className="min-h-dvh flex items-center justify-center">
         <div className="w-full min-h-dvh flex flex-col gap-3 items-center pt-15 sm:pt-0 justify-start sm:justify-center">
-          <Container classes={currentStep === 0 ? "min-h-135" : "h-151"}>
+          <Container classes="h-151">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
                 initial={
-                  currentStep !== 0
+                  currentStep !== 1
                     ? {
                         opacity: 0,
                       }

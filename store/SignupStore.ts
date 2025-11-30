@@ -11,7 +11,7 @@ type SignupStepState = {
 };
 
 const useSignupStepStoreBase = create<SignupStepState>()((set) => ({
-  currentStep: 2,
+  currentStep: 1,
   handlePrevStep: () =>
     set((state) => ({ currentStep: state.currentStep - 1 })),
   handleNextStep: () =>
