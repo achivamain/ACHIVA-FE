@@ -1,4 +1,4 @@
-import type { CategoryCount } from "@/types/Post";
+import { categories } from "@/types/Categories";
 import {
   useCreatePostStepStore,
   useDraftPostStore,
@@ -6,66 +6,24 @@ import {
 import { CategoryButton } from "@/components/Buttons";
 import { NextStepButton } from "./Buttons";
 
-export default function CategorySelector({
-  categoryCounts,
-}: {
-  categoryCounts: CategoryCount[];
-}) {
+export default function CategorySelector() {
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
-  const postedCategories = categoryCounts.filter(
-    (category) => category.count !== 0
-  );
-  const notPostedCategories = categoryCounts.filter(
-    (category) => category.count === 0
-  );
-  // const postedCategories = [
-  //   {
-  //     category: "취미",
-  //     count: 15,
-  //   },
-  //   {
-  //     category: "공부",
-  //     count: 9,
-  //   },
-  // ];
 
   return (
-    <div className="h-full flex-1 flex flex-col justify-between">
+    <div className="flex-1 flex flex-col justify-between">
       <div>
-        {postedCategories.length !== 0 && (
-          <div className="flex flex-wrap gap-5 mb-5">
-            {postedCategories.map((category) => (
-              <div key={category.category} className="flex items-center gap-3">
-                <CategoryButton
-                  isSelected={draft.category === category.category}
-                  onClick={() => {
-                    setPost({ category: category.category });
-                    setPost({ categoryCount: category.count });
-                  }}
-                >
-                  {category.category}
-                </CategoryButton>
-                <p className="font-light text-sm text-[#808080]">
-                  {category.count + 1}번째 이야기
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-        <p className="font-semibold text-theme mb-3">새로운 이야기</p>
         <div className="flex gap-3 flex-wrap">
-          {notPostedCategories.map((category) => (
+          {categories.map((category) => (
             <CategoryButton
-              key={category.category}
-              isSelected={draft.category === category.category}
+              key={category}
+              isSelected={draft.category === category}
               onClick={() => {
-                setPost({ category: category.category });
-                setPost({ categoryCount: category.count });
+                setPost({ category: category });
               }}
             >
-              {category.category}
+              {category}
             </CategoryButton>
           ))}
         </div>

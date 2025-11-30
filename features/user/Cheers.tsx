@@ -1,4 +1,5 @@
 import type { CheerPoint } from "@/types/responses";
+import { cheeringMeta } from "../post/cheeringMeta";
 
 export default function Cheers({
   type,
@@ -8,8 +9,7 @@ export default function Cheers({
   cheers: CheerPoint[];
 }) {
   const totalPoints = cheers.reduce((acc, cheer) => cheer.points + acc, 0);
-  const labels = ["최고예요 👍", "응원해요 🔥", "수고했어요 💕", "동기부여 🍀"];
-  const types = ["최고예요", "응원해요", "수고했어요", "동기부여"];
+  const types = Object.keys(cheeringMeta) as (keyof typeof cheeringMeta)[];
   return (
     <div className="w-full flex flex-col gap-15 sm:gap-10">
       <div>
@@ -22,10 +22,12 @@ export default function Cheers({
         <p className="text-xl font-bold">{type} 응원 버튼</p>
 
         <ul className="flex flex-col gap-4 p-6 border border-gray-200 rounded-lg">
-          {types.map((type, idx) => {
+          {types.map((type) => {
             return (
               <li key={type} className="flex justify-between py-2">
-                <p className="font-bold text-lg text-theme">{labels[idx]}</p>
+                <p className="font-bold text-lg text-theme">
+                  {cheeringMeta[type].label}
+                </p>
                 <p className="text-theme font-semibold">
                   {cheers.find((cheer) => {
                     return cheer.cheeringCategory === type;

@@ -11,12 +11,12 @@ type CreatePostStepState = {
 };
 
 const useCreatePostStepStoreBase = create<CreatePostStepState>()((set) => ({
-  currentStep: 0,
+  currentStep: 2,
   handlePrevStep: () =>
     set((state) => ({ currentStep: state.currentStep - 1 })),
   handleNextStep: () =>
     set((state) => ({ currentStep: state.currentStep + 1 })),
-  resetStep: () => set({ currentStep: 0 }),
+  resetStep: () => set({ currentStep: 2 }),
 }));
 
 export const useCreatePostStepStore = createSelectors(

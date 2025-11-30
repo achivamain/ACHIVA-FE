@@ -7,6 +7,7 @@ import { User } from "@/types/User";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { AnimatePresence } from "motion/react";
+import { DraftPost } from "@/types/Post";
 
 export default function TitleEditor() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -37,6 +38,81 @@ export default function TitleEditor() {
       setContainerWidth(containerRef.current.offsetWidth);
     }
   }, []);
+
+  const addNewPostToBook = async (draft: DraftPost) => {
+    //게시글 생성
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        body: JSON.stringify({
+          post: draft,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        console.log(res);
+        throw new Error("게시글 작성 중 에러");
+      }
+      const data = await res.json();
+      const bookId = draft.book?.id;
+      const postId: string = data.data.id;
+      //책에 게시글 추가
+      const res2 = await fetch(
+        `/api/books/articles?bookId=${bookId}&postId=${postId}`,
+        {
+          method: "POST",
+        }
+      );
+      if (!res2.ok) {
+        console.log(res2);
+        throw new Error("게시글 작성 중 에러");
+      }
+      setIsLoading(false);
+      window.location.href = `/${currentUser?.nickName}`;
+    } catch (err) {
+      console.log(err);
+      alert(
+        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+      );
+      setIsLoading(false);
+    }
+  };
+
+  //새 책 생성
+  const createBookWithNewPost = async (draft: DraftPost) => {
+    setIsLoading(true);
+    try {
+      //책 생성
+      const res = await fetch("/api/books", {
+        method: "POST",
+        body: JSON.stringify({
+          data: draft,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        console.log(res);
+        throw new Error("게시글 작성 중 에러");
+      }
+      //게시물 등록 및 책에 추가
+      const data = await res.json();
+      draft.book!.id = data.id;
+      await addNewPostToBook(draft);
+      setIsLoading(false);
+      window.location.href = `/${currentUser?.nickName}`;
+    } catch (err) {
+      console.log(err);
+      alert(
+        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+      );
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -72,11 +148,11 @@ export default function TitleEditor() {
             />
             <div className={`text-[32px] font-light text-white leading-[40px]`}>
               <div>
-                <span className="font-bold">{draft.category}</span> 기록
+                <span className="font-bold">{draft.book?.title}</span> 기록
               </div>
               <div>
                 <span className="font-bold">
-                  {(draft.categoryCount ?? 0) + 1}번째
+                  {(draft.book?.count ?? 0) + 1}번째
                 </span>{" "}
                 이야기
               </div>
@@ -109,29 +185,10 @@ export default function TitleEditor() {
           isLoading={isLoading}
           // disabled={!draft.title}
           onClick={async () => {
-            setIsLoading(true);
-            try {
-              const res = await fetch("/api/posts", {
-                method: "POST",
-                body: JSON.stringify({
-                  post: draft,
-                }),
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              });
-              if (!res.ok) {
-                console.log(res);
-                throw new Error("게시글 작성 중 에러");
-              }
-              setIsLoading(false);
-              window.location.href = `/${currentUser?.nickName}`;
-            } catch (err) {
-              console.log(err);
-              alert(
-                "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-              );
-              setIsLoading(false);
+            if (draft.book?.id === "") {
+              createBookWithNewPost(draft);
+            } else {
+              addNewPostToBook(draft);
             }
           }}
         >

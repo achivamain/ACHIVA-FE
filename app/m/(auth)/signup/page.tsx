@@ -3,7 +3,7 @@
 import { AnimatePresence } from "motion/react";
 import { motion } from "motion/react";
 import { useSignupStepStore } from "@/store/SignupStore";
-import Link from "next/link";
+import Footer from "@/components/Footer";
 import MobileHeader from "@/components/MobileHeader";
 import Container from "@/features/auth/Container";
 import { TextLogo } from "@/components/Logo";
@@ -61,35 +61,42 @@ export default function Page() {
   }
 
   return (
-    <div className="overflow-x-hidden w-full min-h-dvh flex flex-col gap-3 items-center pt-15 sm:pt-0 justify-start sm:justify-center">
-      <div className="w-full fixed top-0 left-0">
-        <MobileHeader onClick={currentStep !== 0 ? handlePrevStep : undefined}>
-          회원가입
-        </MobileHeader>
+    <>
+      <div className="min-h-dvh flex items-center justify-center">
+        <div className="overflow-x-hidden w-full min-h-dvh flex flex-col gap-3 items-center pt-15 sm:pt-0 justify-start sm:justify-center">
+          <div className="w-full fixed top-0 left-0">
+            <MobileHeader
+              onClick={currentStep !== 0 ? handlePrevStep : undefined}
+            >
+              회원가입
+            </MobileHeader>
+          </div>
+          <Container classes={containerHeight}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={
+                  currentStep !== 0
+                    ? {
+                        opacity: 0,
+                      }
+                    : false
+                }
+                animate={{
+                  opacity: 1,
+                }}
+                exit={{
+                  opacity: 0,
+                }}
+                className="w-full h-full flex flex-col items-center sm:justify-center"
+              >
+                {content}
+              </motion.div>
+            </AnimatePresence>
+          </Container>
+        </div>
       </div>
-      <Container classes={containerHeight}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={
-              currentStep !== 0
-                ? {
-                    opacity: 0,
-                  }
-                : false
-            }
-            animate={{
-              opacity: 1,
-            }}
-            exit={{
-              opacity: 0,
-            }}
-            className="w-full h-full flex flex-col items-center sm:justify-center"
-          >
-            {content}
-          </motion.div>
-        </AnimatePresence>
-      </Container>
-    </div>
+      <Footer />
+    </>
   );
 }

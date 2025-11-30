@@ -8,22 +8,5 @@ export default async function Page() {
   if (session?.error) {
     return <Logout />;
   }
-  const token = session?.access_token;
-  const currentUser = session!.user;
-  const response = await fetch(
-    `${
-      process.env.NEXT_PUBLIC_SERVER_URL
-    }/api/members/{memberId}/count-by-category?memberId=${currentUser!.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  const { data } = await response.json();
-
-  return <MobileCreatePostPage categoryCounts={data.categoryCounts} />;
+  return <MobileCreatePostPage />;
 }

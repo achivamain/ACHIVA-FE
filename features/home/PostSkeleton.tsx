@@ -1,9 +1,4 @@
-import {
-  ThumbUpCheerIcon,
-  FireCheerIcon,
-  HeartCheerIcon,
-  CloverCheerIcon,
-} from "@/components/Icons";
+import { cheeringMeta } from "../post/cheeringMeta";
 
 export default function PostSkeleton() {
   return (
@@ -37,26 +32,19 @@ export default function PostSkeleton() {
 }
 
 function CheerBtnsSkeleton() {
-  const labels = ["최고예요", "수고했어요", "응원해요", "동기부여"];
-  const icons = [
-    ThumbUpCheerIcon,
-    FireCheerIcon,
-    HeartCheerIcon,
-    CloverCheerIcon,
-  ];
-
+  const types = Object.keys(cheeringMeta) as (keyof typeof cheeringMeta)[];
   return (
     <div className="flex gap-1.5 sm:gap-2 items-center justify-center py-3.5">
-      {labels.map((label, idx) => {
-        const Icon = icons[idx];
+      {types.map((type) => {
+        const Icon = cheeringMeta[type].icon;
         return (
           <button
-            id={label}
+            id={type}
             disabled
-            key={label}
+            key={type}
             className={`text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border border-theme px-1.5 sm:px-3 py-1 opacity-50`}
           >
-            <p>{label}</p>
+            <p>{type}</p>
             {<Icon />}
           </button>
         );

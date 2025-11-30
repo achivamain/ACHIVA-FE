@@ -1,5 +1,6 @@
 import type { Category } from "./Categories";
 import type { Cheering } from "./responses";
+import type { Book } from "./Book";
 
 export type Post = {
   titleImageUrl: string;
@@ -10,7 +11,9 @@ export type Post = {
 };
 
 export type DraftPost = Partial<Post> & {
+  id?: string;
   categoryCount?: number;
+  book?: Book;
 }; // 글쓰기 중 타입
 
 export type PostPage = {
@@ -47,6 +50,7 @@ export type PostRes = {
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
   cheerings?: Cheering[];
+  bookTitle: boolean;
 };
 
 export type Question = {
