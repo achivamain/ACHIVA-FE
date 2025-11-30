@@ -35,7 +35,7 @@ export function TitlePage({ size, post }: Props) {
           </h1>
           <div className="text-[32px] font-light text-white leading-[40px]">
             <div>
-              <span className="font-bold">{post.category}</span> 기록
+              <span className="font-bold">{post.bookArticle?.[0]?.bookTitle}</span> 기록
             </div>
             <div>
               <span className="font-bold">{post.authorCategorySeq}번째</span>{" "}

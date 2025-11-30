@@ -10,23 +10,13 @@ function bookResToBook(bookRes: BookRes): Book {
     (i) => i == bookRes.mainArticle.category
   )!;
 
-  let coverColor: string;
-  let coverImage: BookCoverImage;
-
-  coverColor = bookRes.mainArticle.backgroundColor;
-  coverImage =
+  const coverColor: string = bookRes.mainArticle.backgroundColor;
+  const coverImage: BookCoverImage =
     bookCoverImages.find((i) => i == bookRes.mainArticle.photoUrl) || "default";
-
-  //legacy
-  if (bookRes.description != "") {
-    coverColor = JSON.parse(bookRes.description).coverColor;
-    coverImage = JSON.parse(bookRes.description).coverImage;
-  }
-  // ---
 
   return {
     id: bookRes.id,
-    title: bookRes.title,
+    title: bookRes.mainArticle.title,
     category: category,
     coverColor: coverColor,
     coverImage: coverImage,

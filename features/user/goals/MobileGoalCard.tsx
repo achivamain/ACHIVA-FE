@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { HeartIcon } from "@/components/Icons";
+import HeartButton from "@/components/HeartButton";
 import useGoalStore from "@/store/GoalStore";
 
 type GoalType = "vision" | "mission" | "mindset";
@@ -57,12 +57,7 @@ const MobileGoalCard: React.FC<MobileGoalCardProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={() => handleHeartClick(data[0].id, type)}
-            className="w-8 h-8 flex items-center justify-center flex-shrink-0"
-          >
-            <HeartIcon />
-          </button>
+          <HeartButton onClick={() => handleHeartClick(data[0].id, type)} />
         </div>
       ) : (
         // Mission과 Mindset은 리스트
@@ -82,12 +77,7 @@ const MobileGoalCard: React.FC<MobileGoalCardProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => handleHeartClick(item.id, type)}
-                className="w-8 h-8 flex items-center justify-center flex-shrink-0"
-              >
-                <HeartIcon />
-              </button>
+              <HeartButton onClick={() => handleHeartClick(item.id, type)} />
             </li>
           ))}
         </ul>
