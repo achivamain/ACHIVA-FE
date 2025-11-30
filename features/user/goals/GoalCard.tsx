@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { motion } from "motion/react";
 import { HeartIcon } from "@/components/Icons";
 import useGoalStore from "@/store/GoalStore";
 
@@ -14,6 +15,8 @@ interface GoalCardProps {
 
 const GoalCard: React.FC<GoalCardProps> = ({ type, title, emoji }) => {
   const { vision, missions, mindsets, handleHeartClick } = useGoalStore();
+  const [animationKey, setAnimationKey] = useState(0);
+  const [animatingIds, setAnimatingIds] = useState<Record<number, number>>({});
 
   // 타입에 따라 데이터 가져오기
   const getData = () => {
@@ -51,12 +54,23 @@ const GoalCard: React.FC<GoalCardProps> = ({ type, title, emoji }) => {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => handleHeartClick(data[0].id, type)}
+          <motion.button
+            onClick={() => {
+              handleHeartClick(data[0].id, type);
+              setAnimationKey((prev) => prev + 1);
+            }}
             className="w-8 h-8 flex items-center justify-center flex-shrink-0"
+            key={`vision-${animationKey}`}
+            initial={{ scale: 1 }}
+            animate={{ scale: [1, 1.25, 1] }}
+            transition={{
+              duration: 0.2,
+              times: [0, 0.5, 1],
+              ease: "easeInOut",
+            }}
           >
             <HeartIcon />
-          </button>
+          </motion.button>
         </div>
       ) : (
         // Mission과 Mindset은 리스트
@@ -76,12 +90,26 @@ const GoalCard: React.FC<GoalCardProps> = ({ type, title, emoji }) => {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => handleHeartClick(item.id, type)}
+              <motion.button
+                onClick={() => {
+                  handleHeartClick(item.id, type);
+                  setAnimatingIds((prev) => ({
+                    ...prev,
+                    [item.id]: (prev[item.id] || 0) + 1,
+                  }));
+                }}
                 className="w-8 h-8 flex items-center justify-center flex-shrink-0"
+                key={`${item.id}-${animatingIds[item.id] || 0}`}
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.25, 1] }}
+                transition={{
+                  duration: 0.2,
+                  times: [0, 0.5, 1],
+                  ease: "easeInOut",
+                }}
               >
                 <HeartIcon />
-              </button>
+              </motion.button>
             </li>
           ))}
         </ul>
