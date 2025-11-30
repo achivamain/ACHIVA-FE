@@ -36,32 +36,14 @@ export default function Sidebar() {
     },
   });
 
-  const [openedDrawer, setOpenedDrawer] = useState<"응원" | null>(null);
-
-  // flickering 제거 위한 코드
-  // 근데도 간헐적으로 발생하긴하네요.. 나중에 더 수정해볼게요
-  const handleCloseDrawer = () => {
-    setIsClosing(true);
-    setOpenedDrawer(null);
-  };
-
-  const handleExitComplete = () => {
-    setIsClosing(false);
-  };
-
-  // 현재 drawer 관련해서 어색한 UI가 조금 보입니다..만
-  // 나중에 전체적으로 응원탭을 변경하게 되지 않을까 싶어서 일단 그대로 두겠습니다
-  const drawerContent = (
-    <Drawer title="응원" onClose={handleCloseDrawer}>
-      <Notifications />
-    </Drawer>
-  );
-  const [isClosing, setIsClosing] = useState(false);
+  // 사이드바에 drawer로 열리는 다른 것이 들어가지 않을 것 같아서
+  // 변수명도 바꾸고, drawerContext도 뺐습니다
+  const [isCheerDrawerOpen, setIsCheerDrawerOpen] = useState<boolean>(false);
 
   const pathname = decodeURIComponent(usePathname());
 
   let selected;
-  if (openedDrawer === "응원" || isClosing) {
+  if (isCheerDrawerOpen) {
     selected = "응원";
   } else if (pathname === `/${user?.nickName}/home`) {
     selected = "홈";
@@ -78,17 +60,45 @@ export default function Sidebar() {
     selected = "피드";
   }
 
+  const navItems = [
+    {
+      label: "홈",
+      href: `/${user?.nickName}/home`,
+      icon: <HomeIcon fill={selected === "홈"} />,
+    },
+    {
+      label: "목표",
+      href: `/${user?.nickName}/goals`,
+      icon: <GoalIcon fill={selected === "목표"} />,
+    },
+    {
+      label: "피드",
+      href: "/",
+      icon: <FeedIcon fill={selected === "피드"} />,
+    },
+    {
+      label: "응원",
+      onClick: () => setIsCheerDrawerOpen(true),
+      icon: <SideBarHeartIcon fill={selected === "응원"} />,
+    },
+    {
+      label: "MY",
+      href: `/${user?.nickName}`,
+      icon: <MyPageIcon fill={selected === "MY"} />,
+    },
+  ];
+
   return (
     <>
       <motion.nav
         layoutScroll
         className={`text-theme z-10 h-dvh fixed bottom-0 top-0 flex flex-col items-center w-auto lg:w-[250px] ${
-          openedDrawer ? "!w-auto" : ""
+          isCheerDrawerOpen ? "!w-auto" : ""
         } py-8 border-r border-r-[#412A2A] bg-white`}
       >
         <div
           className={`mb-15 w-full h-[39.29px] flex px-6 justify-start lg:hidden ${
-            openedDrawer ? "!block" : ""
+            isCheerDrawerOpen ? "!block" : ""
           }`}
         >
           <Link href="/" className="h-full flex items-end">
@@ -97,58 +107,43 @@ export default function Sidebar() {
         </div>
         <div
           className={`mb-15 w-full justify-start px-6 hidden lg:flex ${
-            openedDrawer ? "!hidden" : ""
+            isCheerDrawerOpen ? "!hidden" : ""
           }`}
         >
           <Link href="/">
             <TextLogo />
           </Link>
         </div>
-        <ul className="flex-1 flex flex-col w-full justify-around gap-5">
-          <Link href={`/${user?.nickName}/home`}>
-            <ListItem
-              isNavFolded={!!openedDrawer}
-              label="홈"
-              icon={<HomeIcon fill={selected === "홈"} />}
-              selected={selected === "홈"}
-            />
-          </Link>
-          <Link href={`/${user?.nickName}/goals`}>
-            <ListItem
-              isNavFolded={!!openedDrawer}
-              label="목표"
-              icon={<GoalIcon fill={selected === "목표"} />}
-              selected={selected === "목표"}
-            />
-          </Link>
-          <Link href="/">
-            <ListItem
-              isNavFolded={!!openedDrawer}
-              label="피드"
-              icon={<FeedIcon fill={selected === "피드"} />}
-              selected={selected === "피드"}
-            />
-          </Link>
-          <button onClick={() => setOpenedDrawer("응원")}>
-            <ListItem
-              isNavFolded={!!openedDrawer}
-              label="응원"
-              icon={<SideBarHeartIcon fill={selected === "응원"} />}
-              selected={selected === "응원"}
-            />
-          </button>
-          <Link href={`/${user?.nickName}`} className="mb-auto">
-            <ListItem
-              isNavFolded={!!openedDrawer}
-              label="MY"
-              icon={<MyPageIcon fill={selected === "MY"} />}
-              selected={selected === "MY"}
-            />
-          </Link>
+        <ul className="flex-1 flex flex-col w-full gap-5">
+          {navItems.map((item) => {
+            return item.href ? (
+              <Link key={item.label} href={item.href}>
+                <ListItem
+                  isNavFolded={!!isCheerDrawerOpen}
+                  label={item.label}
+                  selected={selected === item.label}
+                  icon={item.icon}
+                />
+              </Link>
+            ) : (
+              <button key={item.label} onClick={item.onClick}>
+                <ListItem
+                  isNavFolded={!!isCheerDrawerOpen}
+                  label={item.label}
+                  selected={selected === item.label}
+                  icon={item.icon}
+                />
+              </button>
+            );
+          })}
         </ul>
       </motion.nav>
-      <AnimatePresence onExitComplete={handleExitComplete}>
-        {openedDrawer && drawerContent}
+      <AnimatePresence>
+        {isCheerDrawerOpen && (
+          <Drawer title="응원" onClose={() => setIsCheerDrawerOpen(false)}>
+            <Notifications />
+          </Drawer>
+        )}
       </AnimatePresence>
     </>
   );
@@ -164,14 +159,9 @@ type ListItemProps = {
 function ListItem({ isNavFolded, label, icon, selected }: ListItemProps) {
   return (
     <li
-      key={label}
       className={`relative flex items-center gap-3 px-6 py-1.5 cursor-pointer`}
     >
-      <div
-        className={`${label === "글쓰기" ? "bg-theme/15 rounded-full" : ""}`}
-      >
-        {icon}
-      </div>
+      {icon}
 
       <span
         className={`hidden lg:inline ${isNavFolded ? "!hidden" : ""} text-lg ${

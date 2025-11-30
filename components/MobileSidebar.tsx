@@ -67,6 +67,34 @@ export default function Sidebar() {
     return null; // 렌더링 안 함
   }
 
+  const navItems = [
+    {
+      label: "홈",
+      href: `/${user?.nickName}/home`,
+      icon: <HomeIcon fill={selected === "홈"} />,
+    },
+    {
+      label: "목표",
+      href: `/${user?.nickName}/goals`,
+      icon: <GoalIcon fill={selected === "목표"} />,
+    },
+    {
+      label: "피드",
+      href: "/",
+      icon: <FeedIcon fill={selected === "피드"} />,
+    },
+    {
+      label: "응원",
+      href: "/accounts/notifications",
+      icon: <SideBarHeartIcon fill={selected === "응원"} />,
+    },
+    {
+      label: "MY",
+      href: `/${user?.nickName}`,
+      icon: <MyPageIcon fill={selected === "MY"} />,
+    },
+  ];
+
   return (
     <>
       <motion.nav
@@ -74,41 +102,18 @@ export default function Sidebar() {
         className="text-theme w-full shadow-[0px_-5px_15px_0_rgba(0,0,0,0.05)] h-auto fixed bottom-0 items-center bg-white z-50"
       >
         <ul className="flex w-full justify-around px-[7px] py-[19px]">
-          <Link href={`/${user?.nickName}/home`}>
-            <ListItem
-              label="홈"
-              icon={<HomeIcon fill={selected === "홈"} />}
-              selected={selected === "홈"}
-            />
-          </Link>
-          <Link href={`/${user?.nickName}/goals`}>
-            <ListItem
-              label="목표"
-              icon={<GoalIcon fill={selected === "목표"} />}
-              selected={selected === "목표"}
-            />
-          </Link>
-          <Link href="/">
-            <ListItem
-              label="피드"
-              icon={<FeedIcon fill={selected === "피드"} />}
-              selected={selected === "피드"}
-            />
-          </Link>
-          <Link href={`/accounts/notifications`}>
-            <ListItem
-              label="응원"
-              icon={<SideBarHeartIcon fill={selected === "응원"} />}
-              selected={selected === "응원"}
-            />
-          </Link>
-          <Link href={`/${user?.nickName}`}>
-            <ListItem
-              label="MY"
-              icon={<MyPageIcon fill={selected === "MY"} />}
-              selected={selected === "MY"}
-            />
-          </Link>
+          {navItems.map((item) => {
+            return (
+              <Link key={item.label} href={item.href}>
+                <ListItem
+                  key={item.label}
+                  label={item.label}
+                  icon={item.icon}
+                  selected={selected === item.label}
+                />
+              </Link>
+            );
+          })}
         </ul>
       </motion.nav>
     </>
@@ -123,10 +128,7 @@ type ListItemProps = {
 
 function ListItem({ label, icon, selected }: ListItemProps) {
   return (
-    <li
-      key={label}
-      className="relative flex flex-col items-center gap-1 cursor-pointer w-8"
-    >
+    <li className="relative flex flex-col items-center gap-1 cursor-pointer w-8">
       {selected && (
         <motion.div
           layoutId="mobileNavBar"
