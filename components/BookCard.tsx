@@ -21,7 +21,7 @@ export function BookCard({ book, width }: { book: Book; width?: number }) {
             background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
           }}
         ></div>
-        <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
+        <div className="absolute w-[90%] h-full top-[20%] right-1 bottom-0">
           <BookCoverImage
             name={book.coverImage}
             color={book.coverColor}
@@ -53,7 +53,7 @@ export function BookCardSkeleton({ width }: { width?: number }) {
           width: width,
         }}
       ></div>
-      <div className="pl-4 pr-4 h-full flex-1 flex flex-col">
+      <div className="h-full flex-1 flex flex-col">
         <div className="animate-pulse bg-gray-200 h-6 mt-3" />
         <div className="animate-pulse bg-gray-200 h-4 mt-0" />
       </div>

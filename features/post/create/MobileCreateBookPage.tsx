@@ -71,19 +71,14 @@ export default function MobileCreateBookPage({
             표지 이미지 선택
           </div>
           <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="mx-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
               {bookCoverImages.map((img) => (
                 <div
                   key={img}
                   className="relative aspect-[1/1] cursor-pointer"
                   onClick={() => setCoverImage(img)}
                 >
-                  <Image
-                    src={`/images/${img}.svg`}
-                    alt={img}
-                    fill
-                    className="object-contain"
-                  />
+                  <BookCoverImage name={`${img}`}/>
                 </div>
               ))}
             </div>
@@ -147,7 +142,7 @@ export default function MobileCreateBookPage({
                   background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
                 }}
               />
-              <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
+              <div className="absolute w-[90%] h-full top-[20%]  right-1 bottom-0">
                 <BookCoverImage
                   name={coverImage}
                   color={coverColor}

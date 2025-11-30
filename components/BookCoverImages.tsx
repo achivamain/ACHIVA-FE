@@ -34,6 +34,7 @@ export function BookCoverImage({
       })
       .then((svg) => {
         let modifiedSvg = svg;
+        modifiedSvg = modifiedSvg.replace(/cls-/g, `cls-${filename}-`); //스타일 충돌 방지
         modifiedSvg = modifiedSvg.replace(/#7f7373/g, `transparent`); //배경투명화
         /*if (color) {
           //특정 색상으로 변경시

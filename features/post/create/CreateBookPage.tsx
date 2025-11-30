@@ -36,7 +36,7 @@ export default function CreateBookPage() {
               background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
             }}
           />
-          <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
+          <div className="absolute w-[90%] h-full top-[20%] right-1 bottom-0">
             <BookCoverImage
               name={coverImage}
               color={coverColor}
@@ -112,7 +112,7 @@ export default function CreateBookPage() {
 
     case "image":
       content = (
-        <div className="w-[50rem] h-[30rem] mt-8 flex justify-around flex-row overflow-hidden">
+        <div className="w-[50rem] h-[28rem] mt-8 flex justify-around flex-row overflow-hidden">
           <div className="w-sm flex-col h-full justify-between items-between flex-shrink-0">
             {book}
             <div className="mt-8">
@@ -136,20 +136,15 @@ export default function CreateBookPage() {
               </NextStepButton>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="grid grid-cols-3 gap-4">
+          <div className="mt-4 mx-4 h-[24rem] flex-1 overflow-y-auto min-h-0">
+            <div className="grid grid-cols-3 gap-1">
               {bookCoverImages.map((img) => (
                 <div
                   key={img}
                   className="relative aspect-[1/1] cursor-pointer"
                   onClick={() => setCoverImage(img)}
                 >
-                  <Image
-                    src={`/images/${img}.svg`}
-                    alt={img}
-                    fill
-                    className="object-contain"
-                  ></Image>
+                  <BookCoverImage name={`${img}`}/>
                 </div>
               ))}
             </div>
