@@ -18,7 +18,7 @@ export default function MobileCreateBookPage({
   close: (value: boolean) => void;
 }) {
   const [coverColor, setCoverColor] = useState("#77B5C1");
-  const [coverImage, setCoverImage] = useState<BookCoverImageType>("default");
+  const [coverImage, setCoverImage] = useState<BookCoverImageType>("career01");
   const [title, setTitle] = useState("");
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
