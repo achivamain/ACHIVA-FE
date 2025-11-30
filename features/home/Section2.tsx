@@ -86,9 +86,17 @@ export default function HomeSection2() {
         </div>
       )}
       <div className="flex flex-col gap-7">
+<<<<<<< HEAD
         {posts.map((post) => {
           return <HomePost key={post.id} post={post} />;
         })}
+=======
+        {posts
+          ?.filter((post) => post.bookTitle == false)
+          .map((post) => {
+            return <HomePost key={post.id} post={post} />;
+          })}
+>>>>>>> develop
       </div>
       <div ref={loaderRef}></div>
       {isFetchingNextPage && (

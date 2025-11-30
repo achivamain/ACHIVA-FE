@@ -112,6 +112,7 @@ export default function Notifications() {
                     idx === 0 ? "" : "mt-5"
                   } mb-3`}
                 >
+                {/*책 제목 뜨게 수정할 것*/}
                   <div className="font-semibold text-xl bg-theme text-white rounded-sm px-4 py-1.5">
                     {postCache.get(n.articleId)?.category}
                   </div>
