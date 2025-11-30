@@ -1,13 +1,28 @@
-// 자신의 책 로딩
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import type { DraftPost } from "@/types/Post";
+import { Book, BookRes } from "@/types/Book";
+import { BookCoverImage, bookCoverImages } from "@/types/BookCoverImages";
+import { Category, categories } from "@/types/Categories";
 
 function bookResToBook(bookRes: BookRes): Book {
   const category: Category = categories.find(
     (i) => i == bookRes.mainArticle.category
   )!;
-  const coverColor: string = JSON.parse(bookRes.description).coverColor;
-  const coverImage: BookCoverImage = JSON.parse(bookRes.description).coverImage;
+
+  let coverColor: string;
+  let coverImage: BookCoverImage;
+
+  coverColor = bookRes.mainArticle.backgroundColor;
+  coverImage =
+    bookCoverImages.find((i) => i == bookRes.mainArticle.photoUrl) || "default";
+
+  //legacy
+  if (bookRes.description != "") {
+    coverColor = JSON.parse(bookRes.description).coverColor;
+    coverImage = JSON.parse(bookRes.description).coverImage;
+  }
+  // ---
 
   return {
     id: bookRes.id,
@@ -15,10 +30,11 @@ function bookResToBook(bookRes: BookRes): Book {
     category: category,
     coverColor: coverColor,
     coverImage: coverImage,
-    count: bookRes.articles.length + 1,
+    count: bookRes.articles.length,
   };
 }
 
+// 자신의 책 로딩
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const pageParam = searchParams.get("pageParam");
@@ -42,7 +58,6 @@ export async function GET(req: NextRequest) {
   );
 
   const data = await res.json();
-
   return Response.json({
     ...data,
     content: data.content.map((item: BookRes) => bookResToBook(item)),
@@ -50,39 +65,15 @@ export async function GET(req: NextRequest) {
 }
 
 //책 생성
-import type { DraftPost } from "@/types/Post";
-import { Book, BookRes } from "@/types/Book";
-import { BookCoverImage } from "@/types/BookCoverImages";
-import { Category, categories } from "@/types/Categories";
 
 export async function POST(req: NextRequest) {
-  const { post } = await req.json();
-  const draft = post as DraftPost;
+  const { data } = await req.json();
+  const draft = data as DraftPost;
   const session = await auth();
   const token = session?.access_token;
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
-  console.log(
-    JSON.stringify({
-      title: draft.book?.title,
-      description: JSON.stringify({
-        coverColor: draft.book?.coverColor,
-        coverImage: draft.book?.coverImage,
-      }),
-      main: {
-        photoUrl: draft.titleImageUrl,
-        title: draft.title || "오늘의 성취",
-        category: draft.category,
-        question: draft.pages!.map(({ subtitle, content }) => ({
-          question: subtitle ?? "",
-          content,
-        })),
-        backgroundColor: draft.backgroundColor,
-      },
-      articleIds: [],
-    })
-  );
   const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/books`, {
     method: "POST",
     headers: {
@@ -91,19 +82,18 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify({
       title: draft.book?.title,
-      description: JSON.stringify({
-        coverColor: draft.book?.coverColor,
-        coverImage: draft.book?.coverImage,
-      }),
+      description: "",
       main: {
-        photoUrl: draft.titleImageUrl,
-        title: draft.title || "오늘의 성취",
+        photoUrl: draft.book?.coverImage,
+        title: draft.book?.title,
         category: draft.category,
-        question: draft.pages!.map(({ subtitle, content }) => ({
-          question: subtitle ?? "",
-          content,
-        })),
-        backgroundColor: draft.backgroundColor,
+        question: [
+          {
+            question: "",
+            content: "",
+          },
+        ],
+        backgroundColor: draft.book?.coverColor,
       },
       articleIds: [],
     }),

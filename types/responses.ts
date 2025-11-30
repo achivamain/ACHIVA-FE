@@ -37,7 +37,7 @@ export type Cheering = {
   senderName: string;
   receiverId: string;
   receiverName: string;
-  articleId: number;
+  articleId: string;
   isRead: boolean;
   createdAt: string;
   updatedAt: string;
@@ -72,7 +72,7 @@ export type Notification = {
   senderProfileImageUrl: string;
   receiverId: string;
   receiverName: string;
-  articleId: number;
+  articleId: string;
   isRead: boolean;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string

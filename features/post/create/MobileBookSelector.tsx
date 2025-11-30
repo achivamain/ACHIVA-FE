@@ -1,4 +1,4 @@
-import BookCard from "@/components/BookCard";
+import { BookCard, BookCardSkeleton } from "@/components/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 import {
   useCreatePostStepStore,
@@ -8,8 +8,6 @@ import type { Book } from "@/types/Book";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRef, useEffect } from "react";
 
-//책이 5개보다 많으면? 스크롤 방향?
-//책의 정렬 순서는?
 export default function BookSelector() {
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
@@ -30,6 +28,7 @@ export default function BookSelector() {
     return await response.json();
   }
 
+  //자동로딩 관련
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["books"],
@@ -47,7 +46,7 @@ export default function BookSelector() {
   useEffect(() => {
     const currentElem = loaderRef.current;
     const io = new IntersectionObserver(
-      (entries, observer) => {
+      (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
           return;
@@ -58,9 +57,9 @@ export default function BookSelector() {
     io.observe(currentElem!);
 
     return () => {
-    io.unobserve(currentElem!);
-    io.disconnect();
-  }
+      io.unobserve(currentElem!);
+      io.disconnect();
+    };
   }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
 
   const books: Book[] = data?.pages.flatMap((page) => page.content) ?? [];
@@ -79,7 +78,13 @@ export default function BookSelector() {
                 handleNextStep();
               }}
             >
-              <BookCard book={book} />
+              <BookCard book={{ ...book, count: book.count + 1 }} />
+            </div>
+          ))}
+        {(books.length == 0 || isFetchingNextPage) &&
+          [0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-full flex-1 flex flex-col">
+              <BookCardSkeleton width={162} />
             </div>
           ))}
         <div

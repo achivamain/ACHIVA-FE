@@ -19,7 +19,7 @@ export const UserSchema = z.object({
     .string()
     .min(2, { message: "닉네임은 최소 2자 이상이어야 합니다." })
     .max(15, { message: "닉네임은 최대 15자 이하여야 합니다." })
-    .regex(/^[A-Za-z0-9_]+$/, {
+    .regex(/^[A-Za-z0-9가-힣_]+$/, {
       message: "닉네임에는 영문자·숫자·밑줄(_)만 사용할 수 있습니다.",
     }),
 });

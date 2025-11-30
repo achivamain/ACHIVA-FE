@@ -37,7 +37,7 @@ export type BackgroundColor =
 
 // 백엔드에서 응답으로 받는 형태
 export type PostRes = {
-  id: number;
+  id: string;
   photoUrl: string;
   title: string;
   category: string;
@@ -50,6 +50,7 @@ export type PostRes = {
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
   cheerings?: Cheering[];
+  bookTitle: boolean;
 };
 
 export type Question = {

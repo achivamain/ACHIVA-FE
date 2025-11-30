@@ -3,15 +3,8 @@ import { defaultProfileImg } from "../user/defaultProfileImg";
 
 // 하... 이거 손좀보자
 export function getFirstPage(): PostRes {
-  // console.log(createdAt);
-  // if (createdAt) {
-  //   createdAt = new Date(
-  //     new Date(createdAt).getTime() - 9 * 60 * 60 * 1000
-  //   ).toISOString();
-  // }
-
   return {
-    id: 5,
+    id: "5",
     photoUrl: "",
     title: "",
     category: "",
@@ -68,5 +61,6 @@ export function getFirstPage(): PostRes {
     createdAt: "", // 계정 생성 시각
     updatedAt: "",
     cheerings: [],
+    bookTitle: false,
   };
 }
