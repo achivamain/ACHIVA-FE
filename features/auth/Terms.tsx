@@ -136,7 +136,7 @@ export default function Terms() {
         <button
           className={`w-full font-medium ${
             isAllAgreed ? "bg-theme text-white" : "bg-[#e6e6e6] text-[#a6a6a6]"
-          } rounded-sm px-3 py-1.5`}
+          } rounded-sm px-3 py-2`}
           onClick={() => {
             setAgreements(Array(5).fill(true));
             handleScroll();

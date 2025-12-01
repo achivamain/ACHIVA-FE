@@ -17,7 +17,6 @@ export default function Page() {
   let content;
   switch (currentStep) {
     case 1: // 닉네임
-      console.log("!!");
       content = (
         <>
           <div className="hidden sm:block mb-10">
