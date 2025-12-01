@@ -35,11 +35,11 @@ export default function CreateBookPage() {
               background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
             }}
           />
-          <div className="absolute w-[90%] h-full top-[20%] right-1 bottom-0">
+          <div className="absolute w-[90%] top-[20%] right-1 bottom-0">
             <BookCoverImage
               name={coverImage}
               color={coverColor}
-              className="w-full h-full object-cover p-2"
+              className="w-full object-cover p-2"
             />
           </div>
           <div className="absolute top-2 right-2 text-xl px-[11px] py-[2px] gap-2 text-[#412A2A] bg-white border border-[#D9D9D9] rounded-md font-semibold">

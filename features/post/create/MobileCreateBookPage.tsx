@@ -99,7 +99,6 @@ export default function MobileCreateBookPage({
             <CloseIcon />
           </button>
           <h1 className="text-xl font-semibold">표지 미리보기</h1>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 border-1 border-[#D9D9D9] font-bold text-[#412A2A] px-3 py-[2px] rounded-sm flex-shrink-0">
             <button
               onClick={() => {
                 const newBook = {
@@ -119,10 +118,10 @@ export default function MobileCreateBookPage({
                 }
               }}
               disabled={!title}
+              className="absolute right-4 top-1/2 -translate-y-1/2 border-1 border-[#D9D9D9] font-bold text-[#412A2A] px-3 py-[2px] rounded-sm flex-shrink-0"
             >
               {next == "fin" ? "완료" : "다음"}
             </button>
-          </div>
         </div>
       </div>
       <div className="w-full h-full flex flex-col pb-15 ">
@@ -141,11 +140,11 @@ export default function MobileCreateBookPage({
                   background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
                 }}
               />
-              <div className="absolute w-[90%] h-full top-[20%]  right-1 bottom-0">
+              <div className="absolute w-[90%] top-[20%]  right-1 bottom-0">
                 <BookCoverImage
                   name={coverImage}
                   color={coverColor}
-                  className="w-full h-full object-cover p-2"
+                  className="w-full object-cover p-2"
                 />
               </div>
               <div className="absolute top-2 right-2 px-[11px] py-[2px] gap-2 text-xl text-[#412A2A] bg-white border border-[#D9D9D9] rounded-md font-semibold">
