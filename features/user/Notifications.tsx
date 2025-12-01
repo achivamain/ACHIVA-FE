@@ -115,7 +115,7 @@ export default function Notifications() {
                 >
                   {/*책 제목이 로딩되지 않았다면 카테고리를 띄움*/}
                   <div className="font-semibold text-xl bg-theme text-white rounded-sm px-4 py-1.5">
-                    {postCache.get(n.articleId)?.bookArticle[0]?.bookTitle ||
+                    {postCache.get(n.articleId)?.bookArticle?.[0]?.bookTitle ||
                       postsBookIdCache.get(n.articleId)?.bookTitle ||
                       postCache.get(n.articleId)?.category}
                   </div>
