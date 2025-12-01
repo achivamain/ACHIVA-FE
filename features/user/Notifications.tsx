@@ -10,6 +10,7 @@ import dateFormatter from "@/lib/dateFormatter";
 import { cheeringMeta } from "../post/cheeringMeta";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { postsBookIdCache } from "@/features/post/PostsBookIdCache"
 
 // 포스트 캐시
 const postCache = new Map<string, PostRes | undefined>();
@@ -112,9 +113,11 @@ export default function Notifications() {
                     idx === 0 ? "" : "mt-5"
                   } mb-3`}
                 >
-                {/*책 제목 뜨게 수정할 것*/}
+                  {/*책 제목이 로딩되지 않았다면 카테고리를 띄움*/}
                   <div className="font-semibold text-xl bg-theme text-white rounded-sm px-4 py-1.5">
-                    {postCache.get(n.articleId)?.category}
+                    {postCache.get(n.articleId)?.bookArticle[0]?.bookTitle ||
+                      postsBookIdCache.get(n.articleId)?.bookTitle ||
+                      postCache.get(n.articleId)?.category}
                   </div>
                   <p className="text-[#808080] font-light">
                     {postCache.get(n.articleId)?.authorCategorySeq}번째 이야기

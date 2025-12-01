@@ -2,6 +2,7 @@ import { PostRes } from "@/types/Post";
 import type { Question } from "@/types/Post";
 import PostImg from "@/components/PostImg";
 import { format } from "date-fns";
+import { postsBookIdCache } from "@/features/post/PostsBookIdCache"
 
 type Props = {
   size: number;
@@ -35,7 +36,8 @@ export function TitlePage({ size, post }: Props) {
           </h1>
           <div className="text-[32px] font-light text-white leading-[40px]">
             <div>
-              <span className="font-bold">{post.bookArticle?.[0]?.bookTitle}</span> 기록
+              {/* 책 제목이 로딩되지 않았다면 카테고리를 띄움 */}
+              <span className="font-bold">{post.bookArticle?.[0]?.bookTitle || postsBookIdCache.get(post.id)?.bookTitle || post.category}</span> 기록
             </div>
             <div>
               <span className="font-bold">{post.authorCategorySeq}번째</span>{" "}
