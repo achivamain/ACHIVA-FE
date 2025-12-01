@@ -3,10 +3,11 @@ import { useDebouncedCallback } from "use-debounce";
 import { UserSchema } from "./schima";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useSignupStepStore } from "@/store/SignupStore";
+import { useSignupInfoStore, useSignupStepStore } from "@/store/SignupStore";
 
 export default function NicknameForm() {
   const handleNextStep = useSignupStepStore.use.handleNextStep();
+  const setUser = useSignupInfoStore.use.setUser();
 
   const [nickname, setNickname] = useState("");
   const [error, setError] = useState(""); // 프론트 단 닉네임 검증
@@ -108,7 +109,10 @@ export default function NicknameForm() {
       </p>
       <NextStepButton
         disabled={!!error || !isAvilable}
-        onClick={handleNextStep}
+        onClick={() => {
+          setUser({ nickName: nickname });
+          handleNextStep();
+        }}
       >
         다음
       </NextStepButton>

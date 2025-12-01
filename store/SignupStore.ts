@@ -29,9 +29,8 @@ type EnteredInfoState = {
 
 const initialUser: SignupUser = {
   nickName: "",
-  profileImg: undefined,
+  profileImg: null,
   birth: undefined,
-  gender: undefined,
   categories: [],
 };
 

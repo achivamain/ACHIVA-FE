@@ -11,6 +11,7 @@ import Terms from "@/features/auth/Terms";
 import CategoryForm from "@/features/auth/CategoryForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
 import OathForm from "@/features/auth/OathForm";
+import NicknameForm from "@/features/auth/NicknameForm";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
@@ -18,6 +19,16 @@ export default function Page() {
   let containerHeight = "h-151";
   let content;
   switch (currentStep) {
+    case 1: // 닉네임
+      content = (
+        <>
+          <div className="hidden sm:block mb-10">
+            <TextLogo />
+          </div>
+          <NicknameForm />
+        </>
+      );
+      break;
     case 2: // 약관
       containerHeight = "h-auto";
       content = (

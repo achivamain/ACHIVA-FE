@@ -17,54 +17,19 @@ export default function Page() {
   let content;
   switch (currentStep) {
     case 1: // 닉네임
-      content = (
-        <>
-          <div className="hidden sm:block mb-10">
-            <TextLogo />
-          </div>
-          <NicknameForm />
-        </>
-      );
+      content = <NicknameForm />;
       break;
     case 2: // 약관
-      content = (
-        <>
-          <div className="hidden sm:block mb-10">
-            <TextLogo />
-          </div>
-          <Terms />
-        </>
-      );
+      content = <Terms />;
       break;
     case 3: // 카테고리
-      content = (
-        <>
-          <div className="hidden sm:block mb-10">
-            <TextLogo />
-          </div>
-          <CategoryForm />
-        </>
-      );
+      content = <CategoryForm />;
       break;
     case 4: // 생일
-      content = (
-        <>
-          <div className="hidden sm:block mb-10">
-            <TextLogo />
-          </div>
-          <BirthdayForm />
-        </>
-      );
+      content = <BirthdayForm />;
       break;
     case 5: // 서약서
-      content = (
-        <>
-          <div className="hidden sm:block mb-10">
-            <TextLogo />
-          </div>
-          <OathForm />
-        </>
-      );
+      content = <OathForm />;
   }
 
   return (
@@ -90,6 +55,9 @@ export default function Page() {
                 }}
                 className="w-full h-full flex flex-col items-center sm:justify-center"
               >
+                <div className="hidden sm:block mb-10">
+                  <TextLogo />
+                </div>
                 {content}
               </motion.div>
             </AnimatePresence>
