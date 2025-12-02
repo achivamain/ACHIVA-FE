@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   const content = data.content.filter((post: PostRes) =>
     post.photoUrl.startsWith("https://")
   );
-  return Response.json({
+  return NextResponse.json({
     ...data,
     content: content,
   });

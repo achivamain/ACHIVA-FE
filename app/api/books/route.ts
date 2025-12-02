@@ -1,57 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import type { DraftPost } from "@/types/Post";
-import { Book, BookRes } from "@/types/Book";
-import { BookCoverImage, bookCoverImages } from "@/types/BookCoverImages";
-import { Category, categories } from "@/types/Categories";
+import { bookResToBook } from "@/lib/bookResToBook";
 
-function bookResToBook(bookRes: BookRes): Book {
-  const category: Category = categories.find(
-    (i) => i == bookRes.mainArticle.category
-  )!;
-
-  const coverColor: string = bookRes.mainArticle.backgroundColor;
-  const coverImage: BookCoverImage =
-    bookCoverImages.find((i) => i == bookRes.mainArticle.photoUrl) || "default";
-
-  return {
-    id: bookRes.id,
-    title: bookRes.mainArticle.title,
-    category: category,
-    coverColor: coverColor,
-    coverImage: coverImage,
-    count: bookRes.articles.length,
-  };
-}
-
-// 자신의 책 로딩
+//책 상세 조회
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const pageParam = searchParams.get("pageParam");
-  const sizeParam = searchParams.get("sizeParam");
+  const bookId = searchParams.get("bookId");
 
   const session = await auth();
   const token = session?.access_token;
-
-  if (!token) {
-    return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
-  }
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/books/my?page=${pageParam}&size=${sizeParam}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+  try {
+    if (!token) {
+      return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
     }
-  );
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/books/${bookId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  const data = await res.json();
-  return Response.json({
-    ...data,
-    content: data.content.map((item: BookRes) => bookResToBook(item)),
-  });
+    if (!res.ok) {
+      return NextResponse.json({ error: "내부 서버 오류 발생" }, { status: res.status });
+    }
+    const data = await res.json();
+    return NextResponse.json(bookResToBook(data));
+
+  } catch (error) {
+    console.error("fetch error:", error);
+    return NextResponse.json(
+      { error: "요청 처리 중 오류 발생" },
+      { status: 500 }
+    );
+  }
 }
 
 //책 생성

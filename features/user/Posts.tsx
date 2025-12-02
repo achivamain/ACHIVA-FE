@@ -133,7 +133,7 @@ export default function Posts({ userId }: { userId: string }) {
       )}
       <div ref={containerRef} className="grid grid-cols-3 gap-[1px]">
         {posts.map((post) => {
-          posts.map((post) => postsBookIdCache.set(post.id, post.bookArticle[0])); // 세부 페이지에서 책 정보를 띄우기 위한 임시방편)
+          posts.map((post) => post.bookArticle && postsBookIdCache.set(post.id, post.bookArticle[0])); // 세부 페이지에서 책 정보를 띄우기 위한 임시방편)
           return (
             <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
               <TitlePage size={size} post={post} />

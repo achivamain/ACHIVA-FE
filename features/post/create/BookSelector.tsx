@@ -15,7 +15,7 @@ export default function BookSelector() {
 
   async function fetchBooks(pageParam: number = 0) {
     const response = await fetch(
-      `/api/books?pageParam=${pageParam}&sizeParam=5`,
+      `/api/books/my?pageParam=${pageParam}&sizeParam=5`,
       {
         method: "GET",
         headers: {

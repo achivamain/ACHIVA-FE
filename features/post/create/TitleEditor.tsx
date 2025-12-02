@@ -61,7 +61,7 @@ export default function TitleEditor() {
       const postId: string = data.data.id;
       //책에 게시글 추가
       const res2 = await fetch(
-        `/api/books/articles?bookId=${bookId}&postId=${postId}`,
+        `/api/posts/book?bookId=${bookId}&postId=${postId}`,
         {
           method: "POST",
         }

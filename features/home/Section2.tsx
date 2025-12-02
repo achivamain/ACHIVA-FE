@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 import type { PostsData } from "@/types/responses";
 import HomePost from "@/features/home/Post";
 import { useSession } from "next-auth/react";
+import { postsBookIdCache } from "../post/PostsBookIdCache";
 
 export default function HomeSection2() {
   const { data: session } = useSession();
@@ -87,6 +88,8 @@ export default function HomeSection2() {
       )}
       <div className="flex flex-col gap-7">
         {posts.map((post) => {
+          if (post.bookArticle)
+            postsBookIdCache.set(post.id, post.bookArticle[0]); // 세부 페이지에서 책 정보를 띄우기 위한 임시방편)
           return <HomePost key={post.id} post={post} />;
         })}
       </div>
