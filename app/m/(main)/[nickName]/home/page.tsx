@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import Logout from "@/components/Logout";
 import MobileGoalSummary from "@/features/user/goals/GoalSummary";
 import { CaretRight24pxIcon } from "@/components/Icons";
+import { MobileBookSection } from "@/features/home/MobileBookSection";
 
 export default async function MobileHomePageRoute({
   params,
@@ -25,10 +26,10 @@ export default async function MobileHomePageRoute({
   };
 
   return (
-    <div className="min-h-dvh bg-white pt-14 pb-[104px] flex flex-col">
-      <div className="flex-1" />
-
-      <MobileGoalSummary summaryData={mySummaryData} />
+    <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
+      <div className="flex-1 w-full h-full">
+      <MobileBookSection/>
+      <MobileGoalSummary summaryData={mySummaryData} /></div>
       <div className="h-6" />
 
       <div className="flex justify-center pb-[22px]">
