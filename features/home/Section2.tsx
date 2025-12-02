@@ -88,8 +88,9 @@ export default function HomeSection2() {
       )}
       <div className="flex flex-col gap-7">
         {posts.map((post) => {
-          if (post.bookArticle)
-            postsBookIdCache.set(post.id, post.bookArticle[0]); // 세부 페이지에서 책 정보를 띄우기 위한 임시방편)
+          if (post.bookArticle) { // 세부 페이지에서 책 정보를 띄우기 위한 임시방편)
+            postsBookIdCache.set(post.id, post.bookArticle[0]); 
+          }
           return <HomePost key={post.id} post={post} />;
         })}
       </div>
