@@ -5,7 +5,7 @@ import {
   useDraftPostStore,
 } from "@/store/CreatePostStore";
 import { CategoryButton } from "@/components/Buttons";
-import { basicTopics } from "../basicTopics";
+import { basicTopics } from "@/types/Categories";
 import {
   SubtitleCheckIcon,
   SubtitleDragIcon,
@@ -13,13 +13,19 @@ import {
 } from "@/components/Icons";
 import { NextStepButton } from "./Buttons";
 
+type SubtitleItem = {
+  id: string;
+  subtitle: string; // 타입 추론 때문에 에러나서 string으로 명시해줌
+  selected: boolean;
+};
+
 export default function SubtitlesSelector() {
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const category = draft.category!;
-  const CategoryCount = draft.categoryCount!;
-  const [subtitles, setSubtitles] = useState(
+  const book = draft.book!;
+  const [subtitles, setSubtitles] = useState<SubtitleItem[]>(
     basicTopics[category].map((subtitle) => ({
       id: crypto.randomUUID(),
       subtitle,
@@ -43,10 +49,10 @@ export default function SubtitlesSelector() {
     <div className="h-full flex-1 flex flex-col justify-between gap-5">
       <div>
         <div className="flex flex-wrap gap-5 mb-10">
-          <div key={category} className="flex items-center gap-3">
-            <CategoryButton isSelected={true}>{category}</CategoryButton>
+          <div key={book.id} className="flex items-center gap-3">
+            <CategoryButton isSelected={true}>{book.title}</CategoryButton>
             <p className="font-light text-sm text-[#808080]">
-              {CategoryCount + 1}번째 이야기
+              {book.count + 1}번째 이야기
             </p>
           </div>
         </div>

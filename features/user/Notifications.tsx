@@ -7,14 +7,10 @@ import type { PostRes } from "@/types/Post";
 import type { NotificationsRes } from "@/types/responses";
 import ProfileImg from "@/components/ProfileImg";
 import dateFormatter from "@/lib/dateFormatter";
-import {
-  ThumbUpCheerIcon,
-  FireCheerIcon,
-  HeartCheerIcon,
-  CloverCheerIcon,
-} from "@/components/Icons";
+import { cheeringMeta } from "../post/cheeringMeta";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { postsBookIdCache } from "@/features/post/PostsBookIdCache"
 
 // 포스트 캐시
 const postCache = new Map<string, PostRes | undefined>();
@@ -24,13 +20,6 @@ export default function Notifications() {
   useEffect(() => {
     router.refresh(); // 현재 라우트의 서버 데이터 다시 가져오기
   }, [router]);
-
-  const icons = {
-    최고예요: ThumbUpCheerIcon,
-    수고했어요: FireCheerIcon,
-    응원해요: HeartCheerIcon,
-    동기부여: CloverCheerIcon,
-  };
 
   async function fetchNotifications(pageParam: number = 0) {
     const response = await fetch(
@@ -110,7 +99,8 @@ export default function Notifications() {
       )}
       <ul className="w-full flex flex-col">
         {notifications.map((n, idx) => {
-          const Icon = icons[n.cheeringCategory];
+          const Icon = cheeringMeta[n.cheeringCategory].icon;
+          const color = cheeringMeta[n.cheeringCategory].color;
           const hasTitle =
             idx === 0 ||
             notifications[idx - 1].articleId !== notifications[idx].articleId;
@@ -123,8 +113,11 @@ export default function Notifications() {
                     idx === 0 ? "" : "mt-5"
                   } mb-3`}
                 >
+                  {/*책 제목이 로딩되지 않았다면 카테고리를 띄움*/}
                   <div className="font-semibold text-xl bg-theme text-white rounded-sm px-4 py-1.5">
-                    {postCache.get(n.articleId)?.category}
+                    {postCache.get(n.articleId)?.bookArticle?.[0]?.bookTitle ||
+                      postsBookIdCache.get(n.articleId)?.bookTitle ||
+                      postCache.get(n.articleId)?.category}
                   </div>
                   <p className="text-[#808080] font-light">
                     {postCache.get(n.articleId)?.authorCategorySeq}번째 이야기
@@ -161,7 +154,11 @@ export default function Notifications() {
                   <p className="font-light text-black/50">
                     {dateFormatter(n.createdAt)}
                   </p>
-                  <div className="ml-auto text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border border-theme px-3 py-1 text-white bg-theme">
+                  {/* 응원 버튼 */}
+                  <div
+                    style={{ backgroundColor: color, borderColor: color }}
+                    className="ml-auto text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border px-3 py-1 text-white"
+                  >
                     <p>{n.cheeringCategory}</p>
                     <Icon active />
                   </div>
@@ -187,13 +184,6 @@ function NotificationSkeleton() {
       <div className="w-[50px] rounded-full aspect-square bg-loading animate-pulse" />
       <div className="flex-1 flex gap-2.5 items-center">
         <div className="h-6 w-40 bg-loading animate-pulse rounded-md" />
-        {/* <p className="font-light text-black/50">
-                    {dateFormatter(n.createdAt)}
-                  </p> */}
-        {/* <div className="ml-auto text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border border-theme px-1.5 sm:px-3 py-1 text-white bg-theme">
-                    <p>{n.cheeringCategory}</p>
-                    <Icon active />
-                  </div> */}
       </div>
     </li>
   );
