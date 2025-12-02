@@ -34,10 +34,16 @@ export function CheckIcon({ fill }: { fill: string }) {
   );
 }
 
-export function LoadingIcon({ color = "text-white" }: { color?: string }) {
+export function LoadingIcon({
+  size = "size-5",
+  color = "text-white",
+}: {
+  size?: string;
+  color?: string;
+}) {
   return (
     <svg
-      className={`size-5 animate-spin ${color}`}
+      className={`${size} animate-spin ${color}`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
