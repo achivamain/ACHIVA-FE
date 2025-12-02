@@ -20,7 +20,7 @@ export default function Sidebar() {
   // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
   // static한 세션 정보를 사용하지 않고 api 호출해서 사용
   // tanstack query 사용해서 캐싱되게 하여서 체감 로딩 속도 문제 최소화
-  const { data: user } = useQuery({
+  const { data: user, isLoading: isUserLoading } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const res = await fetch(`/api/members/me`, {
@@ -109,25 +109,28 @@ export default function Sidebar() {
             <TextLogo />
           </Link>
         </div>
-        <ul className="flex-1 flex flex-col w-full gap-5">
+        {/* 유저 로딩 미완료 시 클릭 막음 */}
+        <ul
+          className={`flex-1 flex flex-col w-full gap-5 ${
+            isUserLoading ? "opacity-75 pointer-events-none" : ""
+          }`}
+        >
           {navItems.map((item) => {
+            const listItem = (
+              <ListItem
+                isNavFolded={!!isCheerDrawerOpen}
+                label={item.label}
+                selected={selected === item.label}
+                Icon={item.Icon}
+              />
+            );
             return item.href ? (
               <Link key={item.label} href={item.href}>
-                <ListItem
-                  isNavFolded={!!isCheerDrawerOpen}
-                  label={item.label}
-                  selected={selected === item.label}
-                  Icon={item.Icon}
-                />
+                {listItem}
               </Link>
             ) : (
               <button key={item.label} onClick={item.onClick}>
-                <ListItem
-                  isNavFolded={!!isCheerDrawerOpen}
-                  label={item.label}
-                  selected={selected === item.label}
-                  Icon={item.Icon}
-                />
+                {listItem}
               </button>
             );
           })}

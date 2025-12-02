@@ -16,7 +16,7 @@ export default function Sidebar() {
   // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
   // static한 세션 정보를 사용하지 않고 api 호출해서 사용
   // tanstack query 사용해서 캐싱되게 하여서 체감 로딩 속도 문제 최소화
-  const { data: user } = useQuery({
+  const { data: user, isPending: isUserLoading } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const res = await fetch(`/api/members/me`, {
@@ -98,7 +98,11 @@ export default function Sidebar() {
         layoutScroll
         className="text-theme w-full shadow-[0px_-5px_15px_0_rgba(0,0,0,0.05)] h-auto fixed bottom-0 items-center bg-white z-50"
       >
-        <ul className="flex w-full justify-around px-[7px] py-[19px]">
+        <ul
+          className={`flex w-full justify-around px-[7px] py-[19px] ${
+            isUserLoading ? "opacity-75 pointer-events-none" : ""
+          }`}
+        >
           {navItems.map((item) => {
             return (
               <Link key={item.label} href={item.href}>
