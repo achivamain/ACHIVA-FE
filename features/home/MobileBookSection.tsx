@@ -1,15 +1,14 @@
 "use client";
 //이전 페이지 다음 페이지 아이콘 따로 분리
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useInfiniteQuery} from "@tanstack/react-query";
+import { useEffect, useRef} from "react";
 import { Book } from "@/types/Book";
 import { BookCard } from "@/features/book/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 
 export function MobileBookSection() {
   const bookRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-  const currentPage = useRef<number>(0);
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const pageSize = useRef(0);
@@ -85,7 +84,7 @@ export function MobileBookSection() {
         나의 성취 이야기
       </h1>
       {books.length == 0 && (
-            <p className="text-center ml-[25%]">
+            <p className="text-center mt-30 text-[#808080]">
               여기에 당신의 성취 기록이 담겨요
               <br />첫 성취를 기록해보세요
             </p>
