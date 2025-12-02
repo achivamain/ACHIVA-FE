@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Category, categories } from "@/types/Categories";
 import type { CategoryCount } from "@/types/Post";
 import { AnimatePresence, motion } from "motion/react";
+import { postsBookIdCache } from "@/features/post/PostsBookIdCache"
 
 export default function Posts({ userId }: { userId: string }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -131,15 +132,14 @@ export default function Posts({ userId }: { userId: string }) {
         </div>
       )}
       <div ref={containerRef} className="grid grid-cols-3 gap-[1px]">
-        {posts
-          ?.filter((post) => post.bookTitle == false)
-          .map((post) => {
-            return (
-              <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
-                <TitlePage size={size} post={post} />
-              </Link>
-            );
-          })}
+        {posts.map((post) => {
+          posts.map((post) => post.bookArticle && postsBookIdCache.set(post.id, post.bookArticle[0])); // 세부 페이지에서 책 정보를 띄우기 위한 임시방편)
+          return (
+            <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
+              <TitlePage size={size} post={post} />
+            </Link>
+          );
+        })}
       </div>
       <div ref={loaderRef}></div>
       {isFetchingNextPage && (

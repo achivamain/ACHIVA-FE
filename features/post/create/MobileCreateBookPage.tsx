@@ -5,10 +5,12 @@ import {
 import { useState } from "react";
 import { bookCoverColors } from "../bookCoverColors";
 import { CloseIcon } from "@/components/Icons";
-import { BookCoverImage } from "@/types/BookCoverImages";
-import { bookCoverImages } from "@/types/BookCoverImages";
-import Image from "next/image";
+import {
+  BookCoverImage as BookCoverImageType,
+  bookCoverImages,
+} from "@/types/BookCoverImages";
 import getColorVariants from "@/lib/getColorVariants";
+import { BookCoverImage } from "@/features/book/BookCoverImages";
 
 export default function MobileCreateBookPage({
   close,
@@ -16,7 +18,7 @@ export default function MobileCreateBookPage({
   close: (value: boolean) => void;
 }) {
   const [coverColor, setCoverColor] = useState("#77B5C1");
-  const [coverImage, setCoverImage] = useState<BookCoverImage>("default");
+  const [coverImage, setCoverImage] = useState<BookCoverImageType>("career01");
   const [title, setTitle] = useState("");
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
@@ -68,19 +70,14 @@ export default function MobileCreateBookPage({
             표지 이미지 선택
           </div>
           <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="mx-4 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
               {bookCoverImages.map((img) => (
                 <div
                   key={img}
                   className="relative aspect-[1/1] cursor-pointer"
                   onClick={() => setCoverImage(img)}
                 >
-                  <Image
-                    src={`/images/${img}.png`}
-                    alt={img}
-                    fill
-                    className="object-contain"
-                  />
+                  <BookCoverImage name={`${img}`}/>
                 </div>
               ))}
             </div>
@@ -102,7 +99,6 @@ export default function MobileCreateBookPage({
             <CloseIcon />
           </button>
           <h1 className="text-xl font-semibold">표지 미리보기</h1>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 border-1 border-[#D9D9D9] font-bold text-[#412A2A] px-3 py-[2px] rounded-sm flex-shrink-0">
             <button
               onClick={() => {
                 const newBook = {
@@ -122,10 +118,10 @@ export default function MobileCreateBookPage({
                 }
               }}
               disabled={!title}
+              className="absolute right-4 top-1/2 -translate-y-1/2 border-1 border-[#D9D9D9] font-bold text-[#412A2A] px-3 py-[2px] rounded-sm flex-shrink-0"
             >
               {next == "fin" ? "완료" : "다음"}
             </button>
-          </div>
         </div>
       </div>
       <div className="w-full h-full flex flex-col pb-15 ">
@@ -144,14 +140,11 @@ export default function MobileCreateBookPage({
                   background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
                 }}
               />
-              <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
-                <img
-                  src={`/images/${
-                    coverImage === "default" ? "default.png" : coverImage
-                  }`}
-                  alt={coverImage}
-                  className="w-full h-full object-cover p-2"
-                  style={{}}
+              <div className="absolute w-[90%] top-[20%]  right-1 bottom-0">
+                <BookCoverImage
+                  name={coverImage}
+                  color={coverColor}
+                  className="w-full object-cover p-2"
                 />
               </div>
               <div className="absolute top-2 right-2 px-[11px] py-[2px] gap-2 text-xl text-[#412A2A] bg-white border border-[#D9D9D9] rounded-md font-semibold">

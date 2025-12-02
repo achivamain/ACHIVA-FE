@@ -9,6 +9,7 @@ export type Book = {
   count: number;
   coverColor: string;
   coverImage: BookCoverImage;
+  articles?: PostRes[];
 };
 export type BookRes = {
   id: string;

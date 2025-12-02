@@ -1,6 +1,7 @@
 // 홈 게시글 최신 카테고리 글 불러오기 프록시 api
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { PostRes } from "@/types/Post";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -23,6 +24,12 @@ export async function GET(req: NextRequest) {
       },
     }
   );
-
-  return res;
+  const data = await res.json();
+  const content = data.data.content.filter((post: PostRes) =>
+    post.photoUrl.startsWith("https://")
+  );
+  return NextResponse.json({
+    ...data,
+    data: { ...data.data, content: content },
+  });
 }

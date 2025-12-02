@@ -5,13 +5,13 @@ import {
 import { useState } from "react";
 import { NextStepButton } from "./Buttons";
 import { bookCoverColors } from "../bookCoverColors";
-import { BookCoverImage, bookCoverImages } from "@/types/BookCoverImages";
-import Image from "next/image";
+import { BookCoverImage as BookCoverImageType, bookCoverImages } from "@/types/BookCoverImages";
 import getColorVariants from "@/lib/getColorVariants";
+import { BookCoverImage } from "@/features/book/BookCoverImages";
 
 export default function CreateBookPage() {
   const [coverColor, setCoverColor] = useState("#77B5C1");
-  const [coverImage, setCoverImage] = useState<BookCoverImage>("default");
+  const [coverImage, setCoverImage] = useState<BookCoverImageType>("career01");
   const [title, setTitle] = useState("");
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
@@ -35,13 +35,11 @@ export default function CreateBookPage() {
               background: `linear-gradient(to right, #00000000, ${shadecolor}, ${shadecolor}, #00000000)`,
             }}
           />
-          <div className="absolute w-[90%] h-[90%] right-1 bottom-0">
-            <img
-              src={`/images/${
-                coverImage === "default" ? "default.png" : coverImage
-              }`}
-              alt={coverImage}
-              className="w-full h-full object-cover p-2"
+          <div className="absolute w-[90%] top-[20%] right-1 bottom-0">
+            <BookCoverImage
+              name={coverImage}
+              color={coverColor}
+              className="w-full object-cover p-2"
             />
           </div>
           <div className="absolute top-2 right-2 text-xl px-[11px] py-[2px] gap-2 text-[#412A2A] bg-white border border-[#D9D9D9] rounded-md font-semibold">
@@ -113,7 +111,7 @@ export default function CreateBookPage() {
 
     case "image":
       content = (
-        <div className="w-[50rem] h-[30rem] mt-8 flex justify-around flex-row overflow-hidden">
+        <div className="w-[50rem] h-[28rem] mt-8 flex justify-around flex-row overflow-hidden">
           <div className="w-sm flex-col h-full justify-between items-between flex-shrink-0">
             {book}
             <div className="mt-8">
@@ -137,20 +135,15 @@ export default function CreateBookPage() {
               </NextStepButton>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="grid grid-cols-3 gap-4">
+          <div className="mt-4 mx-4 h-[24rem] flex-1 overflow-y-auto min-h-0">
+            <div className="grid grid-cols-3 gap-1">
               {bookCoverImages.map((img) => (
                 <div
                   key={img}
                   className="relative aspect-[1/1] cursor-pointer"
                   onClick={() => setCoverImage(img)}
                 >
-                  <Image
-                    src={`/images/${img}.png`}
-                    alt={img}
-                    fill
-                    className="object-contain"
-                  ></Image>
+                  <BookCoverImage name={`${img}`}/>
                 </div>
               ))}
             </div>
