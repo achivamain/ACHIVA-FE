@@ -16,6 +16,18 @@ import { useState } from "react";
 import Drawer from "./Drawer";
 import Notifications from "@/features/user/Notifications";
 
+type NavItem =
+  | {
+      label: string;
+      href: string;
+      Icon: React.ComponentType<{ fill: boolean }>;
+    }
+  | {
+      label: string;
+      onClick: () => void;
+      Icon: React.ComponentType<{ fill: boolean }>;
+    };
+
 export default function Sidebar() {
   // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
   // static한 세션 정보를 사용하지 않고 api 호출해서 사용
@@ -42,20 +54,22 @@ export default function Sidebar() {
 
   const pathname = decodeURIComponent(usePathname());
 
-  let selected;
+  let initialSelectedItem;
   if (isCheerDrawerOpen) {
-    selected = "응원";
+    initialSelectedItem = "응원";
   } else if (pathname.endsWith("/home")) {
-    selected = "홈";
+    initialSelectedItem = "홈";
   } else if (pathname.endsWith("/goals")) {
-    selected = "목표";
+    initialSelectedItem = "목표";
   } else if (pathname === "/" || pathname.startsWith("/post")) {
-    selected = "피드";
+    initialSelectedItem = "피드";
   } else {
-    selected = "MY";
+    initialSelectedItem = "MY";
   }
 
-  const navItems = [
+  const [selectedItem, setSelectedItem] = useState(initialSelectedItem);
+
+  const navItems: NavItem[] = [
     {
       label: "홈",
       href: `/${user?.nickName}/home`,
@@ -120,16 +134,26 @@ export default function Sidebar() {
               <ListItem
                 isNavFolded={!!isCheerDrawerOpen}
                 label={item.label}
-                selected={selected === item.label}
+                selected={selectedItem === item.label}
                 Icon={item.Icon}
               />
             );
-            return item.href ? (
-              <Link key={item.label} href={item.href}>
+            return "href" in item ? (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setSelectedItem(item.label)}
+              >
                 {listItem}
               </Link>
             ) : (
-              <button key={item.label} onClick={item.onClick}>
+              <button
+                key={item.label}
+                onClick={() => {
+                  setSelectedItem(item.label);
+                  item.onClick();
+                }}
+              >
                 {listItem}
               </button>
             );

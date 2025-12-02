@@ -11,6 +11,7 @@ import {
   MyPageIcon,
 } from "./Icons";
 import { motion } from "motion/react";
+import { useState } from "react";
 
 export default function Sidebar() {
   // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
@@ -34,18 +35,20 @@ export default function Sidebar() {
 
   const pathname = decodeURIComponent(usePathname());
 
-  let selected;
+  let initialSelectedItem;
   if (pathname === `/accounts/notifications`) {
-    selected = "응원";
+    initialSelectedItem = "응원";
   } else if (pathname.endsWith("/home")) {
-    selected = "홈";
+    initialSelectedItem = "홈";
   } else if (pathname.endsWith("/goals")) {
-    selected = "목표";
+    initialSelectedItem = "목표";
   } else if (pathname === "/" || pathname.startsWith("/post")) {
-    selected = "피드";
+    initialSelectedItem = "피드";
   } else {
-    selected = "MY";
+    initialSelectedItem = "MY";
   }
+
+  const [selectedItem, setSelectedItem] = useState(initialSelectedItem);
 
   const isInvisible =
     /^\/[^/]+\/achievements$/.test(pathname) || // /[nickName]/achievements
@@ -105,12 +108,16 @@ export default function Sidebar() {
         >
           {navItems.map((item) => {
             return (
-              <Link key={item.label} href={item.href}>
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setSelectedItem(item.label)}
+              >
                 <ListItem
                   key={item.label}
                   label={item.label}
                   Icon={item.Icon}
-                  selected={selected === item.label}
+                  selected={selectedItem === item.label}
                 />
               </Link>
             );
