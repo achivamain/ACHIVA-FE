@@ -30,24 +30,11 @@ export default function Onboarding() {
           >
             <div className="flex justify-center items-center w-[359px] h-[46px] px-[63px] py-2.5 rounded-[5px] bg-white/90">
               <p className="flex-grow-0 flex-shrink-0 text-lg font-bold text-center text-theme">
-                회원가입
+                시작하기
               </p>
             </div>
           </button>
         </form>
-
-        <div className="self-stretch flex-grow-0 flex-shrink-0 w-[359px] h-[23px] text-base text-center flex justify-center items-center gap-2">
-          <span className=" text-sm text-center text-white/50">
-            이미 계정이 있나요?
-          </span>
-          <form action={handleSignIn}>
-            <button>
-              <span className=" h-[23px] text-sm font-bold text-center text-white">
-                로그인
-              </span>
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   );

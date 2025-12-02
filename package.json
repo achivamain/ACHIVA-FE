@@ -23,6 +23,7 @@
     "react-dom": "19.1.0",
     "react-easy-crop": "^5.5.0",
     "swiper": "^11.2.10",
+    "use-debounce": "^10.0.6",
     "zod": "^4.0.14",
     "zustand": "^5.0.7"
   },

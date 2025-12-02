@@ -1,9 +1,8 @@
 // 회원가입 시에만 쓰이는...
 export type SignupUser = {
   nickName: string;
-  profileImg?: string;
+  profileImg: string | null;
   birth?: Date;
-  gender?: string;
   categories: string[];
 };
 

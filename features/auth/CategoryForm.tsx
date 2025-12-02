@@ -11,13 +11,10 @@ export default function CategoryForm() {
   const setUser = useSignupInfoStore.use.setUser();
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-5">
       <div className="w-full text-left">
         <p className="font-semibold text-lg">
           원하는 성취 카테고리를 선택해주세요
-        </p>
-        <p className="font-light text-sm text-theme-gray">
-          1개 이상, 최대 5개까지 선택할 수 있어요
         </p>
       </div>
       <div className="flex h-60 flex-col justify-between">
@@ -42,7 +39,7 @@ export default function CategoryForm() {
         </div>
         <NextStepButton
           onClick={handleNextStep}
-          disabled={user.categories.length < 1 || user.categories.length > 5}
+          disabled={user.categories.length === 0}
         >
           다음
         </NextStepButton>
