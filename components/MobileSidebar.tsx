@@ -37,17 +37,14 @@ export default function Sidebar() {
   let selected;
   if (pathname === `/accounts/notifications`) {
     selected = "응원";
-  } else if (pathname === `/${user?.nickName}/home`) {
+  } else if (pathname.endsWith("/home")) {
     selected = "홈";
-  } else if (pathname.startsWith(`/${user?.nickName}/goals`)) {
+  } else if (pathname.endsWith("/goals")) {
     selected = "목표";
-  } else if (pathname === `/${user?.nickName}`) {
-    selected = "MY";
-  } else if (pathname.startsWith("/settings")) {
-    selected = "MY";
+  } else if (pathname === "/" || pathname.startsWith("/post")) {
+    selected = "피드";
   } else {
-    selected = "피드";
-    selected = "피드";
+    selected = "MY";
   }
 
   const isInvisible =
@@ -71,27 +68,27 @@ export default function Sidebar() {
     {
       label: "홈",
       href: `/${user?.nickName}/home`,
-      icon: <HomeIcon fill={selected === "홈"} />,
+      Icon: HomeIcon,
     },
     {
       label: "목표",
       href: `/${user?.nickName}/goals`,
-      icon: <GoalIcon fill={selected === "목표"} />,
+      Icon: GoalIcon,
     },
     {
       label: "피드",
       href: "/",
-      icon: <FeedIcon fill={selected === "피드"} />,
+      Icon: FeedIcon,
     },
     {
       label: "응원",
       href: "/accounts/notifications",
-      icon: <SideBarHeartIcon fill={selected === "응원"} />,
+      Icon: SideBarHeartIcon,
     },
     {
       label: "MY",
       href: `/${user?.nickName}`,
-      icon: <MyPageIcon fill={selected === "MY"} />,
+      Icon: MyPageIcon,
     },
   ];
 
@@ -108,7 +105,7 @@ export default function Sidebar() {
                 <ListItem
                   key={item.label}
                   label={item.label}
-                  icon={item.icon}
+                  Icon={item.Icon}
                   selected={selected === item.label}
                 />
               </Link>
@@ -122,11 +119,11 @@ export default function Sidebar() {
 
 type ListItemProps = {
   label: string;
-  icon: React.ReactNode;
+  Icon: React.ComponentType<{ fill: boolean }>;
   selected: boolean;
 };
 
-function ListItem({ label, icon, selected }: ListItemProps) {
+function ListItem({ label, Icon, selected }: ListItemProps) {
   return (
     <li className="relative flex flex-col items-center gap-1 cursor-pointer w-8">
       {selected && (
@@ -135,7 +132,9 @@ function ListItem({ label, icon, selected }: ListItemProps) {
           className="absolute -top-[19px] left-0 right-0 h-[3px] bg-theme rounded-b-sm"
         />
       )}
-      <div className="w-8 h-8 flex items-center justify-center">{icon}</div>
+      <div className="w-8 h-8 flex items-center justify-center">
+        <Icon fill={selected} />
+      </div>
       <span
         className={`text-[15px] leading-[18px] whitespace-nowrap ${
           selected ? "font-semibold" : "font-light"

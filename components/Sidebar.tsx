@@ -45,46 +45,41 @@ export default function Sidebar() {
   let selected;
   if (isCheerDrawerOpen) {
     selected = "응원";
-  } else if (pathname === `/${user?.nickName}/home`) {
+  } else if (pathname.endsWith("/home")) {
     selected = "홈";
-  } else if (pathname.startsWith(`/${user?.nickName}/goals`)) {
+  } else if (pathname.endsWith("/goals")) {
     selected = "목표";
-  } else if (pathname === `/${user?.nickName}`) {
-    selected = "MY";
-    // 사이드바에서 설정 버튼 빠짐 -> 임시로 MY로 처리
-  } else if (pathname.startsWith("/settings")) {
-    selected = "MY";
-    // 현재는 피드가 기본화면에 묶여 있어서 이렇게 처리했는데
-    // 나중에 기능 추가되면 아마 다른 페이지로 분리될 거 같아서 그때 다시 수정해야할듯?
-  } else {
+  } else if (pathname === "/" || pathname.startsWith("/post")) {
     selected = "피드";
+  } else {
+    selected = "MY";
   }
 
   const navItems = [
     {
       label: "홈",
       href: `/${user?.nickName}/home`,
-      icon: <HomeIcon fill={selected === "홈"} />,
+      Icon: HomeIcon,
     },
     {
       label: "목표",
       href: `/${user?.nickName}/goals`,
-      icon: <GoalIcon fill={selected === "목표"} />,
+      Icon: GoalIcon,
     },
     {
       label: "피드",
       href: "/",
-      icon: <FeedIcon fill={selected === "피드"} />,
+      Icon: FeedIcon,
     },
     {
       label: "응원",
       onClick: () => setIsCheerDrawerOpen(true),
-      icon: <SideBarHeartIcon fill={selected === "응원"} />,
+      Icon: SideBarHeartIcon,
     },
     {
       label: "MY",
       href: `/${user?.nickName}`,
-      icon: <MyPageIcon fill={selected === "MY"} />,
+      Icon: MyPageIcon,
     },
   ];
 
@@ -122,7 +117,7 @@ export default function Sidebar() {
                   isNavFolded={!!isCheerDrawerOpen}
                   label={item.label}
                   selected={selected === item.label}
-                  icon={item.icon}
+                  Icon={item.Icon}
                 />
               </Link>
             ) : (
@@ -131,7 +126,7 @@ export default function Sidebar() {
                   isNavFolded={!!isCheerDrawerOpen}
                   label={item.label}
                   selected={selected === item.label}
-                  icon={item.icon}
+                  Icon={item.Icon}
                 />
               </button>
             );
@@ -152,16 +147,16 @@ export default function Sidebar() {
 type ListItemProps = {
   isNavFolded: boolean;
   label: string;
-  icon: React.ReactNode;
+  Icon: React.ComponentType<{ fill: boolean }>;
   selected: boolean;
 };
 
-function ListItem({ isNavFolded, label, icon, selected }: ListItemProps) {
+function ListItem({ isNavFolded, label, Icon, selected }: ListItemProps) {
   return (
     <li
       className={`relative flex items-center gap-3 px-6 py-1.5 cursor-pointer`}
     >
-      {icon}
+      <Icon fill={selected} />
 
       <span
         className={`hidden lg:inline ${isNavFolded ? "!hidden" : ""} text-lg ${
