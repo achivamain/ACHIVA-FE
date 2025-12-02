@@ -31,7 +31,8 @@ export default async function HomePage({
       <div className="flex-1 flex flex-col justify-between">
         <div className="flex-1 flex justify-center items-end">
           <div className="w-full h-full max-w-[844px]">
-            <BookSection/>
+            {/*<BookSection/>*/}
+            <div className="h-[10%]"></div>
             <WebGoalSummary summaryData={mySummaryData} />
           </div>
         </div>

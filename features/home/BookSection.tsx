@@ -1,10 +1,10 @@
 "use client";
-//이전 페이지 다음 페이지 아이콘 따로 분리
+//제대로 작동하지 않습니다...
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Book } from "@/types/Book";
-import { BookCard } from "@/components/BookCard";
+import { BookCard } from "@/features/book/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 
 export function BookSection() {
@@ -16,7 +16,7 @@ export function BookSection() {
 
   async function fetchBooks(pageParam: number = 0) {
     const response = await fetch(
-      `/api/books?pageParam=${pageParam}&sizeParam=5`,
+      `/api/books/my?pageParam=${pageParam}&sizeParam=5`,
       {
         method: "GET",
         headers: {

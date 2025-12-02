@@ -4,7 +4,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Book } from "@/types/Book";
-import { BookCard } from "@/components/BookCard";
+import { BookCard } from "@/features/book/BookCard";
 import { LoadingIcon } from "@/components/Icons";
 
 export function MobileBookSection() {
@@ -16,7 +16,7 @@ export function MobileBookSection() {
 
   async function fetchBooks(pageParam: number = 0) {
     const response = await fetch(
-      `/api/books?pageParam=${pageParam}&sizeParam=5`,
+      `/api/books/my?pageParam=${pageParam}&sizeParam=5`,
       {
         method: "GET",
         headers: {
@@ -80,11 +80,17 @@ export function MobileBookSection() {
   });
 
   return (
-    <div className="relative w-full h-[22rem] bg-white items-center flex-col mb-5">
+    <div className="relative w-full h-[378px] bg-white items-center flex-col mb-5">
       <h1 className="pt-4 text-[26px] font-semibold m-4 mb-1">
         나의 성취 이야기
       </h1>
-      <div className="h-[276px] flex flex-row items-center justify-between">
+      {books.length == 0 && (
+            <p className="text-center ml-[25%]">
+              여기에 당신의 성취 기록이 담겨요
+              <br />첫 성취를 기록해보세요
+            </p>
+          )}
+      <div className="flex flex-row items-center justify-between mt-4">
         <div
           className="inline-flex overflow-x-auto flex-1 "
           style={{
@@ -93,23 +99,18 @@ export function MobileBookSection() {
           }}
           ref={viewportRef}
         >
-          {books.length == 0 && (
-            <p className="text-center ml-[25%]">
-              여기에 당신의 성취 기록이 담겨요
-              <br />첫 성취를 기록해보세요
-            </p>
-          )}
+          <div className="w-4"></div>
           {books.map((book) => (
             <div
               key={book.id}
-              className="flex-shrink-0 w-[181px] m-2"
+              className="flex-shrink-0 w-[162px] m-2"
               ref={(el) => {
                 if (el) {
                   bookRefs.current.set(books.indexOf(book), el);
                 }
               }}
             >
-              <BookCard book={book} width={181} />
+              <BookCard book={book} width={162} />
             </div>
           ))}
           <div ref={loaderRef}></div>
