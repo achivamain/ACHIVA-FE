@@ -2,7 +2,6 @@ import { NextStepButton } from "./Buttons";
 import { useSignupInfoStore } from "@/store/SignupStore";
 import { format } from "date-fns";
 import { useState } from "react";
-import { defaultProfileImg } from "../user/defaultProfileImg";
 import Post from "../post/Post";
 
 export default function OathForm() {
@@ -51,7 +50,7 @@ export default function OathForm() {
   async function handleSignUp() {
     setIsLoading(true);
     const payload = {
-      profileImageUrl: defaultProfileImg,
+      profileImageUrl: null,
       birth: format(user.birth!, "yyyy-MM-dd"),
       categories: user.categories,
     };
