@@ -168,10 +168,7 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                         } resize-none outline-none overflow-hidden`}
                         value={page.content ?? ""}
                         onChange={(e) => {
-                          if (
-                            e.target.scrollHeight <=
-                            (maxHeight * size) / 430
-                          ) {
+                          if (e.target.scrollHeight <= maxHeight) {
                             setPost((prev) => ({
                               pages: prev.pages?.map((p) =>
                                 p.id == page.id
