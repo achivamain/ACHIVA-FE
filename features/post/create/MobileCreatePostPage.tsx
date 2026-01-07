@@ -38,14 +38,6 @@ export default function MobileCreatePostPage() {
   let title: React.ReactNode;
   let content: React.ReactNode;
   switch (currentStep) {
-    case 2:
-      title = "작성할 이야기를 선택해주세요";
-      content = (
-        <div>
-          <MobileBookSelector />
-        </div>
-      );
-      break;
     case 0:
       title = "원하는 성취 카테고리를 선택해주세요";
       content = (
@@ -54,15 +46,8 @@ export default function MobileCreatePostPage() {
         </div>
       );
       break;
+
     case 1:
-      title = "표지 미리보기";
-      content = (
-        <div className="h-100">
-          <MobileCreateBookPage close={setIsCloseModalOpen} />
-        </div>
-      );
-      break;
-    case 3:
       title = "작성할 내용들을 선택해주세요";
       content = (
         <div className="flex-1 flex flex-col">
@@ -70,7 +55,8 @@ export default function MobileCreatePostPage() {
         </div>
       );
       break;
-    case 4:
+
+    case 2:
       title = "배경색을 선택해주세요";
       content = (
         <div className="flex-1 flex flex-col">
@@ -78,28 +64,32 @@ export default function MobileCreatePostPage() {
         </div>
       );
       break;
-    case 5:
+
+    case 3:
       content = (
         <div>
           <MobileWriting />
         </div>
       );
       break;
-    case 6:
+
+    case 4:
       headerTitle = "사진 추가";
       content = <ImageUploader />;
       break;
-    case 7:
+
+    case 5:
       headerTitle = "표지 미리보기";
       content = <TitleEditor />;
       break;
+
     default:
       title = "에러";
       content = null;
   }
   return (
     <div className="h-full flex-1 flex flex-col">
-      {currentStep > 2 ? (
+      {currentStep > 0 ? (
         <>
         <div className="flex-shrink-0">
           <MobileHeader onClick={handlePrevStep}>
@@ -111,8 +101,6 @@ export default function MobileCreatePostPage() {
             {content}
           </div>
         </>
-      ) : currentStep === 1 ? (
-        <>{content}</>
       ) : (
         <>
           <div className="relative bg-white w-full h-14 mb-5 flex items-center justify-center z-50">

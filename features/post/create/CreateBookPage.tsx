@@ -125,7 +125,7 @@ export default function CreateBookPage() {
                     coverColor: coverColor,
                     coverImage: coverImage,
                   };
-                  setPost({ book: newBook });
+                  //setPost({ book: newBook });
                   handleNextStep();
                   handleNextStep();
                 }}
