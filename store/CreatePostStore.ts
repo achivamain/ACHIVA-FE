@@ -29,7 +29,9 @@ type EnteredDraftState = {
   resetPost: () => void;
 };
 
-const initialPost: DraftPost = {};
+const initialPost: DraftPost = {
+  backgroundColor: "#f9f9f9",
+};
 
 const useDraftPostStoreBase = create<EnteredDraftState>((set) => ({
   post: initialPost,

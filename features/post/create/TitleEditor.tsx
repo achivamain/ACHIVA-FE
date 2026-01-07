@@ -61,8 +61,8 @@ export default function TitleEditor() {
       alert(
         "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
       );
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
 

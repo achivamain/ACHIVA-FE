@@ -57,15 +57,6 @@ export default function MobileCreatePostPage() {
       break;
 
     case 2:
-      title = "배경색을 선택해주세요";
-      content = (
-        <div className="flex-1 flex flex-col">
-          <BgColorSelector />
-        </div>
-      );
-      break;
-
-    case 3:
       content = (
         <div>
           <MobileWriting />
@@ -73,12 +64,12 @@ export default function MobileCreatePostPage() {
       );
       break;
 
-    case 4:
+    case 3:
       headerTitle = "사진 추가";
       content = <ImageUploader />;
       break;
 
-    case 5:
+    case 4:
       headerTitle = "표지 미리보기";
       content = <TitleEditor />;
       break;
