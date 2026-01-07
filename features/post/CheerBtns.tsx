@@ -128,7 +128,7 @@ export default function CheerBtns({
               active ? "text-white" : "border-theme"
             }`}
           >
-            <p>{type}</p>
+            <p className="line-clamp-1">{type}</p>
             {<Icon active={active} />}
           </button>
         );
