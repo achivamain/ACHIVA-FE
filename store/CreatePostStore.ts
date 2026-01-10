@@ -31,6 +31,10 @@ type EnteredDraftState = {
 
 const initialPost: DraftPost = {
   backgroundColor: "#f9f9f9",
+  pages: [
+    { id: crypto.randomUUID(), subtitle: "오늘의 운동 일지", content: "" },
+    { id: crypto.randomUUID(), subtitle: "느낀 점", content: "" },
+  ],
 };
 
 const useDraftPostStoreBase = create<EnteredDraftState>((set) => ({

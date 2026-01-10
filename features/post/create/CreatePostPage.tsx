@@ -10,7 +10,6 @@ import {
 import type { CategoryCount } from "@/types/Post";
 import Modal from "@/components/Modal";
 import { useEffect, useState } from "react";
-import BgColorSelector from "./BgColorSelector";
 import Writing from "./Writing";
 // import BgImageSelector from "./BgImageSelector";
 import ImageUploader from "./ImageUploader";
@@ -18,14 +17,13 @@ import TitleEditor from "./TitleEditor";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useRouter } from "next/navigation";
 
-export default function CreatePostPage({
+export default function CreatePostPage(/*{
   categoryCounts,
 }: {
   categoryCounts: CategoryCount[];
-}) {
+}*/) {
   const router = useRouter();
   const currentStep = useCreatePostStepStore.use.currentStep();
-  const handlePrevStep = useCreatePostStepStore.use.handlePrevStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
   const resetPost = useDraftPostStore.use.resetPost();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
@@ -55,15 +53,6 @@ export default function CreatePostPage({
       break;
 
     case 1:
-      title = "작성할 내용들을 선택해주세요";
-      content = (
-        <div className="h-120">
-          <SubtitlesSelector />
-        </div>
-      );
-      break;
-
-    case 2:
       content = (
         <div>
           <Writing />
@@ -71,12 +60,12 @@ export default function CreatePostPage({
       );
       break;
 
-    case 3:
+    case 2:
       title = "사진 추가";
       content = <ImageUploader />;
       break;
 
-    case 4:
+    case 3:
       title = "표지 미리보기";
       content = <TitleEditor />;
       break;

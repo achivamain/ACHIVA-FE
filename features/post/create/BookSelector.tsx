@@ -76,7 +76,7 @@ export default function BookSelector() {
               className="h-full flex-1 flex flex-col cursor-pointer"
               onClick={() => {
                 setPost({ category: book.category });
-                setPost({ book: book });
+                //setPost({ book: book });
                 handleNextStep();
               }}
             >

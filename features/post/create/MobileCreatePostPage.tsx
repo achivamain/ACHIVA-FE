@@ -8,7 +8,6 @@ import {
   useDraftPostStore,
 } from "@/store/CreatePostStore";
 import { useEffect, useState } from "react";
-import BgColorSelector from "./BgColorSelector";
 import { MobileWriting } from "./Writing";
 import ImageUploader from "./ImageUploader";
 import TitleEditor from "./TitleEditor";
@@ -16,8 +15,6 @@ import TitleEditor from "./TitleEditor";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useRouter } from "next/navigation";
 import MobileHeader from "@/components/MobileHeader";
-import MobileCreateBookPage from "./MobileCreateBookPage";
-import MobileBookSelector from "./MobileBookSelector";
 import { CloseIcon } from "@/components/Icons";
 
 export default function MobileCreatePostPage() {
@@ -48,15 +45,6 @@ export default function MobileCreatePostPage() {
       break;
 
     case 1:
-      title = "작성할 내용들을 선택해주세요";
-      content = (
-        <div className="flex-1 flex flex-col">
-          <SubtitlesSelector />
-        </div>
-      );
-      break;
-
-    case 2:
       content = (
         <div>
           <MobileWriting />
@@ -64,14 +52,22 @@ export default function MobileCreatePostPage() {
       );
       break;
 
-    case 3:
+    case 2:
       headerTitle = "사진 추가";
-      content = <ImageUploader />;
+      content = (
+        <div className="px-5">
+          <ImageUploader />
+        </div>
+      );
       break;
 
-    case 4:
+    case 3:
       headerTitle = "표지 미리보기";
-      content = <TitleEditor />;
+      content = (
+        <div className="px-5">
+          <TitleEditor />
+        </div>
+      );
       break;
 
     default:
@@ -82,13 +78,17 @@ export default function MobileCreatePostPage() {
     <div className="h-full flex-1 flex flex-col">
       {currentStep > 0 ? (
         <>
-        <div className="flex-shrink-0">
-          <MobileHeader onClick={handlePrevStep}>
-            {headerTitle ?? null}
-          </MobileHeader>
+          <div className="flex-shrink-0">
+            <MobileHeader onClick={handlePrevStep}>
+              {headerTitle ?? null}
+            </MobileHeader>
           </div>
-          <div className="w-full flex-1 flex flex-col px-5 pb-15">
-            {title && <h1 className="text-xl font-semibold mb-5 flex-shrink-0">{title}</h1>}
+          <div className="w-full flex-1 flex flex-col pb-15">
+            {title && (
+              <h1 className="text-xl font-semibold mb-5 flex-shrink-0">
+                {title}
+              </h1>
+            )}
             {content}
           </div>
         </>

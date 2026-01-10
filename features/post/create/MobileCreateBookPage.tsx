@@ -109,7 +109,7 @@ export default function MobileCreateBookPage({
                   coverColor: coverColor,
                   coverImage: coverImage,
                 };
-                setPost({ book: newBook });
+                //setPost({ book: newBook });
                 if (next != "fin") {
                   setCurrentStep(next);
                 } else {

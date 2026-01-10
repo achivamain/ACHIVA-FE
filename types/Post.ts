@@ -1,6 +1,5 @@
 import type { Category } from "./Categories";
 import type { Cheering } from "./responses";
-import type { Book } from "./Book";
 
 export type Post = {
   titleImageUrl: string;
