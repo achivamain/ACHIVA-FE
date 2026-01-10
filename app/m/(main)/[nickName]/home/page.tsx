@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
 import MobileGoalSummary from "@/features/user/goals/GoalSummary";
-import { CaretRight24pxIcon } from "@/components/Icons";
-import { MobileBookSection } from "@/features/home/MobileBookSection";
+import { MyCategorys } from "@/features/home/MyCategorys";
+import { User } from "@/types/User";
+import { notFound } from "next/navigation";
 
 export default async function MobileHomePageRoute({
   params,
@@ -14,10 +14,31 @@ export default async function MobileHomePageRoute({
   if (session?.error) {
     return <Logout />;
   }
-  const currentUser = session!.user;
+  const token = session?.access_token;
 
-  const { nickName } = await params;
-  const isOwner = currentUser!.nickName === decodeURIComponent(nickName);
+  const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해
+
+  async function getUser() {
+    // 유저 데이터 가져오기
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const { data } = await response.json();
+    if (!data) {
+      notFound();
+    }
+    return data as User;
+  }
+
+  const [user] = await Promise.all([getUser()]);
 
   const mySummaryData = {
     letters: 20,
@@ -27,22 +48,8 @@ export default async function MobileHomePageRoute({
 
   return (
     <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
-      <div className="flex-1 w-full h-full">
-      <MobileBookSection/>
-      <MobileGoalSummary summaryData={mySummaryData} /></div>
-      <div className="h-6" />
-
-      <div className="flex justify-center pb-[22px]">
-        <Link
-          href="/post/create"
-          className="flex flex-row justify-center items-center gap-1 w-[272px] h-14 px-12 py-4 bg-[#412A2A] rounded-[64px]"
-        >
-          <span className="font-['Pretendard'] font-semibold text-xl leading-6 text-white text-center">
-            오늘의 이야기 작성
-          </span>
-          <CaretRight24pxIcon />
-        </Link>
-      </div>
+      <MyCategorys myCategories={user.categories} />
+      <MobileGoalSummary summaryData={mySummaryData} />
     </div>
   );
 }

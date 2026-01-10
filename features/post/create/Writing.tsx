@@ -55,7 +55,7 @@ export function MobileWriting() {
         <button
           className="absolute top-2.5 right-5 z-99 font-semibold text-white disabled:text-[#808080] py-1 px-3 bg-theme disabled:bg-white border border-theme disabled:border-[#d9d9d9] rounded-sm"
           disabled={!draft.pages?.[currentPage - 1]?.content}
-          onClick={() => setCurrentPage((n) => n + 1 )}
+          onClick={() => setCurrentPage((n) => n + 1)}
         >
           다음
         </button>
@@ -97,7 +97,7 @@ function AddNewPageBtn({ currentPage, setCurrentPage }: Props) {
         }));
         setCurrentPage((prev) => prev + 1);
       }}
-      className="font-semibold text-[#808080] py-1 px-3 border border-[#d9d9d9] rounded-sm"
+      className="font-semibold bg-white text-[#808080] py-1 px-3 border border-[#d9d9d9] rounded-sm"
     >
       빈 페이지 추가하기
     </button>

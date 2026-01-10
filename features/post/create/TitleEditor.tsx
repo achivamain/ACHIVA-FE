@@ -56,6 +56,7 @@ export default function TitleEditor() {
         console.log(res);
         throw new Error("게시글 작성 중 에러");
       }
+      window.location.href = `/${currentUser?.nickName}`;
     } catch (err) {
       console.log(err);
       alert(
@@ -64,7 +65,6 @@ export default function TitleEditor() {
     }
     setIsLoading(false);
   };
-
 
   return (
     <div className="flex flex-col items-center">
@@ -104,7 +104,7 @@ export default function TitleEditor() {
               </div>
               <div>
                 <span className="font-bold">
-                  {(draft.categoryCount?? 0) + 1}번째
+                  {(draft.categoryCount ?? 0) + 1}번째
                 </span>{" "}
                 이야기
               </div>
@@ -137,7 +137,7 @@ export default function TitleEditor() {
           isLoading={isLoading}
           // disabled={!draft.title}
           onClick={async () => {
-              createNewPost(draft);
+            createNewPost(draft);
           }}
         >
           공유하기

@@ -1,13 +1,10 @@
 // pc용 - use client를 위한...
 "use client";
 
-import CategorySelector from "./CategorySelector";
-import SubtitlesSelector from "./SubtitlesSelector";
 import {
   useCreatePostStepStore,
   useDraftPostStore,
 } from "@/store/CreatePostStore";
-import type { CategoryCount } from "@/types/Post";
 import Modal from "@/components/Modal";
 import { useEffect, useState } from "react";
 import Writing from "./Writing";
@@ -25,14 +22,12 @@ export default function CreatePostPage(/*{
   const router = useRouter();
   const currentStep = useCreatePostStepStore.use.currentStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
-  const resetPost = useDraftPostStore.use.resetPost();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
   // 글쓰기 버튼 클릭 시 작성상태 리셋
   useEffect(() => {
     resetStep();
-    resetPost();
-  }, [resetStep, resetPost]);
+  }, [resetStep]);
 
   let title: React.ReactNode = (
     <div className="h-7 flex items-center justify-center">
@@ -40,19 +35,8 @@ export default function CreatePostPage(/*{
     </div>
   );
   let content: React.ReactNode;
-  let size: string = "";
   switch (currentStep) {
     case 0:
-      title = "성취 카테고리를 선택해주세요";
-      content = (
-        <div className="w-lg h-[20rem] mt-8 flex">
-          <CategorySelector />
-        </div>
-      );
-      size = "w-lg h-[20rem] mt-8 flex";
-      break;
-
-    case 1:
       content = (
         <div>
           <Writing />
@@ -60,16 +44,16 @@ export default function CreatePostPage(/*{
       );
       break;
 
-    case 2:
+    case 1:
       title = "사진 추가";
       content = <ImageUploader />;
       break;
 
-    case 3:
+    case 2:
       title = "표지 미리보기";
       content = <TitleEditor />;
       break;
-      
+
     default:
       title = "에러";
       content = null;
@@ -86,11 +70,7 @@ export default function CreatePostPage(/*{
           )
         }
       >
-        {size !== "" ? (
-          <div>{content}</div>
-        ) : (
-          <div className="w-lg mt-8">{content}</div>
-        )}
+        <div className="w-lg mt-8">{content}</div>
       </Modal>
       {isCloseModalOpen && (
         <ModalWithoutCloseBtn
