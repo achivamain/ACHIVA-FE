@@ -106,6 +106,14 @@ export default function ImageUploader() {
           {imageSrc ? "다음" : isMobile ? "갤러리에서 선택" : "컴퓨터에서 선택"}
         </NextStepButton>
       </div>
+      <div className="mt-2 w-full">
+        <button
+          className="w-full h-11 flex items-center justify-center rounded-sm font-medium text-lg py-2 bg-[#E3E3E3] text-[#5C5C5C]"
+          onClick={handleNextStep}
+        >
+          건너뛰기
+        </button>
+      </div>
 
       {/* 파일 입력 */}
       <input

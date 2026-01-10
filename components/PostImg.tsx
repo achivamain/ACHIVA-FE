@@ -17,13 +17,13 @@ export default function PostImg({
           <div className="bg-loading absolute inset-0 animate-pulse"></div>
         </div>
       )}
-      <Image
+      {url &&<Image
         className={`${loaded ? "" : "opacity-0"}`}
         src={url}
         alt="profile image"
         fill
         onLoad={() => setLoaded(true)}
-      />
+      />}
       {filtered && (
         <div className="absolute inset-0 w-full h-full bg-black/70" />
       )}
