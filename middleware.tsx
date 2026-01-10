@@ -41,9 +41,9 @@ export default auth((req) => {
     }
 
     if (isMobile) {
-      return NextResponse.rewrite(new URL("/m/home", req.url));
+      return NextResponse.redirect(new URL("/m/feed", req.url));
     } else {
-      return NextResponse.rewrite(new URL("/home", req.url));
+      return NextResponse.redirect(new URL("/feed", req.url));
     }
   }
 

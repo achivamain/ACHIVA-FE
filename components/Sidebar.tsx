@@ -61,7 +61,7 @@ export default function Sidebar() {
     initialSelectedItem = "홈";
   } else if (pathname.endsWith("/goals")) {
     initialSelectedItem = "목표";
-  } else if (pathname === "/" || pathname.startsWith("/post")) {
+  } else if (pathname === "/feed" || pathname.startsWith("/post")) {
     initialSelectedItem = "피드";
   } else {
     initialSelectedItem = "MY";

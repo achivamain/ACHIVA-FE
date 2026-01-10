@@ -13,15 +13,15 @@ const tabs: FeedTab[] = ["전체", "관심", "응원", "친구"];
 
 export default function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
   return (
-    <div className="flex gap-2 px-4 py-3">
+    <div className="flex flex-wrap gap-x-2 gap-y-[15px] px-4 py-3">
       {tabs.map((tab) => (
         <button
           key={tab}
           onClick={() => onTabChange(tab)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+          className={`flex justify-center items-center px-[19px] py-[7px] h-[35px] rounded-full font-semibold text-lg leading-[21px] transition-colors ${
             activeTab === tab
-              ? "bg-[#412A2A] text-white"
-              : "bg-white border border-[#412A2A]/20 text-[#412A2A] hover:bg-[#412A2A]/5"
+              ? "bg-[#412A2A] border border-[#412A2A] text-white"
+              : "bg-white border border-[#D9D9D9] text-[#412A2A]"
           }`}
         >
           {tab}
