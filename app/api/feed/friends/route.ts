@@ -71,12 +71,12 @@ export async function GET(req: NextRequest) {
     .flat()
     .filter((post) => post.photoUrl?.startsWith("https://"));
 
-  // 정렬 
+  // 정렬
   allPosts.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
-  // 페이지네이션 
+  // 페이지네이션
   const startIdx = pageParam * pageSize;
   const endIdx = startIdx + pageSize;
   const pagedPosts = allPosts.slice(startIdx, endIdx);
@@ -95,4 +95,3 @@ export async function GET(req: NextRequest) {
     empty: pagedPosts.length === 0,
   });
 }
-

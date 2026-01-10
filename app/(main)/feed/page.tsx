@@ -24,7 +24,7 @@ export default function FeedPage() {
             <FeedList activeTab={activeTab} />
           </div>
         </div>
-        
+
         <div className="bg-[#fafafa] w-60 hidden md:flex justify-center">
           <Banner />
         </div>
@@ -33,4 +33,3 @@ export default function FeedPage() {
     </div>
   );
 }
-

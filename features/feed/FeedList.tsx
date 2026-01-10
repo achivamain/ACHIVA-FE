@@ -127,4 +127,3 @@ export default function FeedList({ activeTab }: FeedListProps) {
     </div>
   );
 }
-

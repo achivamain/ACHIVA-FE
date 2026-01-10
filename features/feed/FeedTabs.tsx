@@ -1,7 +1,7 @@
 "use client";
 
-// 피드의 각 탭 관련 처리 
-// 카테고리별 검색 추가 예정 
+// 피드의 각 탭 관련 처리
+// 카테고리별 검색 추가 예정
 export type FeedTab = "전체" | "관심" | "응원" | "친구";
 
 type FeedTabsProps = {
@@ -30,4 +30,3 @@ export default function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
     </div>
   );
 }
-

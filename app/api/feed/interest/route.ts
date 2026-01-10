@@ -41,4 +41,3 @@ export async function GET(req: NextRequest) {
     content: data.data ? undefined : content,
   });
 }
-
