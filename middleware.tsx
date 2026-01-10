@@ -27,7 +27,8 @@ export default auth((req) => {
     pathname !== "/" &&
     pathname !== "/login" &&
     pathname !== "/signup" &&
-    pathname !== "/callback"
+    pathname !== "/callback" &&
+    pathname !== "/onboarding"
   ) {
     return NextResponse.redirect(new URL("/", req.url));
   }
@@ -40,11 +41,7 @@ export default auth((req) => {
       return NextResponse.rewrite(new URL("/onboarding", req.url));
     }
 
-    if (isMobile) {
-      return NextResponse.redirect(new URL("/m/feed", req.url));
-    } else {
-      return NextResponse.redirect(new URL("/feed", req.url));
-    }
+    return NextResponse.redirect(new URL("/feed", req.url));
   }
 
   // -------------------------
