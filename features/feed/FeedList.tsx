@@ -97,7 +97,7 @@ export default function FeedList({ activeTab }: FeedListProps) {
   const posts = data?.pages.flatMap((p) => p.content) ?? [];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-7">
       {isLoading && (
         <div className="w-full flex justify-center py-10">
           <LoadingIcon color="text-theme" />
