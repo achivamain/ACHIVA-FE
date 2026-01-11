@@ -25,8 +25,9 @@ export async function GET(req: NextRequest) {
   );
 
   const data = await res.json();
-  const content = data.content.filter((post: PostRes) =>
-    post.photoUrl.startsWith("https://") || post.photoUrl === ""
+  const content = data.content.filter(
+    (post: PostRes) =>
+      post.photoUrl?.startsWith("https://") || post.photoUrl == null
   );
   return NextResponse.json({
     ...data,

@@ -149,11 +149,9 @@ export default function Post({
           }}
           className="mySwiper"
         >
-          {post.photoUrl && (
             <SwiperSlide>
               <TitlePage size={containerWidth ?? 0} post={post} />
             </SwiperSlide>
-          )}
           {post.question.map((page, idx) => {
             return (
               <SwiperSlide key={idx}>
