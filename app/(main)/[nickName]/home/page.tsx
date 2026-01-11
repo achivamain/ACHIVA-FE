@@ -6,6 +6,8 @@ import Banner from "@/features/event/Banner";
 import { User } from "@/types/User";
 import { notFound } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
+import { CategoryCount } from "@/types/Post";
+import { NextResponse } from "next/server";
 
 export default async function HomePage({
   params,
@@ -17,6 +19,10 @@ export default async function HomePage({
     return <Logout />;
   }
   const token = session?.access_token;
+
+  if (!token) {
+    return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
+  }
 
   const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해
 
@@ -42,6 +48,28 @@ export default async function HomePage({
 
   const [user] = await Promise.all([getUser()]);
 
+  //카테고리별 게시물 수 받아오기
+  async function getPostCategory() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const { data } = await res.json();
+    if (!data) {
+      notFound();
+    }
+    const { categoryCounts } = data;
+    return categoryCounts as CategoryCount[];
+  }
+
+  const [postsCategory] = await Promise.all([getPostCategory()]);
+
   // 나중에 API로 받아와야 함
   const mySummaryData = {
     letters: 20,
@@ -54,7 +82,10 @@ export default async function HomePage({
       <div className="flex-1 flex flex-col justify-between">
         <div className="flex-1 flex justify-center items-end">
           <div className="w-full h-full max-w-[844px]">
-            <MyCategorys myCategories={user.categories} />
+            <MyCategorys
+              myCategories={user.categories}
+              categoryCounts={postsCategory}
+            />
             <div className="h-[10%]"></div>
             <WebGoalSummary summaryData={mySummaryData} />
           </div>
