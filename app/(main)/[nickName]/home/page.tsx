@@ -68,7 +68,7 @@ export default async function HomePage({
     return categoryCounts as CategoryCount[];
   }
 
-  const [postsCategory] = await Promise.all([getPostCategory()]);
+  const [categoryCounts] = await Promise.all([getPostCategory()]);
 
   // 나중에 API로 받아와야 함
   const mySummaryData = {
@@ -84,7 +84,7 @@ export default async function HomePage({
           <div className="w-full h-full max-w-[844px]">
             <MyCategorys
               myCategories={user.categories}
-              categoryCounts={postsCategory}
+              categoryCounts={categoryCounts}
             />
             <div className="h-[10%]"></div>
             <WebGoalSummary summaryData={mySummaryData} />
