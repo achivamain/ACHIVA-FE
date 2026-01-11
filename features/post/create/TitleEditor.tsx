@@ -87,7 +87,7 @@ export default function TitleEditor() {
                 isEditing ? "text-white" : "text-white/80"
               } placeholder:text-white/80 font-semibold text-[45px] mb-[24px] leading-[50px] outline-none`}
               type="text"
-              placeholder="오늘의 성취"
+              placeholder="오늘의 운동"
               autoFocus
               value={draft.title ?? ""}
               onChange={(e) => {
