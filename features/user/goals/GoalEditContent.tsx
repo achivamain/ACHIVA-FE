@@ -1,18 +1,23 @@
 "use client";
 
-// API 완성되면 전반적인 수정 필요
-
-import React, { useState, useEffect, useRef } from "react";
-import useGoalStore from "@/store/GoalStore";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { CaretRightIcon, ThreeDotsIcon } from "@/components/Icons";
 import TwoElementsButton from "@/components/TwoElementsButton";
-import type { ModalData } from "@/types/Goal";
-
-type PendingAction = {
-  type: "archive" | "delete";
-  itemType: "mission" | "mindset";
-  id: number;
-};
+import {
+  useActiveGoals,
+  categorizeGoals,
+  useCreateGoal,
+  useUpdateGoal,
+  useDeleteGoal,
+  useToggleArchive,
+} from "@/hooks/useGoals";
+import type {
+  EditableGoal,
+  EditModalData,
+  PendingAction,
+  GoalCategory,
+  Goal,
+} from "@/types/Goal";
 
 interface GoalEditContentProps {
   onClose: () => void;
@@ -20,23 +25,50 @@ interface GoalEditContentProps {
   isMobile?: boolean;
 }
 
+// Goal을 EditableGoal로 변환
+const toEditable = (goal: Goal): EditableGoal => ({
+  id: goal.id,
+  text: goal.text,
+  isNew: false,
+  originalText: goal.text,
+});
+
+// 임시 ID 생성 (새 항목용)
+const generateTempId = () =>
+  `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 const GoalEditContent: React.FC<GoalEditContentProps> = ({
   onClose,
   onSave,
   isMobile = false,
 }) => {
-  const { vision, missions, mindsets, handleSaveChanges, handleArchive } =
-    useGoalStore();
+  const { data: goals, refetch } = useActiveGoals();
 
-  // 렌더 방지용 임시저장
-  const [data, setData] = useState<ModalData>({
-    vision,
-    missions: missions.filter((m) => !m.isArchived),
-    mindsets: mindsets.filter((m) => !m.isArchived),
+  // useMemo로 분류 결과 메모이제이션 (무한 루프 방지)
+  const { vision, missions, mindsets } = useMemo(
+    () => categorizeGoals(goals),
+    [goals]
+  );
+
+  const createGoal = useCreateGoal();
+  const updateGoal = useUpdateGoal();
+  const deleteGoal = useDeleteGoal();
+  const toggleArchive = useToggleArchive();
+
+  // 편집용 로컬 상태
+  const [data, setData] = useState<EditModalData>({
+    vision: null,
+    missions: [],
+    mindsets: [],
   });
 
-  // 백엔드 연결 대비 Queue
+  // 초기화 여부 추적 (한 번만 초기화)
+  const isInitialized = useRef(false);
+
+  // 대기 중인 액션 (보관/삭제)
   const [pendingActions, setPendingActions] = useState<PendingAction[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 버튼 위치 처리 관련
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -47,16 +79,17 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
   }>({ right: 0 });
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
-  // 데이터 갱신
+  // 서버 데이터로 로컬 상태 초기화 (goals가 로드되면 한 번만)
   useEffect(() => {
-    setData({
-      vision,
-      missions: missions.filter((m) => !m.isArchived),
-      mindsets: mindsets.filter((m) => !m.isArchived),
-    });
-    setPendingActions([]);
-    setOpenDropdown(null);
-  }, [vision, missions, mindsets]);
+    if (goals && !isInitialized.current) {
+      setData({
+        vision: vision ? toEditable(vision) : null,
+        missions: missions.map(toEditable),
+        mindsets: mindsets.map(toEditable),
+      });
+      isInitialized.current = true;
+    }
+  }, [goals, vision, missions, mindsets]);
 
   // 외부 클릭 감지 - 드롭다운 닫기
   useEffect(() => {
@@ -80,11 +113,14 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     }
   }, [openDropdown]);
 
-  // 일반 입력 계열 - 비전: 1개만 가질 수 있음
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 비전 입력
+  const handleVisionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newText = e.target.value;
     setData((prev) => ({
       ...prev,
-      vision: { ...prev.vision, text: e.target.value },
+      vision: prev.vision
+        ? { ...prev.vision, text: newText }
+        : { id: generateTempId(), text: newText, isNew: true },
     }));
   };
 
@@ -101,7 +137,11 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
 
   // 추가 관련
   const addNewItem = (type: "missions" | "mindsets") => {
-    const newItem = { id: Date.now(), text: "", count: 0, isArchived: false };
+    const newItem: EditableGoal = {
+      id: generateTempId(),
+      text: "",
+      isNew: true,
+    };
     setData((prev) => ({ ...prev, [type]: [...prev[type], newItem] }));
   };
 
@@ -135,57 +175,149 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
   };
 
   // 보관함 이동
-  const queueArchive = (type: "missions" | "mindsets", id: number) => {
-    const newList = data[type].filter((item) => item.id !== id);
+  const queueArchive = (type: "missions" | "mindsets", id: string) => {
+    const item = data[type].find((item) => item.id === id);
+    if (!item) return;
+
+    // UI에서 제거
+    const newList = data[type].filter((i) => i.id !== id);
     setData((prev) => ({ ...prev, [type]: newList }));
 
-    setPendingActions((prev) => [
-      ...prev,
-      {
-        type: "archive",
-        itemType: type === "missions" ? "mission" : "mindset",
-        id,
-      },
-    ]);
+    // 새로 추가된 항목이 아니면 보관 대기열에 추가
+    if (!item.isNew) {
+      setPendingActions((prev) => [...prev, { type: "archive", id }]);
+    }
     setOpenDropdown(null);
   };
 
   // 삭제
-  const queueDelete = (type: "missions" | "mindsets", id: number) => {
-    const newList = data[type].filter((item) => item.id !== id);
+  const queueDelete = (type: "missions" | "mindsets", id: string) => {
+    const item = data[type].find((item) => item.id === id);
+    if (!item) return;
+
+    // UI에서 제거
+    const newList = data[type].filter((i) => i.id !== id);
     setData((prev) => ({ ...prev, [type]: newList }));
-    setPendingActions((prev) => [
-      ...prev,
-      {
-        type: "delete",
-        itemType: type === "missions" ? "mission" : "mindset",
-        id,
-      },
-    ]);
+
+    // 새로 추가된 항목이 아니면 삭제 대기열에 추가
+    if (!item.isNew) {
+      setPendingActions((prev) => [...prev, { type: "delete", id }]);
+    }
     setOpenDropdown(null);
   };
 
-  const handleSaveClick = () => {
-    pendingActions.forEach((action) => {
-      if (action.type === "archive") {
-        handleArchive(action.id, action.itemType);
+  // 저장
+  const handleSaveClick = async () => {
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const promises: Promise<unknown>[] = [];
+
+      // 1. 대기 중인 액션 처리 (보관/삭제)
+      for (const action of pendingActions) {
+        if (action.type === "archive") {
+          promises.push(toggleArchive.mutateAsync(action.id));
+        } else if (action.type === "delete") {
+          promises.push(deleteGoal.mutateAsync(action.id));
+        }
       }
-    });
 
-    const cleanedData = { ...data };
-    cleanedData.missions = data.missions.filter(
-      (mission) => mission.text.trim() !== ""
-    );
-    cleanedData.mindsets = data.mindsets.filter(
-      (mindset) => mindset.text.trim() !== ""
-    );
-    handleSaveChanges(cleanedData);
+      // 2. 비전 처리
+      if (data.vision) {
+        const trimmedText = data.vision.text.trim();
+        if (trimmedText) {
+          if (data.vision.isNew) {
+            // 새 비전 생성
+            promises.push(
+              createGoal.mutateAsync({
+                category: "VISION" as GoalCategory,
+                text: trimmedText,
+              })
+            );
+          } else if (trimmedText !== data.vision.originalText) {
+            // 기존 비전 수정 (변경된 경우만)
+            promises.push(
+              updateGoal.mutateAsync({
+                goalId: data.vision.id,
+                data: { category: "VISION", text: trimmedText },
+              })
+            );
+          }
+        }
+      }
 
-    if (onSave) {
-      onSave();
-    } else {
-      onClose();
+      // 3. 미션 처리
+      for (const mission of data.missions) {
+        const trimmedText = mission.text.trim();
+        if (!trimmedText) continue; // 빈 텍스트는 무시
+
+        if (mission.isNew) {
+          promises.push(
+            createGoal.mutateAsync({
+              category: "MISSION" as GoalCategory,
+              text: trimmedText,
+            })
+          );
+        } else if (trimmedText !== mission.originalText) {
+          // 변경된 경우만 업데이트
+          promises.push(
+            updateGoal.mutateAsync({
+              goalId: mission.id,
+              data: { category: "MISSION", text: trimmedText },
+            })
+          );
+        }
+      }
+
+      // 4. 마음가짐 처리
+      for (const mindset of data.mindsets) {
+        const trimmedText = mindset.text.trim();
+        if (!trimmedText) continue; // 빈 텍스트는 무시
+
+        if (mindset.isNew) {
+          promises.push(
+            createGoal.mutateAsync({
+              category: "MINDSET" as GoalCategory,
+              text: trimmedText,
+            })
+          );
+        } else if (trimmedText !== mindset.originalText) {
+          // 변경된 경우만 업데이트
+          promises.push(
+            updateGoal.mutateAsync({
+              goalId: mindset.id,
+              data: { category: "MINDSET", text: trimmedText },
+            })
+          );
+        }
+      }
+
+      // 모든 요청 실행
+      await Promise.all(promises);
+
+      // 최신 데이터 refetch
+      await refetch();
+
+      // 성공 시 모달 닫기
+      if (onSave) {
+        onSave();
+      } else {
+        onClose();
+      }
+    } catch (err) {
+      console.error("목표 저장 실패:", err);
+      setError("저장에 실패했습니다. 다시 시도해주세요.");
+      // 실패해도 최신 데이터로 동기화
+      await refetch();
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  // 취소 (변경 사항 폐기)
+  const handleCancelClick = () => {
+    onClose();
   };
 
   // 미션, 마음가짐 공통
@@ -195,7 +327,6 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     addButtonText: string
   ) => {
     const items = data[type];
-    const singularType = type === "missions" ? "mission" : "mindset";
 
     return (
       <div className="flex flex-col gap-2">
@@ -215,20 +346,21 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
                   handleListItemChange(index, e.target.value, type)
                 }
                 className="w-full bg-transparent outline-none text-[15px] leading-[18px] font-medium text-black pr-8"
+                placeholder={item.isNew ? "내용을 입력하세요" : ""}
               />
               <button
                 ref={(el) => {
-                  buttonRefs.current[`${singularType}-${item.id}`] = el;
+                  buttonRefs.current[`${type}-${item.id}`] = el;
                 }}
                 className="absolute right-4"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleDropdown(`${singularType}-${item.id}`, e);
+                  toggleDropdown(`${type}-${item.id}`, e);
                 }}
               >
                 <ThreeDotsIcon />
               </button>
-              {openDropdown === `${singularType}-${item.id}` && (
+              {openDropdown === `${type}-${item.id}` && (
                 <div
                   className="dropdown-menu fixed z-[100]"
                   style={{
@@ -238,9 +370,13 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
                   }}
                 >
                   <TwoElementsButton
-                    firstButtonText="보관함으로 이동"
+                    firstButtonText={item.isNew ? "취소" : "보관함으로 이동"}
                     secondButtonText="지우기"
-                    onFirstClick={() => queueArchive(type, item.id)}
+                    onFirstClick={() =>
+                      item.isNew
+                        ? queueDelete(type, item.id)
+                        : queueArchive(type, item.id)
+                    }
                     onSecondClick={() => queueDelete(type, item.id)}
                   />
                 </div>
@@ -266,16 +402,28 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
           isMobile ? "px-5 pt-[20px] pb-4 mb-8" : "h-[41px] mb-8"
         }`}
       >
-        <button onClick={onClose} className="w-8 h-8">
+        <button
+          onClick={handleCancelClick}
+          disabled={isSaving}
+          className="w-8 h-8 disabled:opacity-50"
+        >
           <CaretRightIcon />
         </button>
         <button
           onClick={handleSaveClick}
-          className="bg-[#412A2A] text-white font-semibold px-[15px] py-[10px] rounded-[5px] text-[18px] leading-[21px] h-[41px] w-20 flex items-center justify-center"
+          disabled={isSaving}
+          className="bg-[#412A2A] text-white font-semibold px-[15px] py-[10px] rounded-[5px] text-[18px] leading-[21px] h-[41px] w-20 flex items-center justify-center disabled:opacity-50"
         >
-          저장
+          {isSaving ? "저장중..." : "저장"}
         </button>
       </div>
+
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="mx-5 mb-4 p-3 bg-red-100 text-red-600 rounded-[5px] text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Content */}
       <div
@@ -297,9 +445,10 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
           <div className="bg-white rounded-[5px] h-[52px] flex items-center px-4">
             <input
               type="text"
-              value={data.vision.text}
-              onChange={handleChange}
-              className="w-full bg-transparent outline-none text-[15px] leading-[18px] font-medium text-black"
+              value={data.vision?.text ?? ""}
+              onChange={handleVisionChange}
+              placeholder="나의 비전을 입력하세요"
+              className="w-full bg-transparent outline-none text-[15px] leading-[18px] font-medium text-black placeholder:text-[#B3B3B3]"
             />
           </div>
         </div>

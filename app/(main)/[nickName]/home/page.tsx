@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import WebGoalSummary from "@/features/user/goals/GoalSummary";
+import { WebProfileSummary } from "@/features/home/ProfileSummary";
 import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
 import { CaretRight24pxIcon } from "@/components/Icons";
@@ -33,7 +33,7 @@ export default async function HomePage({
           <div className="w-full h-full max-w-[844px]">
             {/*<BookSection/>*/}
             <div className="h-[10%]"></div>
-            <WebGoalSummary summaryData={mySummaryData} />
+            <WebProfileSummary summaryData={mySummaryData} />
           </div>
         </div>
 
