@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 
   const rawContent = data.data?.content ?? data.content ?? [];
   const content = rawContent.filter((post: PostRes) =>
-    post.photoUrl?.startsWith("https://")
+    post.photoUrl?.startsWith("https://") || post.photoUrl == ""
   );
 
   const responseData = data.data ?? data;

@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
   const data = await res.json();
   const content = (data.data?.content ?? data.content ?? []).filter(
-    (post: PostRes) => post.photoUrl?.startsWith("https://")
+    (post: PostRes) => post.photoUrl?.startsWith("https://") || post.photoUrl === ""
   );
 
   return NextResponse.json({

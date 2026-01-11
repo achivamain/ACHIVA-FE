@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
   const allPostsArrays = await Promise.all(postsPromises);
   const allPosts = allPostsArrays
     .flat()
-    .filter((post) => post.photoUrl?.startsWith("https://"));
+    .filter((post) => post.photoUrl?.startsWith("https://") || post.photoUrl == "");
 
   // 정렬
   allPosts.sort(

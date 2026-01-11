@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   // 기존 api랑 새로 개발된 api 반환 방식이 달라요.. 일단 둘 다 처리하도록
   const rawContent = data.data?.content ?? data.content ?? [];
   const content = rawContent.filter((post: PostRes) =>
-    post.photoUrl?.startsWith("https://")
+    post.photoUrl?.startsWith("https://") || post.photoUrl === ""
   );
 
   const responseData = data.data ?? data;
