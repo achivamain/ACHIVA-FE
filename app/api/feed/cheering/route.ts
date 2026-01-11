@@ -1,21 +1,21 @@
-// 게시글 불러오기 프록시 api
+// 피드 - 응원 탭 proxy api
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { PostRes } from "@/types/Post";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const pageParam = searchParams.get("pageParam");
-  const userId = searchParams.get("id");
-  const sort = searchParams.get("sort");
+  const pageParam = searchParams.get("pageParam") ?? "0";
 
   const session = await auth();
   const token = session?.access_token;
+
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/member/${userId}/articles?page=${pageParam}&size=9&sort=createdAt,${sort}`,
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/cheering-feed?page=${pageParam}&size=10&sort=createdAt,DESC`,
     {
       method: "GET",
       headers: {
@@ -24,13 +24,18 @@ export async function GET(req: NextRequest) {
       },
     }
   );
+
   const data = await res.json();
-  const content = data.data.content.filter(
+
+  const rawContent = data.data?.content ?? data.content ?? [];
+  const content = rawContent.filter(
     (post: PostRes) =>
       post.photoUrl?.startsWith("https://") || post.photoUrl == null
   );
+
+  const responseData = data.data ?? data;
   return NextResponse.json({
-    ...data,
-    data: { ...data.data, content: content },
+    ...responseData,
+    content: content,
   });
 }
