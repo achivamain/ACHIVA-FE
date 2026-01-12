@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
 
 //책 생성
 
+/*
 export async function POST(req: NextRequest) {
   const { data } = await req.json();
   const draft = data as DraftPost;
@@ -76,3 +77,4 @@ export async function POST(req: NextRequest) {
   });
   return res;
 }
+*/

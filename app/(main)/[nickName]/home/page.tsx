@@ -1,11 +1,13 @@
-import Link from "next/link";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
 import WebGoalSummary from "@/features/user/goals/GoalSummary";
 import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
-import { CaretRight24pxIcon } from "@/components/Icons";
-import { BookSection } from "@/features/home/BookSection";
+import { User } from "@/types/User";
+import { notFound } from "next/navigation";
+import { MyCategorys } from "@/features/home/MyCategorys";
+import { CategoryCount } from "@/types/Post";
+import { NextResponse } from "next/server";
 
 export default async function HomePage({
   params,
@@ -16,8 +18,57 @@ export default async function HomePage({
   if (session?.error) {
     return <Logout />;
   }
+  const token = session?.access_token;
+
+  if (!token) {
+    return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
+  }
 
   const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해
+
+  async function getUser() {
+    // 유저 데이터 가져오기
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const { data } = await response.json();
+    if (!data) {
+      notFound();
+    }
+    return data as User;
+  }
+
+  const [user] = await Promise.all([getUser()]);
+
+  //카테고리별 게시물 수 받아오기
+  async function getPostCategory() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const { data } = await res.json();
+    if (!data) {
+      notFound();
+    }
+    const { categoryCounts } = data;
+    return categoryCounts as CategoryCount[];
+  }
+
+  const [categoryCounts] = await Promise.all([getPostCategory()]);
 
   // 나중에 API로 받아와야 함
   const mySummaryData = {
@@ -31,22 +82,13 @@ export default async function HomePage({
       <div className="flex-1 flex flex-col justify-between">
         <div className="flex-1 flex justify-center items-end">
           <div className="w-full h-full max-w-[844px]">
-            {/*<BookSection/>*/}
+            <MyCategorys
+              myCategories={user.categories}
+              categoryCounts={categoryCounts}
+            />
             <div className="h-[10%]"></div>
             <WebGoalSummary summaryData={mySummaryData} />
           </div>
-        </div>
-
-        <div className="flex justify-center py-6">
-          <Link
-            href="/post/create"
-            className="flex flex-row justify-center items-center gap-1 w-[272px] h-14 px-12 bg-[#412A2A] rounded-[64px]"
-          >
-            <span className="font-['Pretendard'] font-semibold text-xl leading-6 text-white text-center">
-              오늘의 이야기 작성
-            </span>
-            <CaretRight24pxIcon />
-          </Link>
         </div>
         {/* Footer 크기 디자인 따라서 다름 -> 문의해봐야 */}
         <Footer />

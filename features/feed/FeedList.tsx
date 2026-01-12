@@ -8,7 +8,6 @@ import { LoadingIcon } from "@/components/Icons";
 import type { PostsData } from "@/types/responses";
 import type { FeedTab } from "./FeedTabs";
 import FeedPost from "./FeedPost";
-import { postsBookIdCache } from "../post/PostsBookIdCache";
 
 type FeedListProps = {
   activeTab: FeedTab;
@@ -111,9 +110,6 @@ export default function FeedList({ activeTab }: FeedListProps) {
       )}
 
       {posts.map((post) => {
-        if (post.bookArticle) {
-          postsBookIdCache.set(post.id, post.bookArticle[0]);
-        }
         return <FeedPost key={post.id} post={post} />;
       })}
 

@@ -5,7 +5,10 @@ import {
 import { useState } from "react";
 import { NextStepButton } from "./Buttons";
 import { bookCoverColors } from "../bookCoverColors";
-import { BookCoverImage as BookCoverImageType, bookCoverImages } from "@/types/BookCoverImages";
+import {
+  BookCoverImage as BookCoverImageType,
+  bookCoverImages,
+} from "@/types/BookCoverImages";
 import getColorVariants from "@/lib/getColorVariants";
 import { BookCoverImage } from "@/features/book/BookCoverImages";
 
@@ -125,7 +128,7 @@ export default function CreateBookPage() {
                     coverColor: coverColor,
                     coverImage: coverImage,
                   };
-                  setPost({ book: newBook });
+                  //setPost({ book: newBook });
                   handleNextStep();
                   handleNextStep();
                 }}
@@ -143,7 +146,7 @@ export default function CreateBookPage() {
                   className="relative aspect-[1/1] cursor-pointer"
                   onClick={() => setCoverImage(img)}
                 >
-                  <BookCoverImage name={`${img}`}/>
+                  <BookCoverImage name={`${img}`} />
                 </div>
               ))}
             </div>

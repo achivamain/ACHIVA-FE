@@ -8,7 +8,6 @@ import type { PostsData } from "@/types/responses";
 import HomePost from "@/features/home/Post";
 import { getFirstPage } from "@/features/post/firstPost";
 import PostSkeleton from "./PostSkeleton";
-import { postsBookIdCache } from "../post/PostsBookIdCache";
 
 export default function HomeSection1() {
   async function fetchPosts(pageParam: number = 0) {
@@ -82,10 +81,6 @@ export default function HomeSection1() {
       {posts.length === 0 && !isLoading && <HomePost post={getFirstPage()} />}
       <div className="flex flex-col gap-7">
         {posts.map((post) => {
-          if (post.bookArticle) {
-            // 세부 페이지에서 책 정보를 띄우기 위한 임시방편)
-            postsBookIdCache.set(post.id, post.bookArticle[0]);
-          }
           return <HomePost key={post.id} post={post} />;
         })}
       </div>

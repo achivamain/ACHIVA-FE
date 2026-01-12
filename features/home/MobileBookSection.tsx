@@ -1,8 +1,8 @@
 "use client";
 //이전 페이지 다음 페이지 아이콘 따로 분리
 
-import { useInfiniteQuery} from "@tanstack/react-query";
-import { useEffect, useRef} from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { Book } from "@/types/Book";
 import { BookCard } from "@/features/book/BookCard";
 import { LoadingIcon } from "@/components/Icons";
@@ -84,11 +84,11 @@ export function MobileBookSection() {
         나의 성취 이야기
       </h1>
       {books.length == 0 && (
-            <p className="text-center mt-30 text-[#808080]">
-              여기에 당신의 성취 기록이 담겨요
-              <br />첫 성취를 기록해보세요
-            </p>
-          )}
+        <p className="text-center mt-30 text-[#808080]">
+          여기에 당신의 성취 기록이 담겨요
+          <br />첫 성취를 기록해보세요
+        </p>
+      )}
       <div className="flex flex-row items-center justify-between mt-4">
         <div
           className="inline-flex overflow-x-auto flex-1 "
