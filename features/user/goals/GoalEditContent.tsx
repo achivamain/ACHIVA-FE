@@ -33,7 +33,7 @@ const toEditable = (goal: Goal): EditableGoal => ({
   originalText: goal.text,
 });
 
-// 임시 ID 생성 (새 항목용)
+// 새 항목에 할당되는 임시 ID
 const generateTempId = () =>
   `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
@@ -44,7 +44,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
 }) => {
   const { data: goals, refetch } = useActiveGoals();
 
-  // useMemo로 분류 결과 메모이제이션 (무한 루프 방지)
+  // 분류 과정에서 루프 방지
   const { vision, missions, mindsets } = useMemo(
     () => categorizeGoals(goals),
     [goals]
@@ -62,7 +62,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     mindsets: [],
   });
 
-  // 초기화 여부 추적 (한 번만 초기화)
+  // 초기화 여부 추적
   const isInitialized = useRef(false);
 
   // 대기 중인 액션 (보관/삭제)
@@ -79,7 +79,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
   }>({ right: 0 });
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
-  // 서버 데이터로 로컬 상태 초기화 (goals가 로드되면 한 번만)
+  // 로딩될 때 로컬 상태 초기화
   useEffect(() => {
     if (goals && !isInitialized.current) {
       setData({
@@ -214,7 +214,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     try {
       const promises: Promise<unknown>[] = [];
 
-      // 1. 대기 중인 액션 처리 (보관/삭제)
+      // 보관/삭제 대기열 처리
       for (const action of pendingActions) {
         if (action.type === "archive") {
           promises.push(toggleArchive.mutateAsync(action.id));
@@ -223,12 +223,12 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
         }
       }
 
-      // 2. 비전 처리
+      // Vision 처리
       if (data.vision) {
         const trimmedText = data.vision.text.trim();
         if (trimmedText) {
           if (data.vision.isNew) {
-            // 새 비전 생성
+            // 신규 생성(일반적인 상황에서는 사용할 일 X)
             promises.push(
               createGoal.mutateAsync({
                 category: "VISION" as GoalCategory,
@@ -236,7 +236,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
               })
             );
           } else if (trimmedText !== data.vision.originalText) {
-            // 기존 비전 수정 (변경된 경우만)
+            // 기존 수정
             promises.push(
               updateGoal.mutateAsync({
                 goalId: data.vision.id,
@@ -247,10 +247,10 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
         }
       }
 
-      // 3. 미션 처리
+      // Mission 처리
       for (const mission of data.missions) {
         const trimmedText = mission.text.trim();
-        if (!trimmedText) continue; // 빈 텍스트는 무시
+        if (!trimmedText) continue; 
 
         if (mission.isNew) {
           promises.push(
@@ -260,7 +260,6 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
             })
           );
         } else if (trimmedText !== mission.originalText) {
-          // 변경된 경우만 업데이트
           promises.push(
             updateGoal.mutateAsync({
               goalId: mission.id,
@@ -270,10 +269,10 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
         }
       }
 
-      // 4. 마음가짐 처리
+      // Mindset 처리
       for (const mindset of data.mindsets) {
         const trimmedText = mindset.text.trim();
-        if (!trimmedText) continue; // 빈 텍스트는 무시
+        if (!trimmedText) continue;
 
         if (mindset.isNew) {
           promises.push(
@@ -283,7 +282,6 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
             })
           );
         } else if (trimmedText !== mindset.originalText) {
-          // 변경된 경우만 업데이트
           promises.push(
             updateGoal.mutateAsync({
               goalId: mindset.id,
@@ -293,13 +291,11 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
         }
       }
 
-      // 모든 요청 실행
+      // 요청 실행, 데이터 갱신, 저장하면 모달 닫음
       await Promise.all(promises);
 
-      // 최신 데이터 refetch
       await refetch();
 
-      // 성공 시 모달 닫기
       if (onSave) {
         onSave();
       } else {
@@ -308,19 +304,16 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
     } catch (err) {
       console.error("목표 저장 실패:", err);
       setError("저장에 실패했습니다. 다시 시도해주세요.");
-      // 실패해도 최신 데이터로 동기화
       await refetch();
     } finally {
       setIsSaving(false);
     }
   };
 
-  // 취소 (변경 사항 폐기)
   const handleCancelClick = () => {
     onClose();
   };
 
-  // 미션, 마음가짐 공통
   const listTypeSection = (
     type: "missions" | "mindsets",
     label: string,
@@ -414,11 +407,11 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
           disabled={isSaving}
           className="bg-[#412A2A] text-white font-semibold px-[15px] py-[10px] rounded-[5px] text-[18px] leading-[21px] h-[41px] w-20 flex items-center justify-center disabled:opacity-50"
         >
-          {isSaving ? "저장중..." : "저장"}
+          {"저장"}
         </button>
       </div>
 
-      {/* 에러 메시지 */}
+      {/* Error Message */}
       {error && (
         <div className="mx-5 mb-4 p-3 bg-red-100 text-red-600 rounded-[5px] text-sm">
           {error}

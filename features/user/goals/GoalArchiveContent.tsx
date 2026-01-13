@@ -45,6 +45,22 @@ const GoalArchiveContent: React.FC<GoalArchiveContentProps> = ({
     }
   };
 
+  // 카테고리 정렬 순서 정의
+  const categoryOrder: { [key: string]: number } = {
+    VISION: 1,
+    MISSION: 2,
+    MINDSET: 3,
+  };
+
+  // 999 - Undefined 처리
+  const sortedArchivedGoals = archivedGoals
+    ? [...archivedGoals].sort((a, b) => {
+        const orderA = categoryOrder[a.category] ?? 999;
+        const orderB = categoryOrder[b.category] ?? 999;
+        return orderA - orderB;
+      })
+    : [];
+
   // 외부 클릭 감지 - 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -162,12 +178,12 @@ const GoalArchiveContent: React.FC<GoalArchiveContentProps> = ({
         }
         onClick={(e) => e.stopPropagation()}
       >
-        {!archivedGoals || archivedGoals.length === 0 ? (
+        {sortedArchivedGoals.length === 0 ? (
           <div className="text-center py-10 text-[#808080]">
             보관된 항목이 없습니다.
           </div>
         ) : (
-          archivedGoals.map((item: Goal) => (
+          sortedArchivedGoals.map((item: Goal) => (
             <div
               key={item.id}
               className="relative bg-white rounded-[8.75px] p-6 flex items-center justify-between"

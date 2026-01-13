@@ -58,7 +58,7 @@ const GoalCard: React.FC<GoalCardProps> = ({
     return (
       <div className={cardStyle}>
         <h2 className={titleStyle}>{title}</h2>
-        <div className="flex items-center justify-center py-4">
+        <div className="flex items-center justify-center py-[10.3px]">
           <p className="text-[#808080] text-[15px]">{emptyMessages[type]}</p>
         </div>
       </div>
