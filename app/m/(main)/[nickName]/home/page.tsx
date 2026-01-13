@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import MobileGoalSummary from "@/features/user/goals/GoalSummary";
+import MobileGoalSummary from "@/features/home/ProfileSummary";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import { User } from "@/types/User";
 import { notFound } from "next/navigation";
