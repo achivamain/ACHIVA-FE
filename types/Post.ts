@@ -1,6 +1,5 @@
 import type { Category } from "./Categories";
 import type { Cheering } from "./responses";
-import type { Book } from "./Book";
 
 export type Post = {
   titleImageUrl: string;
@@ -13,7 +12,7 @@ export type Post = {
 export type DraftPost = Partial<Post> & {
   id?: string;
   categoryCount?: number;
-  book?: Book;
+  //book?: Book;
 }; // 글쓰기 중 타입
 
 export type PostPage = {

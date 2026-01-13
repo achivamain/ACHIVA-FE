@@ -24,7 +24,6 @@ export default function SubtitlesSelector() {
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const category = draft.category!;
-  const book = draft.book!;
   const [subtitles, setSubtitles] = useState<SubtitleItem[]>(
     basicTopics[category].map((subtitle) => ({
       id: crypto.randomUUID(),
@@ -49,10 +48,10 @@ export default function SubtitlesSelector() {
     <div className="h-full flex-1 flex flex-col justify-between gap-5">
       <div>
         <div className="flex flex-wrap gap-5 mb-10">
-          <div key={book.id} className="flex items-center gap-3">
-            <CategoryButton isSelected={true}>{book.title}</CategoryButton>
+          <div className="flex items-center gap-3">
+            <CategoryButton isSelected={true}>{category}</CategoryButton>
             <p className="font-light text-sm text-[#808080]">
-              {book.count + 1}번째 이야기
+              {draft.categoryCount}번째 이야기
             </p>
           </div>
         </div>
