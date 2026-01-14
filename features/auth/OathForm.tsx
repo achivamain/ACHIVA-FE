@@ -68,6 +68,15 @@ export default function OathForm() {
         throw new Error("회원가입 중 서버 에러");
       }
 
+      // 회원가입 시에 기본 목표 지정
+      try {
+        await fetch(`/api/goals/seed-defaults`, {
+          method: "POST",
+        });
+      } catch (goalError) {
+        console.error("기본 목표 생성 실패:", goalError);
+      }
+
       window.location.href = "/";
     } catch (err) {
       console.error(err);

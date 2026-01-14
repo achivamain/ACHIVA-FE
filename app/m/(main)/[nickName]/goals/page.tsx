@@ -1,8 +1,7 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import useGoalStore from "@/store/GoalStore";
-import MobileGoalWrapper from "@/features/user/goals/MobileGoalWrapper";
+import MobileGoalPage from "@/features/user/goals/MobileGoalPage";
 
 export default async function MobileGoalsPage({
   params,
@@ -16,23 +15,12 @@ export default async function MobileGoalsPage({
   const currentUser = session!.user;
 
   const { nickName } = await params;
-  const isOwner = currentUser!.nickName === decodeURIComponent(nickName);
+  const decodedNickName = decodeURIComponent(nickName);
+  const isOwner = currentUser!.nickName === decodedNickName;
 
   if (!isOwner) {
     redirect(`/${nickName}`);
   }
 
-  const initialData = useGoalStore.getState();
-
-  if (!initialData) {
-    notFound();
-  }
-
-  const processedInitialData = {
-    vision: initialData.vision,
-    missions: initialData.missions,
-    mindsets: initialData.mindsets,
-  };
-
-  return <MobileGoalWrapper initialData={processedInitialData} />;
+  return <MobileGoalPage nickName={decodedNickName} />;
 }

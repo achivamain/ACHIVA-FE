@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import WebGoalSummary from "@/features/user/goals/GoalSummary";
+import { WebProfileSummary } from "@/features/home/ProfileSummary";
 import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
 import { User } from "@/types/User";
@@ -87,7 +87,7 @@ export default async function HomePage({
               categoryCounts={categoryCounts}
             />
             <div className="h-[10%]"></div>
-            <WebGoalSummary summaryData={mySummaryData} />
+            <WebProfileSummary summaryData={mySummaryData} />
           </div>
         </div>
         {/* Footer 크기 디자인 따라서 다름 -> 문의해봐야 */}

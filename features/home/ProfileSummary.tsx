@@ -1,6 +1,7 @@
-// /home 경로에서 사용하는 Summary 컴포넌트 - 추후 위치 변경 예정
+// 프로필 요약 정보 컴포넌트
+// TODO: API 연결 아직 안 되었음
 
-type GoalSummaryProps = {
+type SummaryCardProps = {
   icon: string;
   value: number;
   title: string;
@@ -16,7 +17,7 @@ type ProfileSummaryProps = {
 };
 
 // 모바일용 개별 정보 카드
-const MobileGoalSummaryCard: React.FC<GoalSummaryProps> = ({
+const MobileSummaryCard: React.FC<SummaryCardProps> = ({
   icon,
   value,
   title,
@@ -38,7 +39,7 @@ const MobileGoalSummaryCard: React.FC<GoalSummaryProps> = ({
 };
 
 // 웹용 개별 정보 카드
-const WebGoalSummaryCard: React.FC<GoalSummaryProps> = ({
+const WebSummaryCard: React.FC<SummaryCardProps> = ({
   icon,
   value,
   title,
@@ -62,24 +63,24 @@ const WebGoalSummaryCard: React.FC<GoalSummaryProps> = ({
 };
 
 // 모바일 전체 영역
-export const MobileGoalSummary: React.FC<ProfileSummaryProps> = ({
+export const MobileProfileSummary: React.FC<ProfileSummaryProps> = ({
   summaryData,
 }) => {
   return (
     <div className="flex flex-col gap-3 px-5">
-      <MobileGoalSummaryCard
+      <MobileSummaryCard
         icon="📚"
         value={summaryData.letters}
         title="글자"
         description="올해 쌓아올린 성취 기록"
       />
-      <MobileGoalSummaryCard
+      <MobileSummaryCard
         icon="🎯"
         value={summaryData.count}
         title="횟수"
         description="올해 나에게 건넨 응원"
       />
-      <MobileGoalSummaryCard
+      <MobileSummaryCard
         icon="💖"
         value={summaryData.points}
         title="포인트"
@@ -90,24 +91,24 @@ export const MobileGoalSummary: React.FC<ProfileSummaryProps> = ({
 };
 
 // 웹 전체 영역
-export const WebGoalSummary: React.FC<ProfileSummaryProps> = ({
+export const WebProfileSummary: React.FC<ProfileSummaryProps> = ({
   summaryData,
 }) => {
   return (
     <div className="flex flex-col gap-4 px-6">
-      <WebGoalSummaryCard
+      <WebSummaryCard
         icon="📚"
         value={summaryData.letters}
         title="글자"
         description="올해 쌓아올린 성취 기록"
       />
-      <WebGoalSummaryCard
+      <WebSummaryCard
         icon="🎯"
         value={summaryData.count}
         title="횟수"
         description="올해 나에게 건넨 응원"
       />
-      <WebGoalSummaryCard
+      <WebSummaryCard
         icon="💖"
         value={summaryData.points}
         title="포인트"
@@ -117,5 +118,10 @@ export const WebGoalSummary: React.FC<ProfileSummaryProps> = ({
   );
 };
 
-// 기본 export는 웹용으로 유지 (하위 호환성)
-export default WebGoalSummary;
+// 하위 호환성을 위한 별칭 (기존 import 유지)
+export const MobileGoalSummary = MobileProfileSummary;
+export const WebGoalSummary = WebProfileSummary;
+
+// 기본 export는 웹용으로 유지
+export default WebProfileSummary;
+
