@@ -11,7 +11,6 @@ type Props = {
 export function TitlePage({ size, post }: Props) {
   const date = new Date(post.createdAt);
 
-
   return (
     <div
       style={{
@@ -26,7 +25,7 @@ export function TitlePage({ size, post }: Props) {
         }}
         className="aspect-square w-[390px] h-[390px] relative"
       >
-         <PostImg url={post.photoUrl} filtered />
+        <PostImg url={post.photoUrl} filtered />
         <div className="absolute top-[90px] left-[23px]">
           <div className="font-light text-[16px] text-white/70">
             {format(date, "yyyy.MM.dd")}
@@ -39,7 +38,8 @@ export function TitlePage({ size, post }: Props) {
               <span className="font-bold">{post.category}</span> 기록
             </div>
             <div>
-              <span className="font-bold">{post.authorCategorySeq}번째</span>{" "}이야기
+              <span className="font-bold">{post.authorCategorySeq}번째</span>{" "}
+              이야기
             </div>
           </div>
         </div>

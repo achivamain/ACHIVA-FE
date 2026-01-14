@@ -149,9 +149,11 @@ export default function Post({
           }}
           className="mySwiper"
         >
-          <SwiperSlide>
-            <TitlePage size={containerWidth ?? 0} post={post} />
-          </SwiperSlide>
+          {post.createdAt && (
+            <SwiperSlide>
+              <TitlePage size={containerWidth ?? 0} post={post} />
+            </SwiperSlide>
+          )}
           {post.question.map((page, idx) => {
             return (
               <SwiperSlide key={idx}>
