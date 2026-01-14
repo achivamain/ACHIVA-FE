@@ -21,7 +21,7 @@ export default function BirthdayForm() {
   const [days, setDays] = useState<number[]>([]);
 
   useEffect(() => {
-    const lastDay = new Date(year, month - 1, 0).getDate();
+    const lastDay = new Date(year, month, 0).getDate();
     setDays(Array.from({ length: lastDay }, (_, i) => i + 1));
     if (day > lastDay) {
       setDay(lastDay);
