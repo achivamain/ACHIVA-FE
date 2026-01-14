@@ -31,82 +31,83 @@ export const categories = [
   "배드민턴",
   "테니스",
   "하키",
-  "복싱 / 격복싱",
+  "복싱/킥복싱",
   "MMA",
   "유도",
   "태권도",
   "주짓수",
   "레슬링",
-  "검도 / 펜싱",
+  "검도/펜싱",
   "수영",
   "서핑",
   "조정",
   "요가",
   "필라테스",
-  "교정 / 재활",
+  "교정/재활",
   "스트레칭",
   "클라이밍",
-  "롤러 / 인라인",
+  "롤러/인라인",
   "보드",
   "빙상",
-  "스키 / 보드",
+  "스키/보드",
 ] as const;
 
 //소분류로 나눠진 버전
-export const groupedCategorys = [
-  {
-    groupName: "근력 / 트레이닝",
-    categories: ["헬스", "맨몸운동", "크로스핏"],
-  },
-  {
-    groupName: "유산소",
-    categories: ["러닝", "걷기", "사이클", "등산"],
-  },
-  {
-    groupName: "구기종목",
-    categories: [
-      "축구",
-      "농구",
-      "풋살",
-      "야구",
-      "볼링",
-      "골프",
-      "배구",
-      "럭비",
-    ],
-  },
-  {
-    groupName: "라켓 / 스틱",
-    categories: ["탁구", "배드민턴", "테니스", "하키"],
-  },
-  {
-    groupName: "격투 / 무술",
-    categories: [
-      "복싱 / 격복싱",
-      "MMA",
-      "유도",
-      "태권도",
-      "주짓수",
-      "레슬링",
-      "검도 / 펜싱",
-    ],
-  },
-  {
-    groupName: "수상",
-    categories: ["수영", "서핑", "조정"],
-  },
-  {
-    groupName: "자세",
-    categories: ["요가", "필라테스", "교정 / 재활", "스트레칭"],
-  },
-  {
-    groupName: "등반",
-    categories: ["클라이밍"],
-  },
-  {
-    groupName: "스케이트 / 스키",
-    categories: ["롤러 / 인라인", "보드", "빙상", "스키 / 보드"],
-  },
-];
+export const groupedCategorys: { groupName: string; categories: Category[] }[] =
+  [
+    {
+      groupName: "근력 / 트레이닝",
+      categories: ["헬스", "맨몸운동", "크로스핏"],
+    },
+    {
+      groupName: "유산소",
+      categories: ["러닝", "걷기", "사이클", "등산"],
+    },
+    {
+      groupName: "구기종목",
+      categories: [
+        "축구",
+        "농구",
+        "풋살",
+        "야구",
+        "볼링",
+        "골프",
+        "배구",
+        "럭비",
+      ],
+    },
+    {
+      groupName: "라켓 / 스틱",
+      categories: ["탁구", "배드민턴", "테니스", "하키"],
+    },
+    {
+      groupName: "격투 / 무술",
+      categories: [
+        "복싱/킥복싱",
+        "MMA",
+        "유도",
+        "태권도",
+        "주짓수",
+        "레슬링",
+        "검도/펜싱",
+      ],
+    },
+    {
+      groupName: "수상",
+      categories: ["수영", "서핑", "조정"],
+    },
+    {
+      groupName: "자세",
+      categories: ["요가", "필라테스", "교정/재활", "스트레칭"],
+    },
+    {
+      groupName: "등반",
+      categories: ["클라이밍"],
+    },
+    {
+      groupName: "스케이트 / 스키",
+      categories: ["롤러/인라인", "보드", "빙상", "스키/보드"],
+    },
+  ];
 
 export type Category = (typeof categories)[number];

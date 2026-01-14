@@ -38,7 +38,7 @@ export default function Sidebar() {
   let initialSelectedItem;
   if (pathname === `/accounts/notifications`) {
     initialSelectedItem = "응원";
-  } else if (pathname.endsWith("/home")) {
+  } else if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
     initialSelectedItem = "홈";
   } else if (pathname.endsWith("/goals")) {
     initialSelectedItem = "목표";

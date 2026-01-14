@@ -1,13 +1,12 @@
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import MobileGoalSummary from "@/features/user/goals/GoalSummary";
-import { MyCategorys } from "@/features/home/MyCategorys";
 import { User } from "@/types/User";
 import { notFound } from "next/navigation";
-import { CategoryCount } from "@/types/Post";
 import { NextResponse } from "next/server";
+import MobileHomeCategorySelector from "@/features/home/HomeCategorySelector";
+import { categories } from "@/types/Categories";
 
-export default async function MobileHomePageRoute({
+export default async function Page({
   params,
 }: {
   params: Promise<{ nickName: string }>;
@@ -46,41 +45,11 @@ export default async function MobileHomePageRoute({
 
   const [user] = await Promise.all([getUser()]);
 
-  //카테고리별 게시물 수 받아오기
-  async function getPostCategory() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const { data } = await res.json();
-    if (!data) {
-      notFound();
-    }
-    const { categoryCounts } = data;
-    return categoryCounts as CategoryCount[];
-  }
-
-  const [categoryCounts] = await Promise.all([getPostCategory()]);
-
-  const mySummaryData = {
-    letters: 20,
-    count: 125,
-    points: 1700,
-  };
+  const selectedCategories = categories.filter((i) => user.categories?.includes(i))
 
   return (
     <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
-      <MyCategorys
-        myCategories={user.categories}
-        categoryCounts={categoryCounts}
-      />
-      <MobileGoalSummary summaryData={mySummaryData} />
+        <MobileHomeCategorySelector defaultSelectedCategories={selectedCategories}/>
     </div>
   );
 }
