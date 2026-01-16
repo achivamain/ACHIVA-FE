@@ -3,7 +3,7 @@ import Logout from "@/components/Logout";
 import { User } from "@/types/User";
 import { notFound } from "next/navigation";
 import { NextResponse } from "next/server";
-import { MobileHomeCategorySelector } from "@/features/home/HomeCategorySelector";
+import { HomeCategorySelector } from "@/features/home/HomeCategorySelector";
 import { categories, Category } from "@/types/Categories";
 
 export default async function Page() {
@@ -57,9 +57,5 @@ export default async function Page() {
     categories: categories.filter((i) => user.categories?.includes(i)),
   };
 
-  return (
-    <div className="min-h-dvh w-full bg-[#F9F9F9] flex flex-col">
-      <MobileHomeCategorySelector user={userData} />
-    </div>
-  );
+  return <HomeCategorySelector user={userData} />;
 }

@@ -9,7 +9,7 @@ export function CategoryCard({ name, image = "" }: CategoryCardProps) {
       <div className="h-18 w-18 bg-[#D9D9D9] rounded-md">
         {/*Image*/}
       </div>
-      <span className="font-semibold text-[15px] text-center mt-1">{name}</span>
+      <span className="font-semibold text-[15px] text-center pt-0.5">{name}</span>
     </div>
   );
 }

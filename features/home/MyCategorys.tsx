@@ -23,11 +23,11 @@ export function MyCategorys({
       <h1 className="pt-4 text-[26px] font-semibold m-4 px-1 mb-1">
         운동 일지 작성하기
       </h1>
-      <div className="flex w-full h-full flex-col px-4 m-1">
+      <div className="flex w-full h-full flex-col px-4 my-1">
         {categorysData.map((cat) => (
           <div
             key={cat.category}
-            className="flex justify-between w-full h-28 bg-white rounded-md my-1 px-4"
+            className="flex justify-between w-full h-26 bg-white rounded-md my-1 px-4 border-0 border-[#E4E4E4] md:border"
           >
             <CategoryCard name={cat.category}/>
             <div className="flex flex-1 flex-col px-8 justify-center">
