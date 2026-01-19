@@ -27,7 +27,7 @@ export default async function MobileHomePageRoute({
   async function getUser() {
     // 유저 데이터 가져오기
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me`,
       {
         method: "GET",
         headers: {
@@ -76,7 +76,10 @@ export default async function MobileHomePageRoute({
 
   return (
     <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
-      <MyCategorys myCategories={user.categories} categoryCounts={categoryCounts}/>
+      <MyCategorys
+        myCategories={user.categories}
+        categoryCounts={categoryCounts}
+      />
       <MobileGoalSummary summaryData={mySummaryData} />
     </div>
   );

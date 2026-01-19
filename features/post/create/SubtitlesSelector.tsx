@@ -1,3 +1,4 @@
+//사용되지 않는 코드
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
@@ -5,7 +6,7 @@ import {
   useDraftPostStore,
 } from "@/store/CreatePostStore";
 import { CategoryButton } from "@/components/Buttons";
-import { basicTopics } from "@/types/Categories";
+//import { basicTopics } from "@/types/Categories";
 import {
   SubtitleCheckIcon,
   SubtitleDragIcon,
@@ -24,6 +25,7 @@ export default function SubtitlesSelector() {
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const category = draft.category!;
+  /*
   const [subtitles, setSubtitles] = useState<SubtitleItem[]>(
     basicTopics[category].map((subtitle) => ({
       id: crypto.randomUUID(),
@@ -161,5 +163,5 @@ export default function SubtitlesSelector() {
         다음
       </NextStepButton>
     </div>
-  );
+  );*/
 }
