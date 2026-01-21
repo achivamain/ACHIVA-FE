@@ -66,7 +66,12 @@ export default function HomePost({ post }: { post: PostRes }) {
         <div>
           <Post post={post} />
         </div>
-        <CheerBtns postId={post.id} cheerings={post.cheerings!} />
+        <CheerBtns
+          postId={post.id}
+          cheerings={post.cheerings!}
+          authorId={post.memberId}
+          authorNickName={post.memberNickName}
+        />
       </div>
       {isModalOpen && (
         <ModalWithoutCloseBtn

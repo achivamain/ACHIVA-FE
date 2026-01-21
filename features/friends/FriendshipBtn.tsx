@@ -2,6 +2,8 @@
 
 import { FriendData } from "@/types/Friends";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { sendFriendRequestNotification } from "@/lib/pushNotification";
 
 type Props = {
   userId: string;
@@ -9,6 +11,7 @@ type Props = {
 };
 
 export default function FriendShipBtn({ userId, currentUserFriends }: Props) {
+  const { data: session } = useSession();
   const data = currentUserFriends.findLast(
     (friend) =>
       (friend.status === "ACCEPTED" &&
@@ -73,7 +76,15 @@ export default function FriendShipBtn({ userId, currentUserFriends }: Props) {
           });
           const data = await response.json();
           setFriendStatus((prev) => ({ ...prev, id: data.data.id }));
-          // 왜 id가 안담기냐.... 나중에 삭제API 나오면 해결하자
+
+          // 앱에 친구 요청 알림 전송 (postMessage)
+          if (response.ok && session?.access_token && session?.user?.id) {
+            sendFriendRequestNotification(session.access_token, {
+              receiverId: userId,
+              senderId: session.user.id,
+              senderNickName: session.user.nickName,
+            });
+          }
         } else if (friendStatus.status === "PENDING") {
           // 친구신청 취소 API 나오면 취소하도록 해야함
         }
