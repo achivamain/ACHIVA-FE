@@ -37,6 +37,7 @@ export default function ImageUploader() {
     updateImageCrop,
     updateImageZoom,
     setMinZoom,
+    removeImage,
   } = useMultiImageUploader({
     apiUrl: "/api/posts/upload",
     onUploadCompleted: (srcs: string[]) => {
@@ -61,7 +62,7 @@ export default function ImageUploader() {
       <button
         ref={prevRef}
         className="
-        absolute left-3 top-1/2 -translate-y-1/2 hidden sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
+        absolute left-3 top-1/2 -translate-y-1/2 sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
       >
         <svg
           width="9"
@@ -81,7 +82,7 @@ export default function ImageUploader() {
       </button>
       <button
         ref={nextRef}
-        className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
+        className="absolute right-3 top-1/2 -translate-y-1/2 sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
       >
         <svg
           width="9"
@@ -183,6 +184,12 @@ export default function ImageUploader() {
                   showGrid={true}
                   objectFit="contain"
                 />
+                <button
+                  className="absolute right-3 top-7 -translate-y-1/2 flex justify-center items-center z-5 bg-white w-[60px] h-[30px]"
+                  onClick={() => removeImage(image.id)}
+                >
+                  삭제
+                </button>
               </SwiperSlide>
             ))}
           </div>
@@ -239,7 +246,10 @@ export default function ImageUploader() {
         ref={input}
         type="file"
         accept="image/*"
-        onChange={onFileChange}
+        onChange={(e) => {
+          onFileChange(e);
+          e.target.value = "";
+        }}
         className="hidden"
       />
     </div>

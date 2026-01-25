@@ -271,6 +271,12 @@ export function useMultiImageUploader({
     },
     [],
   );
+
+  //이미지 삭제
+  const removeImage = (id: string) => {
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  };
+  
   /** 업로드 처리 */
   const onUpload = async () => {
     if (images.length === 0) {
@@ -335,6 +341,7 @@ export function useMultiImageUploader({
     onUpload,
     updateImageCrop,
     updateImageZoom,
+    removeImage,
     setMinZoom,
     resetAll,
   };
