@@ -3,7 +3,7 @@ import Logout from "@/components/Logout";
 import MobileGoalSummary from "@/features/home/ProfileSummary";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import { User } from "@/types/User";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { CategoryCount } from "@/types/Post";
 import { NextResponse } from "next/server";
 
@@ -26,18 +26,22 @@ export default async function MobileHomePageRoute({
 
   async function getUser() {
     // 유저 데이터 가져오기
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me`,
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
-
-    const { data } = await response.json();
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return redirect("/api/auth/logout");
+      throw new Error(errorData.error || "서버 오류");
+    }
+    const { data } = await res.json();
     if (!data) {
       notFound();
     }
@@ -56,8 +60,12 @@ export default async function MobileHomePageRoute({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || "서버 오류");
+    }
     const { data } = await res.json();
     if (!data) {
       notFound();
@@ -66,21 +74,83 @@ export default async function MobileHomePageRoute({
     return categoryCounts as CategoryCount[];
   }
 
-  const [categoryCounts] = await Promise.all([getPostCategory()]);
+  //홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
+  async function getSummeryData() {
+    try {
+      // 총 글자수
+      const charRes = fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-  const mySummaryData = {
-    letters: 20,
-    count: 125,
-    points: 1700,
-  };
+      // 보낸 응원 포인트
+      const cheerRes = fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-  return (
-    <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
-      <MyCategorys
-        myCategories={user.categories}
-        categoryCounts={categoryCounts}
-      />
-      <MobileGoalSummary summaryData={mySummaryData} />
-    </div>
-  );
+      // 목표 포인트
+      const goalRes = fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const responses = await Promise.all([charRes, cheerRes, goalRes]);
+      responses.forEach((res) => {
+        if (!res.ok) {
+          console.log(res);
+          throw new Error(`데이터 로딩 실패 (${res.status})`);
+        }
+      });
+      const [charData, cheerData, goalData] = await Promise.all(
+        responses.map((res) => res.json()),
+      );
+
+      return {
+        letters: charData.data.totalCharacterCount,
+        count: goalData.data.totalClickCount,
+        points: cheerData.data.totalSendingCheeringScore,
+      };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  try {
+    const [categoryCounts, mySummaryData] = await Promise.all([
+      getPostCategory(),
+      getSummeryData(),
+    ]);
+    return (
+      <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
+        <MyCategorys
+          myCategories={user.categories}
+          categoryCounts={categoryCounts}
+        />
+        <MobileGoalSummary summaryData={mySummaryData} />
+      </div>
+    );
+  } catch (err) {
+    console.log(err);
+    notFound(); // 에러 종류에 따라 처리를 나눌 필요가 있을지도
+  }
 }
