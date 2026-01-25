@@ -31,7 +31,7 @@ export default function TitleEditor() {
   const setPost = useDraftPostStore.use.setPost();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const size = window.innerWidth < 640 ? containerWidth ?? 0 : 480;
+  const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 480;
 
   useLayoutEffect(() => {
     if (containerRef.current) {
@@ -60,7 +60,7 @@ export default function TitleEditor() {
     } catch (err) {
       console.log(err);
       alert(
-        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
       );
     }
     setIsLoading(false);
@@ -76,7 +76,7 @@ export default function TitleEditor() {
           }}
           className="aspect-square w-[390px] h-[390px] relative z-[60]"
         >
-          <PostImg url={draft.titleImageUrl!} filtered />
+          <PostImg url={draft.photoUrls?.[0] || null} filtered />
           <div className="absolute top-[90px] left-[23px]">
             <div className="font-light text-[16px] text-white/70">
               {format(new Date(), "yyyy.MM.dd")}

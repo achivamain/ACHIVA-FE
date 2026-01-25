@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from "react";
-import useImageUploader from "@/hooks/useImageUploader";
+import { useMultiImageUploader } from "@/hooks/useImageUploader";
 import Cropper from "react-easy-crop";
 import { NextStepButton } from "./Buttons";
 import {
@@ -17,27 +17,28 @@ export default function ImageUploader() {
   const input = useRef<HTMLInputElement | null>(null);
 
   const {
-    imageSrc,
-    crop,
-    zoom,
+    images,
     isUploading,
     onFileChange,
     onCropComplete,
     onUpload,
-    setCrop,
-    setZoom,
-    resetAll,
-  } = useImageUploader({
+    updateImageCrop,
+    updateImageZoom,
+  } = useMultiImageUploader({
     apiUrl: "/api/posts/upload",
-    onUploadCompleted: (src: string) => {
-      setPost({ titleImageUrl: src });
+    onUploadCompleted: (srcs: string[]) => {
+      setPost((draft) => ({
+        ...draft,
+        photoUrls: [...(draft.photoUrls ?? []), ...srcs],
+      }));
       handleNextStep();
     },
+    maxImages: 5, //최대 5장까지
   });
 
   return (
     <div className="h-full flex flex-col items-center justify-center">
-      {!imageSrc && (
+      {!images && (
         <div className="aspect-square w-full sm:w-120 flex flex-col justify-center items-center gap-2 mb-5">
           <svg
             width="72"
@@ -58,29 +59,32 @@ export default function ImageUploader() {
       )}
 
       {/* 크롭 영역 */}
-      {imageSrc && (
+      {images && (
         <div className="w-full sm:w-120">
-          <div className="relative aspect-square bg-black/5 rounded-md">
+          {images.map((image) => (
             <Cropper
-              image={imageSrc}
-              crop={crop}
-              zoom={zoom}
+              key={image.id}
+              image={image.imageSrc}
+              crop={image.crop}
+              zoom={image.zoom}
               onMediaLoaded={(mediaSize) => {
                 const { width, height } = mediaSize; // 원본 이미지 크기
                 const zoomByWidth = size / width;
                 const zoomByHeight = size / height;
-                setZoom(Math.max(zoomByWidth, zoomByHeight)); // cropSize 꽉 차도록 zoom 조정
+                updateImageZoom(image.id, Math.max(zoomByWidth, zoomByHeight)); // cropSize 꽉 차도록 zoom 조정
               }}
               aspect={1} // 정사각형
               cropSize={{ width: size, height: size }}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
+              onCropChange={(crop) => updateImageCrop(image.id, crop)}
+              onZoomChange={(zoom) => updateImageZoom(image.id, zoom)}
+              onCropComplete={(area, pixs) =>
+                onCropComplete(image.id, area, pixs)
+              }
               restrictPosition={true}
               showGrid={true}
               objectFit="contain"
             />
-          </div>
+          ))}
         </div>
       )}
 
@@ -89,30 +93,39 @@ export default function ImageUploader() {
           // disabled={isUploading}
           isLoading={isUploading}
           onClick={() => {
-            if (!imageSrc) {
-              // RN 환경에서는 카메라 요청, 아니면 파일인풋 클릭
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(
-                  JSON.stringify({ type: "REQUEST_CAMERA" })
-                );
-              } else {
-                input.current?.click();
-              }
+            // RN 환경에서는 카메라 요청, 아니면 파일인풋 클릭
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(
+                JSON.stringify({ type: "REQUEST_CAMERA" }),
+              );
             } else {
-              onUpload();
+              input.current?.click();
             }
           }}
         >
-          {imageSrc ? "다음" : isMobile ? "갤러리에서 선택" : "컴퓨터에서 선택"}
+          {isMobile ? "갤러리에서 선택" : "컴퓨터에서 선택"}
         </NextStepButton>
       </div>
       <div className="mt-2 w-full">
-        <button
-          className="w-full h-11 flex items-center justify-center rounded-sm font-medium text-lg py-2 bg-[#E3E3E3] text-[#5C5C5C]"
-          onClick={handleNextStep}
-        >
-          건너뛰기
-        </button>
+        {images ? (
+          <NextStepButton
+            // disabled={isUploading}
+            isLoading={isUploading}
+            onClick={() => {
+              onUpload();
+              handleNextStep();
+            }}
+          >
+            다음
+          </NextStepButton>
+        ) : (
+          <button
+            className="w-full h-11 flex items-center justify-center rounded-sm font-medium text-lg py-2 bg-[#E3E3E3] text-[#5C5C5C]"
+            onClick={handleNextStep}
+          >
+            건너뛰기
+          </button>
+        )}
       </div>
 
       {/* 파일 입력 */}

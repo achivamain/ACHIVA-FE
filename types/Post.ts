@@ -2,7 +2,7 @@ import type { Category } from "./Categories";
 import type { Cheering } from "./responses";
 
 export type Post = {
-  titleImageUrl: string;
+  photoUrls: string[];
   title: string;
   category: Category;
   backgroundColor: BackgroundColor;
@@ -37,7 +37,7 @@ export type BackgroundColor =
 // 백엔드에서 응답으로 받는 형태
 export type PostRes = {
   id: string;
-  photoUrl: string;
+  photoUrls: string[];
   title: string;
   category: string;
   question: Question[];

@@ -6,7 +6,7 @@ export default function PostImg({
   url,
   filtered = false,
 }: {
-  url: string;
+  url: string | null;
   filtered?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
@@ -17,7 +17,7 @@ export default function PostImg({
           <div className="bg-loading absolute inset-0 animate-pulse"></div>
         </div>
       )}
-      {url &&<Image
+      {url && <Image
         className={`${loaded ? "" : "opacity-0"}`}
         src={url}
         alt="profile image"

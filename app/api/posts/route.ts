@@ -11,6 +11,14 @@ export async function POST(req: NextRequest) {
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
+
+  if ((draft.photoUrls?.length ?? 0) > 5) {
+    return NextResponse.json(
+      { error: "이미지는 최대 5장까지 업로드 가능합니다." },
+      { status: 400 },
+    );
+  }
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles`,
     {
@@ -20,7 +28,7 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        photoUrl: draft.titleImageUrl,
+        photoUrls: draft.photoUrls,
         title: draft.title || "오늘의 운동",
         category: draft.category,
         question: draft.pages!.map(({ subtitle, content }) => ({
@@ -29,7 +37,7 @@ export async function POST(req: NextRequest) {
         })),
         backgroundColor: draft.backgroundColor,
       }),
-    }
+    },
   );
 
   return res;
@@ -55,7 +63,7 @@ export async function GET(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res;
@@ -81,7 +89,7 @@ export async function DELETE(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res;

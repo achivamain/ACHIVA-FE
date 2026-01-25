@@ -6,6 +6,7 @@ type Props = {
   onUploadCompleted: (url: string) => void; // 이미지 주소 받아서 상태 등 업데이트
 };
 
+//단일 이미지 업로드
 export default function useImageUploader({ apiUrl, onUploadCompleted }: Props) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -84,7 +85,7 @@ export default function useImageUploader({ apiUrl, onUploadCompleted }: Props) {
       const blob = await getCroppedBlob(
         imageSrc,
         croppedAreaPixels,
-        originalFile?.type
+        originalFile?.type,
       );
       const fileNameBase = (originalFile?.name ?? "image-from-app")
         .replace(/\.[^/.]+$/, "")
@@ -137,6 +138,199 @@ export default function useImageUploader({ apiUrl, onUploadCompleted }: Props) {
   };
 }
 
+type ImageItem = {
+  id: string;
+  imageSrc: string;
+  originalFile: File | null;
+  crop: { x: number; y: number };
+  zoom: number;
+  croppedAreaPixels: Area | null;
+};
+
+type MultiProps = {
+  apiUrl: string;
+  onUploadCompleted: (urls: string[]) => void; // 배열로
+  maxImages?: number; // 최대 업로드 가능 매수
+};
+
+//여러 장 업로드
+export function useMultiImageUploader({
+  apiUrl,
+  onUploadCompleted,
+  maxImages = 1,
+}: MultiProps) {
+  const [images, setImages] = useState<ImageItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // 새 이미지 추가
+  const addImage = useCallback(
+    (image: ImageItem) => {
+      setImages((prev) => {
+        if (prev.length >= maxImages) {
+          alert(`최대 ${maxImages}장까지 업로드할 수 있습니다.`);
+          return prev;
+        }
+        return [...prev, image];
+      });
+    },
+    [maxImages],
+  ); //maxImages가 바뀔 때에만 새로 생성되도록 함
+
+  // 앱으로부터 메시지를 받기 위한 로직 추가
+  useEffect(() => {
+    const handleMessageFromApp = (event: MessageEvent) => {
+      const message = event.data;
+
+      // 약속된 'IMAGE_DATA' 타입인지, 데이터가 있는지 확인합니다.
+      if (message && message.type === "IMAGE_DATA" && message.data) {
+        console.log("앱으로부터 이미지 데이터를 받았습니다.");
+        const imageBase64 = message.data;
+
+        addImage({
+          id: Date.now().toString(),
+          imageSrc: `data:image/jpeg;base64,${imageBase64}`,
+          originalFile: null,
+          crop: { x: 0, y: 0 },
+          zoom: 1,
+          croppedAreaPixels: null,
+        });
+      }
+    };
+
+    window.addEventListener("message", handleMessageFromApp);
+
+    // 컴포넌트가 언마운트될 때 이벤트 리스너를 정리합니다.
+    return () => {
+      window.removeEventListener("message", handleMessageFromApp);
+    };
+  }, [addImage]); // addImage는 useCallback을 사용하여 maxImages가 바뀌지 않는 한 안 바뀜
+
+  /** 파일 선택 -> dataURL로 미리보기 세팅 */
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    if (!files) return;
+
+    if (images.length + files.length > maxImages) {
+      alert(`최대 ${maxImages}장까지 업로드할 수 있습니다.`);
+      return;
+    }
+
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 업로드할 수 있습니다.");
+        continue;
+      }
+
+      try {
+        const dataUrl = await readFileAsDataURL(file);
+        addImage({
+          id: Date.now().toString(),
+          imageSrc: dataUrl,
+          originalFile: file,
+          crop: { x: 0, y: 0 },
+          zoom: 1,
+          croppedAreaPixels: null,
+        });
+      } catch {
+        alert("알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      }
+    }
+  };
+
+  /** 특정 이미지의 크롭 업데이트 */
+  const updateImageCrop = (id: string, crop: { x: number; y: number }) => {
+    setImages((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, crop } : img)),
+    );
+  };
+
+  /** 특정 이미지의 줌 업데이트 */
+  const updateImageZoom = (id: string, zoom: number) => {
+    setImages((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, zoom } : img)),
+    );
+  };
+
+  /** 크롭 완료 */
+  const onCropComplete = useCallback(
+    (id: string, _: Area, croppedPixels: Area) => {
+      setImages((prev) =>
+        prev.map((img) =>
+          img.id === id ? { ...img, croppedAreaPixels: croppedPixels } : img,
+        ),
+      );
+    },
+    [],
+  );
+  /** 업로드 처리 */
+  const onUpload = async () => {
+    if (images.length === 0) {
+      alert("이미지를 선택해주세요.");
+      return;
+    }
+    if (images.some((img) => !img.croppedAreaPixels)) {
+      alert("모든 이미지의 크롭을 완료해주세요.");
+      return;
+    }
+
+    setIsUploading(true);
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (const image of images) {
+        const blob = await getCroppedBlob(
+          image.imageSrc,
+          image.croppedAreaPixels!,
+          image.originalFile?.type,
+        );
+        const fileNameBase = (image.originalFile?.name ?? "image-from-app")
+          .replace(/\.[^/.]+$/, "")
+          .slice(0, 80);
+        const ext = mimeToExt(blob.type) || "jpg";
+        const croppedFile = new File([blob], `${fileNameBase}-cropped.${ext}`, {
+          type: blob.type,
+        });
+
+        const formData = new FormData();
+        formData.append("file", croppedFile);
+
+        // 같은 오리진의 Next API 라우트로 업로드 (프록시)
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data?.error || "업로드 실패");
+
+        uploadedUrls.push(data.url);
+      }
+      onUploadCompleted(uploadedUrls);
+      resetAll();
+    } catch (e) {
+      alert("업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const resetAll = () => {
+    setImages([]);
+  };
+
+  return {
+    images,
+    isUploading,
+    onFileChange,
+    onCropComplete,
+    onUpload,
+    updateImageCrop,
+    updateImageZoom,
+    resetAll,
+  };
+}
+
 /* -------------------- 유틸 함수들 -------------------- */
 
 /** File -> dataURL */
@@ -156,7 +350,7 @@ function readFileAsDataURL(file: File): Promise<string> {
 async function getCroppedBlob(
   imageSrc: string,
   crop: Area,
-  preferType?: string
+  preferType?: string,
 ): Promise<Blob> {
   const image = await loadImage(imageSrc);
 
@@ -180,14 +374,14 @@ async function getCroppedBlob(
     0,
     0,
     canvas.width,
-    canvas.height
+    canvas.height,
   );
 
   const type = normalizeImageType(preferType) || "image/jpeg";
   const quality = type === "image/jpeg" ? 0.92 : undefined;
 
   const blob: Blob = await new Promise((resolve) =>
-    canvas.toBlob((b) => resolve(b as Blob), type, quality)
+    canvas.toBlob((b) => resolve(b as Blob), type, quality),
   );
 
   if (!blob) throw new Error("크롭 블랍 생성 실패");

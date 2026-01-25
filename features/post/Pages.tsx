@@ -25,7 +25,7 @@ export function TitlePage({ size, post }: Props) {
         }}
         className="aspect-square w-[390px] h-[390px] relative"
       >
-        <PostImg url={post.photoUrl} filtered />
+        <PostImg url={post.photoUrls?.[0] || null} filtered />
         <div className="absolute top-[90px] left-[23px]">
           <div className="font-light text-[16px] text-white/70">
             {format(date, "yyyy.MM.dd")}
