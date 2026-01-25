@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMultiImageUploader } from "@/hooks/useImageUploader";
 import Cropper from "react-easy-crop";
 import { NextStepButton } from "./Buttons";
@@ -7,6 +7,9 @@ import {
   useCreatePostStepStore,
   useDraftPostStore,
 } from "@/store/CreatePostStore";
+import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperType } from "swiper";
+import { Pagination, Navigation } from "swiper/modules";
 
 export default function ImageUploader() {
   const isMobile = window.innerWidth < 640;
@@ -16,6 +19,15 @@ export default function ImageUploader() {
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const input = useRef<HTMLInputElement | null>(null);
 
+  //swiper 관련
+  const prevRef = useRef<HTMLButtonElement | null>(null);
+  const nextRef = useRef<HTMLButtonElement | null>(null);
+  const pageRef = useRef<HTMLDivElement | null>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isBeginning, setIsBeginning] = useState(false);
+  const [isEnd, setIsEnd] = useState(false);
+
   const {
     images,
     isUploading,
@@ -24,6 +36,7 @@ export default function ImageUploader() {
     onUpload,
     updateImageCrop,
     updateImageZoom,
+    setMinZoom,
   } = useMultiImageUploader({
     apiUrl: "/api/posts/upload",
     onUploadCompleted: (srcs: string[]) => {
@@ -36,9 +49,57 @@ export default function ImageUploader() {
     maxImages: 5, //최대 5장까지
   });
 
+  //이미지 추가시 페이지 이동
+  useEffect(() => {
+    if (swiperRef.current && images.length > 0) {
+      swiperRef.current.slideTo(images.length - 1);
+    }
+  }, [images.length]);
+
   return (
     <div className="h-full flex flex-col items-center justify-center">
-      {!images && (
+      <button
+        ref={prevRef}
+        className="
+        absolute left-3 top-1/2 -translate-y-1/2 hidden sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
+      >
+        <svg
+          width="9"
+          height="15"
+          viewBox="0 0 9 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7.9375 13.5938L1.84375 7.5L7.9375 1.40625"
+            stroke="#412A2A"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        ref={nextRef}
+        className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
+      >
+        <svg
+          width="9"
+          height="15"
+          viewBox="0 0 9 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M1.0625 1.40625L7.15625 7.5L1.0625 13.5937"
+            stroke="#412A2A"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {images.length == 0 && (
         <div className="aspect-square w-full sm:w-120 flex flex-col justify-center items-center gap-2 mb-5">
           <svg
             width="72"
@@ -59,33 +120,73 @@ export default function ImageUploader() {
       )}
 
       {/* 크롭 영역 */}
-      {images && (
-        <div className="w-full sm:w-120">
-          {images.map((image) => (
-            <Cropper
-              key={image.id}
-              image={image.imageSrc}
-              crop={image.crop}
-              zoom={image.zoom}
-              onMediaLoaded={(mediaSize) => {
-                const { width, height } = mediaSize; // 원본 이미지 크기
-                const zoomByWidth = size / width;
-                const zoomByHeight = size / height;
-                updateImageZoom(image.id, Math.max(zoomByWidth, zoomByHeight)); // cropSize 꽉 차도록 zoom 조정
-              }}
-              aspect={1} // 정사각형
-              cropSize={{ width: size, height: size }}
-              onCropChange={(crop) => updateImageCrop(image.id, crop)}
-              onZoomChange={(zoom) => updateImageZoom(image.id, zoom)}
-              onCropComplete={(area, pixs) =>
-                onCropComplete(image.id, area, pixs)
-              }
-              restrictPosition={true}
-              showGrid={true}
-              objectFit="contain"
-            />
-          ))}
-        </div>
+      {images.length > 0 && (
+        <Swiper
+          className="w-full sm:w-120 aspect-square"
+          pagination={{
+            el: pageRef.current,
+            type: "fraction",
+          }}
+          watchOverflow={false} // 1장이어도 pagination 보이게
+          navigation={{ prevEl: null, nextEl: null }}
+          modules={[Pagination, Navigation]}
+          onBeforeInit={(swiper) => {
+            if (swiper.params.navigation) {
+              // @ts-ignore
+              swiper.params.navigation.prevEl = prevRef.current;
+              // @ts-ignore
+              swiper.params.navigation.nextEl = nextRef.current;
+            }
+            if (swiper.params.pagination) {
+              // @ts-ignore
+              swiper.params.pagination.el = pageRef.current;
+            }
+          }}
+          onSwiper={(sw) => {
+            swiperRef.current = sw;
+            setIsBeginning(sw.isBeginning);
+            setIsEnd(sw.isEnd);
+          }}
+          onSlideChange={(sw) => {
+            setCurrentPage(sw.activeIndex + 1);
+            setIsBeginning(sw.isBeginning);
+            setIsEnd(sw.isEnd);
+          }}
+        >
+          <div className="relative aspect-square bg-black/5 rounded-md">
+            {images.map((image, idx) => (
+              <SwiperSlide key={idx}>
+                <Cropper
+                  image={image.imageSrc}
+                  crop={image.crop}
+                  zoom={image.zoom}
+                  minZoom={image.minZoom || 1}
+                  onMediaLoaded={(mediaSize) => {
+                    const { width, height } = mediaSize; // 원본 이미지 크기
+                    const zoomByWidth = size / width;
+                    const zoomByHeight = size / height;
+
+                    updateImageZoom(
+                      image.id,
+                      Math.max(zoomByWidth, zoomByHeight),
+                    ); // cropSize 꽉 차도록 zoom 조정
+                    setMinZoom(image.id, Math.max(zoomByWidth, zoomByHeight)); // 줌 최솟값 -> cropSize 꽉 차게
+                  }}
+                  aspect={1} // 정사각형
+                  cropSize={{ width: size, height: size }}
+                  onCropChange={(crop) => updateImageCrop(image.id, crop)}
+                  onZoomChange={(zoom) => updateImageZoom(image.id, zoom)}
+                  onCropComplete={(area, pixs) =>
+                    onCropComplete(image.id, area, pixs)
+                  }
+                  restrictPosition={true}
+                  showGrid={true}
+                  objectFit="contain"
+                />
+              </SwiperSlide>
+            ))}
+          </div>
+        </Swiper>
       )}
 
       <div className="mt-5 w-full">
@@ -103,17 +204,22 @@ export default function ImageUploader() {
             }
           }}
         >
-          {isMobile ? "갤러리에서 선택" : "컴퓨터에서 선택"}
+          {isMobile
+            ? images.length > 0
+              ? "갤러리에서 추가"
+              : "갤러리에서 선택"
+            : images.length > 0
+              ? "컴퓨터에서 추가"
+              : "컴퓨터에서 선택"}
         </NextStepButton>
       </div>
       <div className="mt-2 w-full">
-        {images ? (
+        {images.length > 0 ? (
           <NextStepButton
             // disabled={isUploading}
             isLoading={isUploading}
             onClick={() => {
               onUpload();
-              handleNextStep();
             }}
           >
             다음

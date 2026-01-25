@@ -144,6 +144,7 @@ type ImageItem = {
   originalFile: File | null;
   crop: { x: number; y: number };
   zoom: number;
+  minZoom?: number;
   croppedAreaPixels: Area | null;
 };
 
@@ -252,6 +253,13 @@ export function useMultiImageUploader({
     );
   };
 
+  //최소 줌 설정
+  const setMinZoom = (id: string, minZoom: number) => {
+    setImages((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, minZoom } : img)),
+    );
+  };
+
   /** 크롭 완료 */
   const onCropComplete = useCallback(
     (id: string, _: Area, croppedPixels: Area) => {
@@ -327,6 +335,7 @@ export function useMultiImageUploader({
     onUpload,
     updateImageCrop,
     updateImageZoom,
+    setMinZoom,
     resetAll,
   };
 }
