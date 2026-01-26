@@ -30,7 +30,7 @@ export default function CreatePostPage(/*{
   }, [resetStep]);
 
   let title: React.ReactNode = (
-    <div className="h-7 flex items-center justify-center">
+    <div className="flex items-center justify-center h-7">
       {/* 자리 비움 */}
     </div>
   );
@@ -78,7 +78,7 @@ export default function CreatePostPage(/*{
           onClose={() => setIsCloseModalOpen(false)}
         >
           <li
-            className="py-2 cursor-pointer text-[#DF171B] font-semibold"
+            className="py-2 text-[#DF171B] font-semibold cursor-pointer"
             onClick={router.back}
           >
             삭제

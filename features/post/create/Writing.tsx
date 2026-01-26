@@ -13,7 +13,7 @@ export default function Writing() {
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const [currentPage, setCurrentPage] = useState(1);
   return (
-    <div className="h-full flex flex-col justify-between">
+    <div className="flex flex-col justify-between h-full">
       <div className="absolute top-7 right-17">
         <AddNewPageBtn
           currentPage={currentPage}
@@ -39,12 +39,12 @@ export function MobileWriting() {
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const [currentPage, setCurrentPage] = useState(1);
   return (
-    <div className="h-full flex flex-col justify-between">
+    <div className="flex flex-col justify-between h-full">
       <Slides currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-99 flex justify-center">
+      <div className="absolute flex justify-center top-4 left-1/2 -translate-x-1/2 z-99">
         <Bullets currentPage={currentPage} />
       </div>
-      <div className="absolute top-112 right-4 z-99 flex justify-center mt-2.5">
+      <div className="absolute flex justify-center top-112 right-4 z-99 mt-2.5">
         <AddNewPageBtn
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
@@ -53,7 +53,11 @@ export function MobileWriting() {
 
       {currentPage !== draft.pages?.length && (
         <button
-          className="absolute top-2.5 right-5 z-99 font-semibold text-white disabled:text-[#808080] py-1 px-3 bg-theme disabled:bg-white border border-theme disabled:border-[#d9d9d9] rounded-sm"
+          className="absolute 
+          top-2.5 right-5 z-99 py-1 px-3 
+          font-semibold text-white disabled:text-[#808080]
+          bg-theme border border-theme rounded-sm
+          disabled:bg-white  disabled:border-[#d9d9d9]"
           disabled={!draft.pages?.[currentPage - 1]?.content}
           onClick={() => setCurrentPage((n) => n + 1)}
         >
@@ -63,7 +67,11 @@ export function MobileWriting() {
 
       {currentPage === draft.pages?.length && (
         <button
-          className="absolute top-2.5 right-5 z-99 font-semibold text-white disabled:text-[#808080] py-1 px-3 bg-theme disabled:bg-white border border-theme disabled:border-[#d9d9d9] rounded-sm"
+          className="absolute 
+          top-2.5 right-5 z-99 py-1 px-3 
+          font-semibold text-white disabled:text-[#808080]
+          bg-theme border border-theme rounded-sm
+          disabled:bg-white  disabled:border-[#d9d9d9]"
           disabled={!draft.pages?.every((page) => page.content)}
           onClick={handleNextStep}
         >
@@ -97,7 +105,9 @@ function AddNewPageBtn({ currentPage, setCurrentPage }: Props) {
         }));
         setCurrentPage((prev) => prev + 1);
       }}
-      className="font-semibold bg-white text-[#808080] py-1 px-3 border border-[#d9d9d9] rounded-sm"
+      className="py-1 px-3
+      font-semibold text-[#808080]
+      bg-white border border-[#d9d9d9] rounded-sm"
     >
       빈 페이지 추가하기
     </button>
@@ -112,7 +122,7 @@ function Bullets({ currentPage }: { currentPage: number }) {
     1;
 
   return (
-    <ol className="w-full flex justify-center mt-2 mb-6 gap-1">
+    <ol className="flex justify-center gap-1 w-full mt-2 mb-6 ">
       {pagesWithSubtitle?.map((page, idx) => {
         return (
           <li key={page.id}>

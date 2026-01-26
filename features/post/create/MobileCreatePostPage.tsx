@@ -61,7 +61,7 @@ export default function MobileCreatePostPage() {
       content = null;
   }
   return (
-    <div className="h-full flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full">
       {currentStep > 0 ? (
         <div className="flex-shrink-0">
           <MobileHeader onClick={handlePrevStep}>
@@ -76,9 +76,9 @@ export default function MobileCreatePostPage() {
         </div>
       )}
 
-      <div className="w-full flex-1 flex flex-col pb-15">
+      <div className="flex flex-col w-full flex-1 pb-15">
         {title && (
-          <h1 className="text-xl font-semibold mb-5 flex-shrink-0">{title}</h1>
+          <h1 className="flex-shrink-0 mb-5 text-xl font-semibold">{title}</h1>
         )}
         {content}
       </div>
@@ -89,7 +89,7 @@ export default function MobileCreatePostPage() {
           onClose={() => setIsCloseModalOpen(false)}
         >
           <li
-            className="py-2 cursor-pointer text-[#DF171B] font-semibold"
+            className="py-2 text-[#DF171B] font-semibold cursor-pointer"
             onClick={router.back}
           >
             삭제

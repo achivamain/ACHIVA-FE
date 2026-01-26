@@ -175,14 +175,14 @@ export function useMultiImageUploader({
       });
     },
     [maxImages],
-  ); //maxImages가 바뀔 때에만 새로 생성되도록 함
+  ); //useCallback - maxImages가 바뀔 때에만 새로 생성되도록 함
 
   // 앱으로부터 메시지를 받기 위한 로직 추가
   useEffect(() => {
     const handleMessageFromApp = (event: MessageEvent) => {
       const message = event.data;
 
-      // 약속된 'IMAGE_DATA' 타입인지, 데이터가 있는지 확인합니다.
+      // 데이터 확인
       if (message && message.type === "IMAGE_DATA" && message.data) {
         console.log("앱으로부터 이미지 데이터를 받았습니다.");
         const imageBase64 = message.data;
@@ -253,7 +253,7 @@ export function useMultiImageUploader({
     );
   };
 
-  //최소 줌 설정
+  // 최소 줌 설정 - 이미지가 cropSize보다 작아지는 일 방지
   const setMinZoom = (id: string, minZoom: number) => {
     setImages((prev) =>
       prev.map((img) => (img.id === id ? { ...img, minZoom } : img)),
@@ -276,7 +276,7 @@ export function useMultiImageUploader({
   const removeImage = (id: string) => {
     setImages((prev) => prev.filter((img) => img.id !== id));
   };
-  
+
   /** 업로드 처리 */
   const onUpload = async () => {
     if (images.length === 0) {

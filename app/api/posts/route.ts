@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
 
+  // 확인 절차를 추가하긴 했는데 불필요시 삭제 가능
   if ((draft.photoUrls?.length ?? 0) > 5) {
     return NextResponse.json(
       { error: "이미지는 최대 5장까지 업로드 가능합니다." },

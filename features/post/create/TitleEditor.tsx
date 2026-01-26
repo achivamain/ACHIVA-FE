@@ -83,9 +83,11 @@ export default function TitleEditor() {
             </div>
             <input
               maxLength={18}
-              className={`w-full relative z-[62] ${
-                isEditing ? "text-white" : "text-white/80"
-              } placeholder:text-white/80 font-semibold text-[45px] mb-[24px] leading-[50px] outline-none`}
+              className={`w-full relative mb-[24px] z-[62]
+                font-semibold text-[45px]  leading-[50px] 
+                outline-none 
+                placeholder:text-white/80 
+                ${isEditing ? "text-white" : "text-white/80"} `}
               type="text"
               placeholder="오늘의 운동"
               autoFocus

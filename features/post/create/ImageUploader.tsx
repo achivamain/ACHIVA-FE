@@ -20,14 +20,15 @@ export default function ImageUploader() {
   const input = useRef<HTMLInputElement | null>(null);
 
   //swiper 관련
-  const prevRef = useRef<HTMLButtonElement | null>(null);
-  const nextRef = useRef<HTMLButtonElement | null>(null);
-  const pageRef = useRef<HTMLDivElement | null>(null);
+  const swiperPrevRef = useRef<HTMLButtonElement | null>(null);
+  const swiperNextRef = useRef<HTMLButtonElement | null>(null);
+  const swiperPageRef = useRef<HTMLDivElement | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [isBeginning, setIsBeginning] = useState(false);
-  const [isEnd, setIsEnd] = useState(false);
+  const [isBeginningPage, setIsBeginning] = useState(false);
+  const [isEndPage, setIsEnd] = useState(false);
 
+  //이미지 업로드 및 크롭 기능
   const {
     images,
     isUploading,
@@ -43,14 +44,16 @@ export default function ImageUploader() {
     onUploadCompleted: (srcs: string[]) => {
       setPost((draft) => ({
         ...draft,
-        photoUrls: [...(draft.photoUrls ?? []), ...srcs],
+        photoUrls: srcs,
+        /*다음 페이지로 넘어갔다가 다시 되돌아오는 경우 어떻게 되는지(업로드가 중복으로 되나?)
+          확인 필요*/
       }));
       handleNextStep();
     },
     maxImages: 5, //최대 5장까지
   });
 
-  //이미지 추가시 페이지 이동
+  //이미지 추가시 추가된 이미지로 페이지 이동
   useEffect(() => {
     if (swiperRef.current && images.length > 0) {
       swiperRef.current.slideTo(images.length - 1);
@@ -58,11 +61,14 @@ export default function ImageUploader() {
   }, [images.length]);
 
   return (
-    <div className="h-full flex flex-col items-center justify-center">
+    <div className=" flex flex-col items-center justify-center h-full">
       <button
-        ref={prevRef}
+        ref={swiperPrevRef}
         className="
-        absolute left-3 top-1/2 -translate-y-1/2 sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
+        absolute sm:flex justify-center items-center
+        left-3 top-1/2 z-5
+        w-[30px] h-[30px] -translate-y-1/2
+        bg-white rounded-full opacity-50"
       >
         <svg
           width="9"
@@ -81,8 +87,12 @@ export default function ImageUploader() {
         </svg>
       </button>
       <button
-        ref={nextRef}
-        className="absolute right-3 top-1/2 -translate-y-1/2 sm:flex justify-center items-center z-5 bg-white rounded-full w-[30px] h-[30px] opacity-50"
+        ref={swiperNextRef}
+        className="
+        absolute sm:flex justify-center items-center
+        left-3 top-1/2 z-5
+        w-[30px] h-[30px] -translate-y-1/2
+        bg-white rounded-full opacity-50"
       >
         <svg
           width="9"
@@ -100,8 +110,14 @@ export default function ImageUploader() {
           />
         </svg>
       </button>
+
       {images.length == 0 && (
-        <div className="aspect-square w-full sm:w-120 flex flex-col justify-center items-center gap-2 mb-5">
+        <div
+          className="flex flex-col justify-center items-center 
+        aspect-square w-full 
+        gap-2 mb-5 
+        sm:w-120"
+        >
           <svg
             width="72"
             height="72"
@@ -125,7 +141,7 @@ export default function ImageUploader() {
         <Swiper
           className="w-full sm:w-120 aspect-square"
           pagination={{
-            el: pageRef.current,
+            el: swiperPageRef.current,
             type: "fraction",
           }}
           watchOverflow={false} // 1장이어도 pagination 보이게
@@ -134,13 +150,13 @@ export default function ImageUploader() {
           onBeforeInit={(swiper) => {
             if (swiper.params.navigation) {
               // @ts-ignore
-              swiper.params.navigation.prevEl = prevRef.current;
+              swiper.params.navigation.prevEl = swiperPrevRef.current;
               // @ts-ignore
-              swiper.params.navigation.nextEl = nextRef.current;
+              swiper.params.navigation.nextEl = swiperNextRef.current;
             }
             if (swiper.params.pagination) {
               // @ts-ignore
-              swiper.params.pagination.el = pageRef.current;
+              swiper.params.pagination.el = swiperPageRef.current;
             }
           }}
           onSwiper={(sw) => {
@@ -171,7 +187,9 @@ export default function ImageUploader() {
                       image.id,
                       Math.max(zoomByWidth, zoomByHeight),
                     ); // cropSize 꽉 차도록 zoom 조정
-                    setMinZoom(image.id, Math.max(zoomByWidth, zoomByHeight)); // 줌 최솟값 -> cropSize 꽉 차게
+                    setMinZoom(image.id, Math.max(zoomByWidth, zoomByHeight));
+                    // 줌 최솟값 -> cropSize 꽉 차게
+                    // 이미지가 cropSize보다 작아지면 문제가 생길 것 같아서 추가하였음.
                   }}
                   aspect={1} // 정사각형
                   cropSize={{ width: size, height: size }}
@@ -185,7 +203,10 @@ export default function ImageUploader() {
                   objectFit="contain"
                 />
                 <button
-                  className="absolute right-3 top-7 -translate-y-1/2 flex justify-center items-center z-5 bg-white w-[60px] h-[30px]"
+                  className="absolute flex justify-center items-center
+                  right-3 top-7 -translate-y-1/2 z-5 
+                  w-[60px] h-[30px]
+                  bg-white"
                   onClick={() => removeImage(image.id)}
                 >
                   삭제
@@ -233,7 +254,10 @@ export default function ImageUploader() {
           </NextStepButton>
         ) : (
           <button
-            className="w-full h-11 flex items-center justify-center rounded-sm font-medium text-lg py-2 bg-[#E3E3E3] text-[#5C5C5C]"
+            className="flex items-center justify-center
+            py-2 w-full h-11 
+            font-medium text-lg text-[#5C5C5C]
+            bg-[#E3E3E3] rounded-sm "
             onClick={handleNextStep}
           >
             건너뛰기
