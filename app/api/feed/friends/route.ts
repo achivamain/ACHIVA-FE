@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   const friendsData = await friendsRes.json();
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
   // 각 친구의 게시글 전부 조회
   const friendIds = acceptedFriends.map((f) =>
-    f.requesterId === currentUserId ? f.receiverId : f.requesterId
+    f.requesterId === currentUserId ? f.receiverId : f.requesterId,
   );
 
   const postsPromises = friendIds.map(async (friendId) => {
@@ -60,22 +60,18 @@ export async function GET(req: NextRequest) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     const data = await res.json();
     return (data.data?.content ?? data.content ?? []) as PostRes[];
   });
 
   const allPostsArrays = await Promise.all(postsPromises);
-  const allPosts = allPostsArrays
-    .flat()
-    .filter(
-      (post) => post.photoUrl?.startsWith("https://") || post.photoUrl == null
-    );
+  const allPosts = allPostsArrays.flat();
 
   // 정렬
   allPosts.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
   // 페이지네이션

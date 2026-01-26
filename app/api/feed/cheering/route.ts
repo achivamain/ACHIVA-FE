@@ -1,7 +1,6 @@
 // 피드 - 응원 탭 proxy api
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { PostRes } from "@/types/Post";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -22,16 +21,13 @@ export async function GET(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   const data = await res.json();
 
   const rawContent = data.data?.content ?? data.content ?? [];
-  const content = rawContent.filter(
-    (post: PostRes) =>
-      post.photoUrl?.startsWith("https://") || post.photoUrl == null
-  );
+  const content = rawContent;
 
   const responseData = data.data ?? data;
   return NextResponse.json({

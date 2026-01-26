@@ -5,7 +5,7 @@ import { defaultProfileImg } from "../user/defaultProfileImg";
 export function getFirstPage(): PostRes {
   return {
     id: "5",
-    photoUrl: "",
+    photoUrls: [],
     title: "",
     category: "",
     question: [

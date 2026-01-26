@@ -165,11 +165,11 @@ export default function Post({
               </SwiperSlide>
             );
           })}
-          {post.photoUrl && (
-            <SwiperSlide>
-              <PostImg url={post.photoUrl} />
+          {post.photoUrls.map((photoUrl, idx) => (
+            <SwiperSlide key={`image-${idx}`}>
+              <PostImg url={photoUrl} />
             </SwiperSlide>
-          )}
+          ))}
         </Swiper>
       </div>
     </div>

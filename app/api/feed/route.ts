@@ -1,7 +1,6 @@
 // 피드 - 전체 탭 proxy api
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { PostRes } from "@/types/Post";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -22,16 +21,14 @@ export async function GET(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   const data = await res.json();
-  
+
   // 기존 api랑 새로 개발된 api 반환 방식이 달라요.. 일단 둘 다 처리하도록
   const rawContent = data.data?.content ?? data.content ?? [];
-  const content = rawContent.filter((post: PostRes) =>
-    post.photoUrl?.startsWith("https://") || post.photoUrl == null
-  );
+  const content = rawContent;
 
   const responseData = data.data ?? data;
   return NextResponse.json({
@@ -39,4 +36,3 @@ export async function GET(req: NextRequest) {
     content: content,
   });
 }
-
