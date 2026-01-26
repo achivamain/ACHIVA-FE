@@ -10,13 +10,24 @@ import { CategoryCard } from "../category/CategoryCard";
 export function MyCategorys({
   myCategories,
   categoryCounts,
+  categoryCharCounts = [],
 }: {
   myCategories: string[];
   categoryCounts: CategoryCount[];
+  categoryCharCounts?: CategoryCount[];
 }) {
   const resetPost = useDraftPostStore.use.resetPost();
   const setPost = useDraftPostStore.use.setPost();
-  const categorysData = categoryCounts.filter((i) => myCategories.includes(i.category))
+  const categorysData = myCategories.map((cat) => {
+    const countData = categoryCounts.find((i) => i.category == cat);
+    const charCountData = categoryCharCounts.find((i) => i.category == cat);
+
+    return {
+      category: cat,
+      count: countData?.count ?? 0,
+      charCount: charCountData?.count ?? null,
+    };
+  });
 
   return (
     <div className="flex w-full flex-col pb-4">
@@ -29,16 +40,24 @@ export function MyCategorys({
             key={cat.category}
             className="flex justify-between w-full h-26 bg-white rounded-md my-1 px-4 border-0 border-[#E4E4E4] md:border"
           >
-            <CategoryCard name={cat.category}/>
+            <CategoryCard name={cat.category} />
             <div className="flex flex-1 flex-col px-8 justify-center">
-              <span className="font-semibold text-[18px]">{cat.count > 0 ? `${cat.count}번째 이야기🔥` : `새로운 이야기`}</span>
-              <span className="text-[#808080] text-[15px]">{cat.count > 0 ? `` : `0`}글자</span>
+              <span className="font-semibold text-[18px]">
+                {cat.count > 0 ? `${cat.count}번째 이야기🔥` : `새로운 이야기`}
+              </span>
+              <span className="text-[#808080] text-[15px]">
+                {cat.charCount ? `${cat.charCount}글자` : "\u00A0"}
+                {/* 데이터가 없을 때는 빈칸으로 표시 */}
+              </span>
             </div>
             <button
               className="flex"
               onClick={() => {
                 resetPost();
-                setPost({ category: categories.find((i) => i === cat.category), categoryCount: cat.count });
+                setPost({
+                  category: categories.find((i) => i === cat.category),
+                  categoryCount: cat.count,
+                });
               }}
             >
               <Link
@@ -51,7 +70,11 @@ export function MyCategorys({
           </div>
         ))}
       </div>
-      <Link href={"/categories"}><button className="w-50 mx-4 bg-white rounded-full border border-[#D9D9D9] p-1 font-medium text-[#412A2A] text-[18px]">새로운 운동 작성</button></Link>
+      <Link href={"/categories"}>
+        <button className="w-50 mx-4 bg-white rounded-full border border-[#D9D9D9] p-1 font-medium text-[#412A2A] text-[18px]">
+          새로운 운동 작성
+        </button>
+      </Link>
     </div>
   );
 }
