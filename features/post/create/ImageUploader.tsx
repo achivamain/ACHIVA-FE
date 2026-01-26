@@ -273,6 +273,7 @@ export default function ImageUploader() {
         ref={input}
         type="file"
         accept="image/*"
+        multiple
         onChange={(e) => {
           onFileChange(e);
           e.target.value = "";
