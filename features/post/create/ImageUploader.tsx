@@ -62,55 +62,6 @@ export default function ImageUploader() {
 
   return (
     <div className=" flex flex-col items-center justify-center h-full">
-      <button
-        ref={swiperPrevRef}
-        className="
-        absolute sm:flex justify-center items-center
-        left-3 top-1/2 z-5
-        w-[30px] h-[30px] -translate-y-1/2
-        bg-white rounded-full opacity-50"
-      >
-        <svg
-          width="9"
-          height="15"
-          viewBox="0 0 9 15"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M7.9375 13.5938L1.84375 7.5L7.9375 1.40625"
-            stroke="#412A2A"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      <button
-        ref={swiperNextRef}
-        className="
-        absolute sm:flex justify-center items-center
-        left-3 top-1/2 z-5
-        w-[30px] h-[30px] -translate-y-1/2
-        bg-white rounded-full opacity-50"
-      >
-        <svg
-          width="9"
-          height="15"
-          viewBox="0 0 9 15"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M1.0625 1.40625L7.15625 7.5L1.0625 13.5937"
-            stroke="#412A2A"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
       {images.length == 0 && (
         <div
           className="flex flex-col justify-center items-center 
@@ -170,6 +121,58 @@ export default function ImageUploader() {
             setIsEnd(sw.isEnd);
           }}
         >
+          {images.length !== 0 && (
+            <button
+              ref={swiperPrevRef}
+              className="
+        absolute flex justify-center items-center
+        left-3 top-1/2 z-5
+        w-[30px] h-[30px] -translate-y-1/2
+        bg-white rounded-full opacity-50"
+            >
+              <svg
+                width="9"
+                height="15"
+                viewBox="0 0 9 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.9375 13.5938L1.84375 7.5L7.9375 1.40625"
+                  stroke="#412A2A"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
+          {images.length !== 0 && (
+            <button
+              ref={swiperNextRef}
+              className="
+        absolute flex justify-center items-center
+        right-3 top-1/2 z-5
+        w-[30px] h-[30px] -translate-y-1/2
+        bg-white rounded-full opacity-50"
+            >
+              <svg
+                width="9"
+                height="15"
+                viewBox="0 0 9 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M1.0625 1.40625L7.15625 7.5L1.0625 13.5937"
+                  stroke="#412A2A"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
           <div className="relative aspect-square bg-black/5 rounded-md">
             {images.map((image, idx) => (
               <SwiperSlide key={idx}>
