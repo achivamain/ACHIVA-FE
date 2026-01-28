@@ -20,7 +20,9 @@ export default function MobileHeader({ children, onClick = undefined }: Props) {
       >
         <BackIcon />
       </div>
-      <p className="font-semibold">{children}</p>
+      <div className="font-semibold flex items-center justify-center">
+        {children}
+      </div>
     </div>
   );
 }

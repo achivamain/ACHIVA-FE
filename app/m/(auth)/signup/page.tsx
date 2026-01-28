@@ -11,6 +11,7 @@ import Terms from "@/features/auth/Terms";
 import CategoryForm from "@/features/auth/CategoryForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
 import OathForm from "@/features/auth/OathForm";
+import ProgressIndicator from "@/features/auth/ProgressIndicator";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
@@ -68,7 +69,7 @@ export default function Page() {
             <MobileHeader
               onClick={currentStep !== 0 ? handlePrevStep : undefined}
             >
-              회원가입
+              <ProgressIndicator currentStep={3} />
             </MobileHeader>
           </div>
           <Container classes={containerHeight}>
@@ -78,8 +79,8 @@ export default function Page() {
                 initial={
                   currentStep !== 0
                     ? {
-                        opacity: 0,
-                      }
+                      opacity: 0,
+                    }
                     : false
                 }
                 animate={{
