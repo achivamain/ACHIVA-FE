@@ -6,6 +6,7 @@ import { categories } from "@/types/Categories";
 import { CategoryCount } from "@/types/Post";
 import Link from "next/link";
 import { CategoryCard } from "../category/CategoryCard";
+import { Category } from "@/types/Categories";
 
 export function MyCategorys({
   myCategories,
@@ -40,7 +41,7 @@ export function MyCategorys({
             key={cat.category}
             className="flex justify-between w-full h-26 bg-white rounded-md my-1 px-4 border-0 border-[#E4E4E4] md:border"
           >
-            <CategoryCard name={cat.category} />
+            <CategoryCard background={false} name={cat.category as Category} />
             <div className="flex flex-1 flex-col px-8 justify-center">
               <span className="font-semibold text-[18px]">
                 {cat.count > 0 ? `${cat.count}번째 이야기🔥` : `새로운 이야기`}
