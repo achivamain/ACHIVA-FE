@@ -32,7 +32,7 @@ export default function CategorySelector({
                       isSelected ? disSelectCategory(cat) : selectCategory(cat)
                     }
                   >
-                    <CategoryCard name={cat}></CategoryCard>
+                    <CategoryCard background={true} name={cat}></CategoryCard>
                   </button>
                 </div>
               );
