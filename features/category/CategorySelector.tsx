@@ -16,10 +16,10 @@ export default function CategorySelector({
   disSelectCategory,
 }: CategorySelectorProps) {
   return (
-    <div className="flex h-full w-full flex-col gap-5">
+    <div className="flex h-full w-full flex-col gap-10">
       {groupedCategorys.map((group) => (
         <div key={group.groupName} className="flex w-full flex-col">
-          <h2 className="font-medium text-[19px] py-2">{group.groupName}</h2>
+          <h2 className="font-medium text-[19px] pb-2">{group.groupName}</h2>
           <div className="flex flex-wrap w-full gap-3">
             {group.categories.map((cat) => {
               const isSelected = selectedCategories?.includes(cat);

@@ -170,7 +170,7 @@ export function MobileHomeCategorySelector({
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full bg-white">
       <MobileHeader onClick={() => user?.categories === selectedCategories? router.back() : setIsCloseModalOpen(true)}>
         <></>
       </MobileHeader>

@@ -146,6 +146,10 @@ export default async function MobileHomePageRoute({
           myCategories={user.categories}
           categoryCounts={categoryCounts}
         />
+        <div className="h-30">{/* 배너? */}</div>
+        <h1 className="text-[26px] font-semibold mx-5 mb-3">
+          올해의 기록
+        </h1>
         <MobileGoalSummary summaryData={mySummaryData} />
       </div>
     );
