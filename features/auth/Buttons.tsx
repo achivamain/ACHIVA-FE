@@ -20,3 +20,17 @@ export function NextStepButton({
     </button>
   );
 }
+
+export function SkipButton({
+  children,
+  ...props
+}: Omit<ButtonProps, "isLoading">) {
+  return (
+    <button
+      {...props}
+      className="flex items-center justify-center w-full font-medium text-base text-[#a6a6a6] bg-[#e6e6e6] rounded-[5px] px-3 h-[50px]"
+    >
+      {children}
+    </button>
+  );
+}

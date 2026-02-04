@@ -9,6 +9,7 @@ import Container from "@/features/auth/Container";
 import { TextLogo } from "@/components/Logo";
 import Terms from "@/features/auth/Terms";
 import CategoryForm from "@/features/auth/CategoryForm";
+import ProfileImageForm from "@/features/auth/ProfileImageForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
 import OathForm from "@/features/auth/OathForm";
 import ProgressIndicator from "@/features/auth/ProgressIndicator";
@@ -40,17 +41,27 @@ export default function Page() {
         </>
       );
       break;
-    case 4: // 생일
+    case 4: // 프로필사진
       content = (
         <>
           <div className="hidden sm:block mb-10">
             <TextLogo />
           </div>
-          <BirthdayForm />
+          <ProfileImageForm />
         </>
       );
       break;
-    case 5: // 서약서
+    case 5: // 카테고리
+      content = (
+        <>
+          <div className="hidden sm:block mb-10">
+            <TextLogo />
+          </div>
+          <CategoryForm />
+        </>
+      );
+      break;
+    case 6: // 서약서
       content = (
         <>
           <div className="hidden sm:block">
@@ -69,7 +80,7 @@ export default function Page() {
             <MobileHeader
               onClick={currentStep !== 0 ? handlePrevStep : undefined}
             >
-              <ProgressIndicator currentStep={3} />
+              <ProgressIndicator currentStep={currentStep} />
             </MobileHeader>
           </div>
           <Container classes={containerHeight}>

@@ -50,7 +50,7 @@ export default function OathForm() {
   async function handleSignUp() {
     setIsLoading(true);
     const payload = {
-      profileImageUrl: null,
+      profileImageUrl: user.profileImg || null,
       birth: format(user.birth!, "yyyy-MM-dd"),
       categories: user.categories,
     };
