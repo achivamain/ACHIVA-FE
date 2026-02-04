@@ -140,7 +140,6 @@ export default async function MobileHomePageRoute({
       const responses = await Promise.all([charRes, cheerRes, goalRes]);
       responses.forEach((res) => {
         if (!res.ok) {
-          console.log(res);
           throw new Error(`데이터 로딩 실패 (${res.status})`);
         }
       });
@@ -154,8 +153,7 @@ export default async function MobileHomePageRoute({
         points: cheerData.data.totalSendingCheeringScore,
       };
     } catch (err) {
-      console.log(err);
-      throw err;
+      throw new Error(`데이터 처리 실패: ${err}`);
     }
   }
 
@@ -179,7 +177,7 @@ export default async function MobileHomePageRoute({
       </div>
     );
   } catch (err) {
-    console.log(err);
+    console.error(err);
     notFound(); // 에러 종류에 따라 처리를 나눌 필요가 있을지도
   }
 }
