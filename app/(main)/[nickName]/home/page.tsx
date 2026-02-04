@@ -45,7 +45,7 @@ export default async function HomePage({
     }
     const { data } = await res.json();
     if (!data) {
-      notFound();
+      throw new Error("Invaild user data");
     }
     return data as User;
   }
@@ -70,7 +70,7 @@ export default async function HomePage({
     }
     const { data } = await res.json();
     if (!data) {
-      notFound();
+      throw new Error("Invaild post counts of categories data");
     }
     const { categoryCounts } = data;
     return categoryCounts as CategoryCount[];
@@ -94,7 +94,7 @@ export default async function HomePage({
     }
     const { data } = await res.json();
     if (!data) {
-      notFound();
+      throw new Error("Invaild character counts of categories data");
     }
     const { categoryCharacterCounts } = data;
     return categoryCharacterCounts as CategoryCharCount[];
