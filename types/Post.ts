@@ -26,6 +26,11 @@ export type CategoryCount = {
   count: number;
 };
 
+export type CategoryCharCount = {
+  category: Category;
+  characterCount: number;
+};
+
 export type BackgroundColor =
   | "#f9f9f9"
   | "#000000"

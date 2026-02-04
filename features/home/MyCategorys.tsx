@@ -3,7 +3,7 @@
 import { CaretLeftIcon } from "@/components/Icons";
 import { useDraftPostStore } from "@/store/CreatePostStore";
 import { categories } from "@/types/Categories";
-import { CategoryCount } from "@/types/Post";
+import { CategoryCharCount, CategoryCount } from "@/types/Post";
 import Link from "next/link";
 import { CategoryCard } from "../category/CategoryCard";
 import { Category } from "@/types/Categories";
@@ -15,7 +15,7 @@ export function MyCategorys({
 }: {
   myCategories: string[];
   categoryCounts: CategoryCount[];
-  categoryCharCounts?: CategoryCount[];
+  categoryCharCounts?: CategoryCharCount[];
 }) {
   const resetPost = useDraftPostStore.use.resetPost();
   const setPost = useDraftPostStore.use.setPost();
@@ -26,7 +26,7 @@ export function MyCategorys({
     return {
       category: cat,
       count: countData?.count ?? 0,
-      charCount: charCountData?.count ?? null,
+      charCount: charCountData?.characterCount ?? 0,
     };
   });
 
@@ -48,8 +48,7 @@ export function MyCategorys({
                 {cat.count > 0 ? `${cat.count}번째 이야기🔥` : `새로운 이야기`}
               </span>
               <span className="text-[#808080] text-[15px]">
-                {cat.charCount ? `${cat.charCount}글자` : "\u00A0"}
-                {/* 데이터가 없을 때는 빈칸으로 표시 */}
+                {`${cat.charCount}글자`}
               </span>
             </div>
             <button

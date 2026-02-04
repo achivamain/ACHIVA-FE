@@ -6,7 +6,7 @@ import Banner from "@/features/event/Banner";
 import { User } from "@/types/User";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
-import { CategoryCount } from "@/types/Post";
+import { CategoryCharCount, CategoryCount } from "@/types/Post";
 import { NextResponse } from "next/server";
 
 export default async function HomePage({
@@ -76,6 +76,30 @@ export default async function HomePage({
     return categoryCounts as CategoryCount[];
   }
 
+  //카테고리별 글자수 받아오기
+  async function getCategorysCharCount() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || "서버 오류");
+    }
+    const { data } = await res.json();
+    if (!data) {
+      notFound();
+    }
+    const { categoryCharacterCounts } = data;
+    return categoryCharacterCounts as CategoryCharCount[];
+  }
+
   //홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
   async function getSummeryData() {
     try {
@@ -138,10 +162,12 @@ export default async function HomePage({
   }
 
   try {
-    const [categoryCounts, mySummaryData] = await Promise.all([
-      getPostCategory(),
-      getSummeryData(),
-    ]);
+    const [categoryCounts, mySummaryData, categoryCharCounts] =
+      await Promise.all([
+        getPostCategory(),
+        getSummeryData(),
+        getCategorysCharCount(),
+      ]);
     return (
       <div className="w-full flex-1 flex">
         <div className="flex-1 flex flex-col justify-between">
@@ -150,6 +176,7 @@ export default async function HomePage({
               <MyCategorys
                 myCategories={user.categories}
                 categoryCounts={categoryCounts}
+                categoryCharCounts={categoryCharCounts}
               />
               <div className="h-[10%]"></div>
               <WebProfileSummary summaryData={mySummaryData} />
