@@ -1,11 +1,11 @@
 import Image from "next/image";
 
-export function TextLogo({ width = 134 }: { width?: number }) {
+export function TextLogo({ width = 176 }: { width?: number }) {
   return (
     <div
       style={{
         width, // 원하는 너비
-        aspectRatio: "147.85 / 43.35", // viewBox 비율 그대로
+        aspectRatio: "176 / 24", // viewBox 비율 그대로
       }}
     >
       <img className="w-full" src="/textLogo.svg" alt="로고" />
@@ -13,12 +13,12 @@ export function TextLogo({ width = 134 }: { width?: number }) {
   );
 }
 
-export function TextLogoWhite({ width = 134 }: { width?: number }) {
+export function TextLogoWhite({ width = 176 }: { width?: number }) {
   return (
     <div
       style={{
         width, // 원하는 너비
-        aspectRatio: "147.85 / 43.35", // viewBox 비율 그대로
+        aspectRatio: "176 / 24", // viewBox 비율 그대로
       }}
     >
       <img style={{ width: width }} src="/textLogoWhite.svg" alt="로고" />
