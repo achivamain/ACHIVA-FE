@@ -118,7 +118,6 @@ export default async function HomePage({
       const responses = await Promise.all([charRes, cheerRes, goalRes]);
       responses.forEach((res) => {
         if (!res.ok) {
-          console.log(res);
           throw new Error(`데이터 로딩 실패 (${res.status})`);
         }
       });
@@ -132,8 +131,8 @@ export default async function HomePage({
         points: cheerData.data.totalSendingCheeringScore,
       };
     } catch (err) {
-      console.log(err);
-      throw err;
+      console.error("Error in fetch summery data: ", err);
+      throw new Error(`Error in fetch summery data: ${err}`);
     }
   }
 
@@ -164,7 +163,7 @@ export default async function HomePage({
       </div>
     );
   } catch (err) {
-    console.log(err);
+    console.error(err);
     notFound(); // 에러 종류에 따라 처리를 나눌 필요가 있을지도
   }
 }
