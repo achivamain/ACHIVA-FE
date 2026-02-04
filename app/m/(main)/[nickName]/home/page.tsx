@@ -38,7 +38,7 @@ export default async function MobileHomePageRoute({
           className="flex flex-row justify-center items-center gap-1 w-[272px] h-14 px-12 py-4 bg-[#412A2A] rounded-[64px]"
         >
           <span className="font-['Pretendard'] font-semibold text-xl leading-6 text-white text-center">
-            오늘의 이야기 작성
+            오늘의 이야기 작성.
           </span>
           <CaretRight24pxIcon />
         </Link>
