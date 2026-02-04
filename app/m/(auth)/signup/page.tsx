@@ -30,13 +30,13 @@ export default function Page() {
         </>
       );
       break;
-    case 3: // 카테고리
+    case 3: // 생일 -- 여기까지했음
       content = (
         <>
           <div className="hidden sm:block mb-10">
             <TextLogo />
           </div>
-          <CategoryForm />
+          <BirthdayForm />
         </>
       );
       break;
