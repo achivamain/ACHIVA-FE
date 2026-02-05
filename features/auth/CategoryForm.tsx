@@ -28,7 +28,7 @@ export default function CategoryForm() {
         <p className="font-semibold text-2xl leading-[29px] text-black">
           관심있는 운동을 선택해주세요
         </p>
-        <p className="font-light text-[15px] leading-[18px] text-[#808080] mt-2.5 break-keep">
+        <p className="font-light text-[15px] leading-[20px] text-[#808080] mt-2.5 break-keep">
           관심있는 운동을 기록하고, 같은 관심사의 사람들과 서로 응원해요
         </p>
         {/* 에러 메시지 */}
@@ -40,7 +40,7 @@ export default function CategoryForm() {
       </div>
 
       {/* 카테고리 선택 영역 */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden pt-4 pb-20">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pt-4 pb-20 scrollbar-hide">
         <CategorySelector
           selectedCategories={selectedCategories}
           selectCategory={selectCategory}

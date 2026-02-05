@@ -98,11 +98,11 @@ export default function ProfileImageForm() {
       {imageSrc && (
         <dialog
           ref={dialog}
-          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl z-20 max-w-none max-h-none w-[calc(100vw-40px)] h-auto p-5 flex flex-col justify-center"
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl z-20 max-w-none max-h-none h-auto p-5 flex flex-col justify-center"
         >
           <div
             className="relative w-full bg-black/5 rounded-md overflow-hidden"
-            style={{ height: 320 }}
+            style={{ height: 320, width: 320 }}
           >
             <Cropper
               image={imageSrc}

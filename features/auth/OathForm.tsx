@@ -39,8 +39,7 @@ export default function OathForm() {
     const updateWidth = () => {
       const desktop = window.innerWidth >= 640; // sm breakpoint
       setIsDesktop(desktop);
-      // 웹에서는 Container 내부 크기(약 304px = 360px - 패딩), 모바일에서는 전체 너비
-      setContainerWidth(desktop ? 304 : window.innerWidth);
+      setContainerWidth(desktop ? 376 : window.innerWidth);
     };
     updateWidth();
     window.addEventListener("resize", updateWidth);
