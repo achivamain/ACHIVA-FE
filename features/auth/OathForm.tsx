@@ -32,11 +32,15 @@ export default function OathForm() {
   const [currentPage, setCurrentPage] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [isDesktop, setIsDesktop] = useState(false);
   const pageRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
     const updateWidth = () => {
-      setContainerWidth(window.innerWidth);
+      const desktop = window.innerWidth >= 640; // sm breakpoint
+      setIsDesktop(desktop);
+      // 웹에서는 Container 내부 크기(약 304px = 360px - 패딩), 모바일에서는 전체 너비
+      setContainerWidth(desktop ? 304 : window.innerWidth);
     };
     updateWidth();
     window.addEventListener("resize", updateWidth);
@@ -100,13 +104,13 @@ export default function OathForm() {
       {/* 슬라이드 */}
       <div
         ref={containerRef}
-        className="relative -mx-7 mt-11 mb-30"
+        className={`relative mt-6 sm:mt-4 mb-6 sm:mb-4 ${isDesktop ? "" : "-mx-7"}`}
         style={{ width: containerWidth || "100vw" }}
       >
         {/* 페이지 표시(1/2, 2/2 ..) */}
         <div
           ref={pageRef}
-          className="absolute top-5 right-5 z-10 bg-black/35 px-4 py-1 rounded-full text-white text-[15px] font-medium"
+          className="absolute top-3 sm:top-2 right-3 sm:right-2 z-10 bg-black/35 px-3 sm:px-2.5 py-0.5 rounded-full text-white text-sm sm:text-xs font-medium"
         >
           {currentPage + 1}/{slides.length}
         </div>
@@ -114,21 +118,21 @@ export default function OathForm() {
         <Swiper
           modules={[Pagination]}
           onSlideChange={(swiper) => setCurrentPage(swiper.activeIndex)}
-          className="w-full"
+          className={`w-full ${isDesktop ? "rounded-lg overflow-hidden" : ""}`}
         >
           {slides.map((slide, idx) => (
             <SwiperSlide key={idx}>
               <div
-                className="w-full aspect-square flex flex-col justify-center px-5"
+                className="w-full aspect-square flex flex-col justify-center px-5 sm:px-4"
                 style={{
                   backgroundColor: "#A6736F",
                   maxHeight: containerWidth || "100vw",
                 }}
               >
-                <h2 className="font-semibold text-[32px] leading-[38px] text-white mb-[30px]">
+                <h2 className="font-semibold text-[32px] sm:text-xl leading-[38px] sm:leading-tight text-white mb-[30px] sm:mb-4">
                   {slide.title}
                 </h2>
-                <p className="text-[17px] font-normal leading-[150%] text-white whitespace-pre-wrap">
+                <p className="text-[17px] sm:text-sm font-normal leading-[150%] text-white whitespace-pre-wrap">
                   {slide.content}
                 </p>
               </div>
@@ -138,7 +142,7 @@ export default function OathForm() {
       </div>
 
       {/* 버튼 */}
-      <div className="px-0 mb-15">
+      <div className="px-0 mb-15 sm:mb-0">
         <NextStepButton
           disabled={!isLastSlide}
           isLoading={isLoading}
