@@ -58,7 +58,7 @@ export default async function Page() {
   };
 
   return (
-    <div className="min-h-dvh w-full bg-[#F9F9F9] flex flex-col">
+    <div className="min-h-dvh w-full flex flex-col">
       <MobileHomeCategorySelector user={userData} />
     </div>
   );

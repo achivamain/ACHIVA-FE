@@ -4,7 +4,7 @@ import MobileGoalSummary from "@/features/home/ProfileSummary";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import { User } from "@/types/User";
 import { notFound, redirect } from "next/navigation";
-import { CategoryCount } from "@/types/Post";
+import { CategoryCharCount, CategoryCount } from "@/types/Post";
 import { NextResponse } from "next/server";
 
 export default async function MobileHomePageRoute({
@@ -43,7 +43,7 @@ export default async function MobileHomePageRoute({
     }
     const { data } = await res.json();
     if (!data) {
-      notFound();
+      throw new Error("Invaild user data");
     }
     return data as User;
   }
@@ -68,10 +68,34 @@ export default async function MobileHomePageRoute({
     }
     const { data } = await res.json();
     if (!data) {
-      notFound();
+      throw new Error("Invaild post counts of categories data");
     }
     const { categoryCounts } = data;
     return categoryCounts as CategoryCount[];
+  }
+
+  //카테고리별 글자수 받아오기
+  async function getCategorysCharCount() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || "서버 오류");
+    }
+    const { data } = await res.json();
+    if (!data) {
+      throw new Error("Invaild character counts of categories data");
+    }
+    const { categoryCharacterCounts } = data;
+    return categoryCharacterCounts as CategoryCharCount[];
   }
 
   //홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
@@ -134,16 +158,21 @@ export default async function MobileHomePageRoute({
   }
 
   try {
-    const [categoryCounts, mySummaryData] = await Promise.all([
-      getPostCategory(),
-      getSummeryData(),
-    ]);
+    const [categoryCounts, mySummaryData, categoryCharCounts] =
+      await Promise.all([
+        getPostCategory(),
+        getSummeryData(),
+        getCategorysCharCount(),
+      ]);
     return (
       <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
         <MyCategorys
           myCategories={user.categories}
           categoryCounts={categoryCounts}
+          categoryCharCounts={categoryCharCounts}
         />
+        <div className="h-30">{/* 배너? */}</div>
+        <h1 className="text-[26px] font-semibold mx-5 mb-3">올해의 기록</h1>
         <MobileGoalSummary summaryData={mySummaryData} />
       </div>
     );

@@ -46,7 +46,7 @@ const WebSummaryCard: React.FC<SummaryCardProps> = ({
   description,
 }) => {
   return (
-    <div className="flex items-center gap-6 w-full max-w-[844px] min-h-[88px] bg-white border border-[#E4E4E4] rounded-[10px] py-4 px-6">
+    <div className="flex items-center gap-6 w-full max-w-[844px] min-h-[88px] bg-white border-0 border-[#E4E4E4] rounded-[10px] py-4 px-6 sm:border">
       <div className="w-11 h-14 text-[43px] flex items-center justify-center">
         {icon}
       </div>
@@ -95,7 +95,7 @@ export const WebProfileSummary: React.FC<ProfileSummaryProps> = ({
   summaryData,
 }) => {
   return (
-    <div className="flex flex-col gap-4 px-6">
+    <div className="flex flex-col gap-2 px-5 sm:gap-4">
       <WebSummaryCard
         icon="📚"
         value={summaryData.letters}
