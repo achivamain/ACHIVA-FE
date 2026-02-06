@@ -7,14 +7,14 @@ import Script from "next/script";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 export const metadata: Metadata = {
-  title: "ACHIVA",
-  description: "성취 중심 SNS 플랫폼",
+  title: "나는오늘운동한다 | 운동 기록 SNS",
+  description: "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS, 나는오늘운동한다",
   icons: {
     icon: "/favicon.svg",
   },
   openGraph: {
-    title: "ACHIVA",
-    description: "성취 중심 SNS 플랫폼",
+    title: "나는오늘운동한다",
+    description: "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS",
     images: ["/logo.png"],
   },
 };
