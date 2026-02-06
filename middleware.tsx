@@ -79,5 +79,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: "/:path*", // 모든 경로 적용
+  matcher: ["/((?!_next|api|sitemap.xml|robots.txt).*)"],
 };
