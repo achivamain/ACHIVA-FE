@@ -24,7 +24,7 @@ export default function Footer() {
           문의사항
         </Link>
       </div>
-      <p className="px-3">© Achiva</p>
+      <p className="px-3">© iworkouttoday</p>
     </footer>
   );
 }

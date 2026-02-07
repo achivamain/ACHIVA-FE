@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import GoalCard from "@/features/user/goals/GoalCard";
 import { GoalEditIcon, GoalArchiveIcon } from "@/components/Icons";
 import { useActiveGoals, categorizeGoals } from "@/hooks/useGoals";
+import { TextLogo } from "@/components/Logo";
 
 interface MobileGoalPageProps {
   nickName: string;
@@ -42,10 +43,8 @@ const MobileGoalPage: React.FC<MobileGoalPageProps> = ({ nickName }) => {
   return (
     <div className="min-h-dvh bg-[#F9F9F9] pb-[104px]">
       {/* Header */}
-      <div className="px-[20px] pt-[20px] pb-[16px] flex justify-between items-center">
-        <h1 className="text-[34px] font-bold leading-[41px] text-[#412A2A]">
-          ACHIVA
-        </h1>
+      <div className="px-[24px] pt-[20px] pb-[24px] flex justify-between items-center">
+          <TextLogo/>
         <div className="flex items-center gap-4">
           <button
             onClick={handleArchiveClick}
@@ -91,4 +90,3 @@ const MobileGoalPage: React.FC<MobileGoalPageProps> = ({ nickName }) => {
 };
 
 export default MobileGoalPage;
-

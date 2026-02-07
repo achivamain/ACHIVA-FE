@@ -8,11 +8,11 @@ export default function Banner() {
     >
       <section className="flex flex-col gap-7 px-5 py-10">
         <p className="font-bold text-xl">
-          Achiva
+          나/오/운
           <br />
           이벤트
         </p>
-        <p className="font-bold">나만의 성취 미니북</p>
+        <p className="font-bold">나만의 운동 미니북</p>
         <p className="text-sm">
           작은 성취들이 모여
           <br />
