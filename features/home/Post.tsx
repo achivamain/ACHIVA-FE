@@ -9,25 +9,9 @@ import ProfileImg from "@/components/ProfileImg";
 import Link from "next/link";
 import CheerBtns from "../post/CheerBtns";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
-import { useQuery } from "@tanstack/react-query";
+import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 
-export default function HomePost({ post }: { post: PostRes }) {
-  const { data: currentUser } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const res = await fetch(`/api/members/me`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) {
-        throw new Error("network error");
-      }
-      return (await res.json()).data as User;
-    },
-  });
-
+export default function HomePost({ post, currentUser }: { post: PostRes, currentUser?: User }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <>
