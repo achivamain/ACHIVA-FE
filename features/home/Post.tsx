@@ -9,7 +9,6 @@ import ProfileImg from "@/components/ProfileImg";
 import Link from "next/link";
 import CheerBtns from "../post/CheerBtns";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
-import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 
 export default function HomePost({ post, currentUser }: { post: PostRes, currentUser?: User }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
