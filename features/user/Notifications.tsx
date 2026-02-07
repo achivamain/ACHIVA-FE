@@ -10,6 +10,7 @@ import dateFormatter from "@/lib/dateFormatter";
 import { cheeringMeta } from "../post/cheeringMeta";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ProfileImg from "@/components/ProfileImg";
 
 // 포스트 캐시
 const postCache = new Map<string, PostRes | undefined>();
@@ -108,13 +109,17 @@ export default function Notifications() {
               {hasTitle && (
                 <Link
                   href={`/post/${n.articleId}`}
-                  className={`flex items-center gap-3 ${
-                    idx === 0 ? "" : "mt-5"
-                  } mb-3`}
+                  className={`flex items-center gap-3 ${idx === 0 ? "" : "mt-5"
+                    } mb-3`}
                 >
                   <div className="font-semibold text-xl bg-theme text-white rounded-sm px-4 py-1.5">
-                    {postCache.get(n.articleId)?.category}
-                  </div>
+<<<<<<< HEAD
+  { postCache.get(n.articleId)?.category }
+=======
+                    {postCache.get(n.articleId)?.bookArticle?.[0]?.bookTitle ||
+                      postCache.get(n.articleId)?.category}
+>>>>>>> 080cc85 (perf: implement Phase 2 optimizations including rq tuning and cache removal)
+                  </div >
                   <p className="text-[#808080] font-light">
                     {postCache.get(n.articleId)?.authorCategorySeq}번째 이야기
                   </p>
@@ -132,45 +137,47 @@ export default function Notifications() {
                       />
                     </svg>
                   </button>
-                </Link>
-              )}
+                </Link >
+              )
+}
 
-              <li
-                className={`flex gap-2.5 items-center py-2 ${
-                  hasTitle ? "" : "border-t border-t-black/15"
-                }`}
-              >
-                <Link href={`/${n.senderName}`}>
-                  <ProfileImg url={n.senderProfileImageUrl} size={50} />
-                </Link>
-                <div className="flex-1 flex gap-2.5 items-center">
-                  <Link href={`/${n.senderName}`} className="font-semibold">
-                    {n.senderName}
-                  </Link>
-                  <p className="font-light text-black/50">
-                    {dateFormatter(n.createdAt)}
-                  </p>
-                  {/* 응원 버튼 */}
-                  <div
-                    style={{ backgroundColor: color, borderColor: color }}
-                    className="ml-auto text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border px-3 py-1 text-white"
-                  >
-                    <p>{n.cheeringCategory}</p>
-                    <Icon active />
-                  </div>
-                </div>
-              </li>
-            </div>
+<li
+  className={`flex gap-2.5 items-center py-2 ${hasTitle ? "" : "border-t border-t-black/15"
+    }`}
+>
+  <Link href={`/${n.senderName}`}>
+    <ProfileImg url={n.senderProfileImageUrl} size={50} />
+  </Link>
+  <div className="flex-1 flex gap-2.5 items-center">
+    <Link href={`/${n.senderName}`} className="font-semibold">
+      {n.senderName}
+    </Link>
+    <p className="font-light text-black/50">
+      {dateFormatter(n.createdAt)}
+    </p>
+    {/* 응원 버튼 */}
+    <div
+      style={{ backgroundColor: color, borderColor: color }}
+      className="ml-auto text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border px-3 py-1 text-white"
+    >
+      <p>{n.cheeringCategory}</p>
+      <Icon active />
+    </div>
+  </div>
+</li>
+            </div >
           );
         })}
-      </ul>
-      <div ref={loaderRef}></div>
-      {isFetchingNextPage && (
-        <div className="w-full flex my-2 justify-center">
-          <LoadingIcon color="text-theme" />
-        </div>
-      )}
+      </ul >
+  <div ref={loaderRef}></div>
+{
+  isFetchingNextPage && (
+    <div className="w-full flex my-2 justify-center">
+      <LoadingIcon color="text-theme" />
     </div>
+  )
+}
+    </div >
   );
 }
 

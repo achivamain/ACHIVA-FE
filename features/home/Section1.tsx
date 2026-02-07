@@ -2,14 +2,31 @@
 
 import HomeHeader from "@/features/home/HomeHeader";
 import { LoadingIcon } from "@/components/Icons";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import type { PostsData } from "@/types/responses";
 import HomePost from "@/features/home/Post";
 import { getFirstPage } from "@/features/post/firstPost";
 import PostSkeleton from "./PostSkeleton";
+import { User } from "@/types/User";
 
 export default function HomeSection1() {
+  const { data: currentUser } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
+
   async function fetchPosts(pageParam: number = 0) {
     const response = await fetch(`/api/home?pageParam=${pageParam}`, {
       method: "GET",
@@ -81,7 +98,7 @@ export default function HomeSection1() {
       {posts.length === 0 && !isLoading && <HomePost post={getFirstPage()} />}
       <div className="flex flex-col gap-7">
         {posts.map((post) => {
-          return <HomePost key={post.id} post={post} />;
+          return <HomePost key={post.id} post={post} currentUser={currentUser} />;
         })}
       </div>
       <div ref={loaderRef}></div>

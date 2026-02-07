@@ -27,6 +27,7 @@ export default function ProfileImg({ url, size }: ProfileImgProps) {
           alt="profile image"
           width={size}
           height={size}
+          sizes={`${size}px`}
           onLoad={() => setLoaded(true)}
         ></Image>
       )}

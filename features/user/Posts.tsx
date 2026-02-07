@@ -202,9 +202,8 @@ function CategorySelector({
             {allCategories.map((c) => (
               <li
                 onClick={() => setCategory(c as Category | "전체")}
-                className={`text-center py-1.5 cursor-pointer text-[#808080] hover:text-theme hover:bg-gray-100 ${
-                  c === category ? "!text-theme font-semibold" : ""
-                }`}
+                className={`text-center py-1.5 cursor-pointer text-[#808080] hover:text-theme hover:bg-gray-100 ${c === category ? "!text-theme font-semibold" : ""
+                  }`}
                 key={c}
               >
                 {c}
