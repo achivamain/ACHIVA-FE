@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     // 업로드 성공. 필요하면 퍼블릭 URL 생성 규칙에 맞게 location을 만들어서 내려주세요.
     return NextResponse.json({ ok: true, url: url.split("?")[0] });
   } catch (e) {
-    console.log(e);
+    console.error("Error in uploading image: ", e);
     return NextResponse.json({ error: "서버 오류" }, { status: 500 });
   }
 }

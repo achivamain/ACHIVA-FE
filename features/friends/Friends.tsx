@@ -8,8 +8,6 @@ import { useQueries, useMutation, useQueryClient } from "@tanstack/react-query";
 import FriendsSkeleton from "./FriendsSkeleton";
 import { useState } from "react";
 import { defaultProfileImg } from "@/features/user/defaultProfileImg";
-import { useSession } from "next-auth/react";
-import { sendFriendAcceptNotification } from "@/lib/pushNotification";
 
 type Props = {
   nickName: string;
@@ -28,7 +26,6 @@ type FriendsRequestsResponse = {
 };
 
 export default function Friends({ nickName, isMe }: Props) {
-  const { data: session } = useSession();
   const [selectedMenu, setSelectedMenu] = useState<"친구 목록" | "친구 요청">(
     "친구 목록"
   );
@@ -38,15 +35,7 @@ export default function Friends({ nickName, isMe }: Props) {
 
   // 친구 수락 시 뮤테이션 함수
   const acceptFriendMutation = useMutation({
-    mutationFn: async ({
-      friendshipId,
-      requesterId,
-      requesterNickName,
-    }: {
-      friendshipId: number;
-      requesterId: string;
-      requesterNickName?: string;
-    }) => {
+    mutationFn: async (friendshipId: number) => {
       const res = await fetch(
         `/api/friendships/accept?friendshipId=${friendshipId}`,
         {
@@ -56,24 +45,13 @@ export default function Friends({ nickName, isMe }: Props) {
       if (!res.ok) {
         throw new Error("친구 수락 과정에서 문제가 발생했습니다.");
       }
-      return { result: await res.json(), requesterId, requesterNickName, friendshipId };
+      return res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["friends", nickName] });
       queryClient.invalidateQueries({
         queryKey: ["receivedFriendRequests", nickName],
       });
-
-      // 앱에 친구 수락 알림 전송 (postMessage)
-      if (session?.access_token && session?.user?.id) {
-        sendFriendAcceptNotification(session.access_token, {
-          friendshipId: data.friendshipId,
-          requesterId: data.requesterId,
-          requesterNickName: data.requesterNickName,
-          accepterId: session.user.id,
-          accepterNickName: session.user.nickName,
-        });
-      }
     },
   });
 
@@ -215,13 +193,7 @@ export default function Friends({ nickName, isMe }: Props) {
                 </Link>
                 <div className="ml-auto flex gap-2">
                   <button
-                    onClick={() =>
-                      acceptFriendMutation.mutate({
-                        friendshipId: friend.id,
-                        requesterId: friend.requesterId,
-                        requesterNickName: user.nickName,
-                      })
-                    }
+                    onClick={() => acceptFriendMutation.mutate(friend.id)}
                     className="font-semibold text-lg px-6 py-2 rounded-md bg-theme text-white"
                   >
                     수락

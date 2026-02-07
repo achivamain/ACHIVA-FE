@@ -5,18 +5,13 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect, useMemo } from "react";
 import { useAnimate } from "motion/react";
 import { cheeringMeta } from "./cheeringMeta";
-import { sendCheerNotification } from "@/lib/pushNotification";
 
 export default function CheerBtns({
   postId,
   cheerings = [],
-  authorId,
-  authorNickName,
 }: {
   postId: string;
   cheerings?: Cheering[];
-  authorId: string; 
-  authorNickName?: string;
 }) {
   const [scope, animate] = useAnimate();
   const { data: session } = useSession();
@@ -121,18 +116,6 @@ export default function CheerBtns({
                   ...prev,
                   [type]: { ...prev[type], id },
                 }));
-
-                // 앱에 응원 알림 전송 (postMessage)
-                if (session?.access_token && currentUserId) {
-                  sendCheerNotification(session.access_token, {
-                    postId,
-                    cheeringType: type,
-                    senderId: currentUserId,
-                    senderNickName: session.user?.nickName,
-                    receiverId: authorId,
-                    receiverNickName: authorNickName,
-                  });
-                }
               }
               setCheeringsState((prev) => ({
                 ...prev,
