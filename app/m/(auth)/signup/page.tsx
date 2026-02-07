@@ -8,9 +8,11 @@ import MobileHeader from "@/components/MobileHeader";
 import Container from "@/features/auth/Container";
 import { TextLogo } from "@/components/Logo";
 import Terms from "@/features/auth/Terms";
-import CategoryForm from "@/features/auth/CategoryForm";
+import CategoryForm, { CategoryNextButton } from "@/features/auth/CategoryForm";
+import ProfileImageForm from "@/features/auth/ProfileImageForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
 import OathForm from "@/features/auth/OathForm";
+import ProgressIndicator from "@/features/auth/ProgressIndicator";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
@@ -29,17 +31,7 @@ export default function Page() {
         </>
       );
       break;
-    case 3: // 카테고리
-      content = (
-        <>
-          <div className="hidden sm:block mb-10">
-            <TextLogo />
-          </div>
-          <CategoryForm />
-        </>
-      );
-      break;
-    case 4: // 생일
+    case 3: // 생일 
       content = (
         <>
           <div className="hidden sm:block mb-10">
@@ -49,7 +41,27 @@ export default function Page() {
         </>
       );
       break;
-    case 5: // 서약서
+    case 4: // 프로필사진
+      content = (
+        <>
+          <div className="hidden sm:block mb-10">
+            <TextLogo />
+          </div>
+          <ProfileImageForm />
+        </>
+      );
+      break;
+    case 5: // 카테고리
+      content = (
+        <>
+          <div className="hidden sm:block mb-10">
+            <TextLogo />
+          </div>
+          <CategoryForm />
+        </>
+      );
+      break;
+    case 6: // 서약서
       content = (
         <>
           <div className="hidden sm:block">
@@ -64,11 +76,12 @@ export default function Page() {
     <>
       <div className="min-h-dvh flex items-center justify-center">
         <div className="overflow-x-hidden w-full min-h-dvh flex flex-col gap-3 items-center pt-15 sm:pt-0 justify-start sm:justify-center">
-          <div className="w-full fixed top-0 left-0">
+          <div className="w-full fixed top-0 left-0 z-50">
             <MobileHeader
               onClick={currentStep !== 0 ? handlePrevStep : undefined}
+              rightElement={currentStep === 5 ? <CategoryNextButton /> : undefined}
             >
-              회원가입
+              <ProgressIndicator currentStep={currentStep} />
             </MobileHeader>
           </div>
           <Container classes={containerHeight}>
@@ -78,8 +91,8 @@ export default function Page() {
                 initial={
                   currentStep !== 0
                     ? {
-                        opacity: 0,
-                      }
+                      opacity: 0,
+                    }
                     : false
                 }
                 animate={{

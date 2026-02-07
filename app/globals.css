@@ -47,3 +47,13 @@ button:disabled {
 input:focus {
   outline-color: var(--color-theme);
 }
+
+/* 스크롤바 숨기기 유틸리티 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

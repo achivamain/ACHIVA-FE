@@ -27,6 +27,7 @@ export default auth((req) => {
     pathname !== "/" &&
     pathname !== "/login" &&
     pathname !== "/signup" &&
+    pathname !== "/signup-test" && // 회원가입 Test Entry Point
     pathname !== "/callback" &&
     pathname !== "/onboarding"
   ) {
