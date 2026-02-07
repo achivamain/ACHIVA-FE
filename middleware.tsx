@@ -49,7 +49,13 @@ export default auth((req) => {
   // -------------------------
   if (isMobile) {
     const url = req.nextUrl.clone();
-    if (!url.pathname.startsWith("/callback") && !url.pathname.startsWith("/m")) {
+    const isNextAction = req.headers.has("next-action");
+
+    if (
+      !url.pathname.startsWith("/callback") &&
+      !url.pathname.startsWith("/m") &&
+      !isNextAction
+    ) {
       url.pathname = `/m${pathname}`;
     }
     const res = NextResponse.rewrite(url);

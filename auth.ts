@@ -30,12 +30,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id_token: account.id_token,
           expires_at: account.expires_at,
         };
-      } else if (Date.now() < token.expires_at! * 1000) {
+      } else if (token.expires_at && Date.now() < (token.expires_at as number) * 1000) {
         // 토큰 만료 전
         return token;
-      } else {
-        // 만료됐는데 리프레시 토큰 없으면 오류
-        if (!token.refresh_token) throw new TypeError("Missing refresh_token");
+      } else if (token.refresh_token) {
+        // 토큰 만료되어 리프레시 필요
 
         try {
           const response = await fetch(
@@ -75,6 +74,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return token;
         }
       }
+
+      // 위 조건에 해당하지 않는 비로그인 유저 등은 토큰 그대로 반환
+      return token;
     },
     async session({ session, token }) {
       session.user.id = token.id as string;
