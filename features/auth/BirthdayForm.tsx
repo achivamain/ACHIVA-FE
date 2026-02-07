@@ -4,7 +4,7 @@ import { NextStepButton } from "./Buttons";
 import { useSignupInfoStore, useSignupStepStore } from "@/store/SignupStore";
 
 // 웹의 경우에 호환되는 휠 관련 라이브러리가 없어서 직접 구현하였습니다.
-// 괜찮은 라이브러리 있거나 하면 수정해주세요.. 코드가 너무 기네요
+// 추후 라이브러리로 대체 예정
 
 const ITEM_HEIGHT = 39;
 const VISIBLE_ITEMS = 5;

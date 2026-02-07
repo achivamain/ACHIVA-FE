@@ -19,7 +19,6 @@ export default function CategoryForm() {
     });
   };
 
-  const isOverLimit = user.categories.length > 5;
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -31,12 +30,6 @@ export default function CategoryForm() {
         <p className="font-light text-[15px] leading-[20px] text-[#808080] mt-2.5 break-keep">
           관심있는 운동을 기록하고, 같은 관심사의 사람들과 서로 응원해요
         </p>
-        {/* 에러 메시지 */}
-        {isOverLimit && (
-          <p className="font-light text-sm text-theme-red mt-2">
-            카테고리는 최대 5개만 선택할 수 있습니다
-          </p>
-        )}
       </div>
 
       {/* 카테고리 선택 영역 */}
@@ -55,7 +48,7 @@ export default function CategoryForm() {
 export function CategoryNextButton() {
   const handleNextStep = useSignupStepStore.use.handleNextStep();
   const user = useSignupInfoStore.use.user();
-  const isValid = user.categories.length >= 1 && user.categories.length <= 5;
+  const isValid = user.categories.length >= 1;
 
   return (
     <button

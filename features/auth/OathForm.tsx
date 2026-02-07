@@ -6,6 +6,8 @@ import { format } from "date-fns";
 import { useRef, useState, useLayoutEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+import { CaretLeftIcon, CaretRightIcon } from "@/components/Icons";
 
 const slides = [
   {
@@ -34,6 +36,7 @@ export default function OathForm() {
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const pageRef = useRef<HTMLDivElement | null>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
 
   useLayoutEffect(() => {
     const updateWidth = () => {
@@ -116,6 +119,7 @@ export default function OathForm() {
 
         <Swiper
           modules={[Pagination]}
+          onSwiper={(swiper) => (swiperRef.current = swiper)}
           onSlideChange={(swiper) => setCurrentPage(swiper.activeIndex)}
           className={`w-full ${isDesktop ? "rounded-lg overflow-hidden" : ""}`}
         >
@@ -138,6 +142,28 @@ export default function OathForm() {
             </SwiperSlide>
           ))}
         </Swiper>
+
+        {/* 웹에서 서약서 페이지 넘기는 버튼 */}
+        {currentPage === 0 && (
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => swiperRef.current?.slideNext()}
+            className="hidden sm:flex absolute right-2 top-2 pt-10 z-20 w-10 h-10 items-center justify-center cursor-pointer"
+            aria-label="다음 슬라이드"
+          >
+            <CaretLeftIcon />
+          </button>
+        )}
+        {currentPage === 1 && (
+          <button
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => swiperRef.current?.slidePrev()}
+            className="hidden sm:flex absolute left-2 top-2 pt-10 z-20 w-10 h-10 items-center justify-center cursor-pointer"
+            aria-label="이전 슬라이드"
+          >
+            <CaretRightIcon />
+          </button>
+        )}
       </div>
 
       {/* 버튼 */}
