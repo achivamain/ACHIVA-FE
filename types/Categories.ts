@@ -65,13 +65,23 @@ export const categoryImages: Record<Category, string> = {
   "배구": "/images/categories/03_volleyball.svg",
   "럭비": "/images/categories/03_rugby.svg",
   // 04. 라켓 / 스틱
+  /*
   "탁구": "/images/categories/04_tableTennis.svg",
   "배드민턴": "/images/categories/04_badminton.svg",
   "테니스": "/images/categories/04_tennis.svg",
   "하키": "/images/categories/04_hockey.svg",
   // 05. 정밀 / 과녁
   "볼링": "/images/categories/05_bowling.svg",
-  "골프": "/images/categories/05_golf.svg",
+  "골프": "/images/categories/05_golf.svg", */
+  
+
+
+  "탁구": "images/categories/13.png",
+  "배드민턴": "images/categories/14.png",
+  "테니스": "images/categories/15.png",
+  "하키": "images/categories/16.png",
+  "볼링": "images/categories/17.png",
+  "골프": "images/categories/18.png", 
   // 06. 격투 / 무술
   "복싱": "/images/categories/06_boxing.svg",
   "MMA": "/images/categories/06_mma.svg",
