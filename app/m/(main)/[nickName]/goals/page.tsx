@@ -12,11 +12,30 @@ export default async function MobileGoalsPage({
   if (session?.error) {
     return <Logout />;
   }
-  const currentUser = session!.user;
+  const token = session?.access_token;
+  if (!token) {
+    redirect("/api/auth/logout");
+  }
 
   const { nickName } = await params;
   const decodedNickName = decodeURIComponent(nickName);
-  const isOwner = currentUser!.nickName === decodedNickName;
+
+  // 백엔드 API로 실제 유저 닉네임을 조회하여 본인 확인
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) {
+    redirect("/api/auth/logout");
+  }
+  const { data: me } = await res.json();
+  const isOwner = me.nickName === decodedNickName;
 
   if (!isOwner) {
     redirect(`/${nickName}`);
