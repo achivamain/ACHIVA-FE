@@ -2,13 +2,30 @@
 
 import { HomeSectionHeader } from "./HomeHeader";
 import { LoadingIcon } from "@/components/Icons";
-import { useInfiniteQuery, useIsFetching } from "@tanstack/react-query";
+import { useInfiniteQuery, useIsFetching, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import type { PostsData } from "@/types/responses";
 import HomePost from "@/features/home/Post";
 import { useSession } from "next-auth/react";
+import { User } from "@/types/User";
 
 export default function HomeSection2() {
+  const { data: currentUser } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data as User;
+    },
+  });
+
   const { data: session } = useSession();
   const currentUserId = session?.user?.id;
 
@@ -87,7 +104,7 @@ export default function HomeSection2() {
       )}
       <div className="flex flex-col gap-7">
         {posts.map((post) => {
-          return <HomePost key={post.id} post={post} />;
+          return <HomePost key={post.id} post={post} currentUser={currentUser} />;
         })}
       </div>
       <div ref={loaderRef}></div>

@@ -108,12 +108,12 @@ export default function Notifications() {
               {hasTitle && (
                 <Link
                   href={`/post/${n.articleId}`}
-                  className={`flex items-center gap-3 ${
-                    idx === 0 ? "" : "mt-5"
-                  } mb-3`}
+                  className={`flex items-center gap-3 ${idx === 0 ? "" : "mt-5"
+                    } mb-3`}
                 >
                   <div className="font-semibold text-xl bg-theme text-white rounded-sm px-4 py-1.5">
-                    {postCache.get(n.articleId)?.category}
+                    {postCache.get(n.articleId)?.bookArticle?.[0]?.bookTitle ||
+                      postCache.get(n.articleId)?.category}
                   </div>
                   <p className="text-[#808080] font-light">
                     {postCache.get(n.articleId)?.authorCategorySeq}번째 이야기
@@ -136,9 +136,8 @@ export default function Notifications() {
               )}
 
               <li
-                className={`flex gap-2.5 items-center py-2 ${
-                  hasTitle ? "" : "border-t border-t-black/15"
-                }`}
+                className={`flex gap-2.5 items-center py-2 ${hasTitle ? "" : "border-t border-t-black/15"
+                  }`}
               >
                 <Link href={`/${n.senderName}`}>
                   <ProfileImg url={n.senderProfileImageUrl} size={50} />
