@@ -24,10 +24,10 @@ export default async function HomePage({
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
 
-  const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해
+  const { nickName } = await params; 
 
+  // 유저 데이터 가져오기
   async function getUser() {
-    // 유저 데이터 가져오기
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
       {
@@ -39,20 +39,18 @@ export default async function HomePage({
       },
     );
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
       return redirect("/api/auth/logout");
-      throw new Error(errorData.error || "서버 오류");
     }
     const { data } = await res.json();
     if (!data) {
-      throw new Error("Invaild user data");
+      throw new Error("Invalid user data");
     }
     return data as User;
   }
 
   const [user] = await Promise.all([getUser()]);
 
-  //카테고리별 게시물 수 받아오기
+  // 카테고리별 게시물 수 받아오기
   async function getPostCategory() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
@@ -70,13 +68,13 @@ export default async function HomePage({
     }
     const { data } = await res.json();
     if (!data) {
-      throw new Error("Invaild post counts of categories data");
+      throw new Error("Invalid post counts of categories data");
     }
     const { categoryCounts } = data;
     return categoryCounts as CategoryCount[];
   }
 
-  //카테고리별 글자수 받아오기
+  // 카테고리별 글자수 받아오기
   async function getCategorysCharCount() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
@@ -94,14 +92,14 @@ export default async function HomePage({
     }
     const { data } = await res.json();
     if (!data) {
-      throw new Error("Invaild character counts of categories data");
+      throw new Error("Invalid character counts of categories data");
     }
     const { categoryCharacterCounts } = data;
     return categoryCharacterCounts as CategoryCharCount[];
   }
 
-  //홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
-  async function getSummeryData() {
+  // 홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
+  async function getSummaryData() {
     try {
       // 총 글자수
       const charRes = fetch(
@@ -155,8 +153,8 @@ export default async function HomePage({
         points: cheerData.data.totalSendingCheeringScore,
       };
     } catch (err) {
-      console.error("Error in fetch summery data: ", err);
-      throw new Error(`Error in fetch summery data: ${err}`);
+      console.error("Error in fetch summary data: ", err);
+      throw new Error(`Error in fetch summary data: ${err}`);
     }
   }
 
@@ -164,7 +162,7 @@ export default async function HomePage({
     const [categoryCounts, mySummaryData, categoryCharCounts] =
       await Promise.all([
         getPostCategory(),
-        getSummeryData(),
+        getSummaryData(),
         getCategorysCharCount(),
       ]);
     return (
