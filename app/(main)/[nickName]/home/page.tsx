@@ -7,7 +7,6 @@ import { User } from "@/types/User";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import { CategoryCharCount, CategoryCount } from "@/types/Post";
-import { NextResponse } from "next/server";
 
 export default async function HomePage({
   params,
@@ -21,10 +20,10 @@ export default async function HomePage({
   const token = session?.access_token;
 
   if (!token) {
-    return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
+    redirect("/api/auth/logout");
   }
 
-  const { nickName } = await params; 
+  const { nickName } = await params;
 
   // 유저 데이터 가져오기
   async function getUser() {
@@ -39,7 +38,7 @@ export default async function HomePage({
       },
     );
     if (!res.ok) {
-      return redirect("/api/auth/logout");
+      redirect("/api/auth/logout");
     }
     const { data } = await res.json();
     if (!data) {
@@ -101,9 +100,12 @@ export default async function HomePage({
   // 홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
   async function getSummaryData() {
     try {
+      // 검색 기간을 올해로 지정
+      const startDate = `${new Date().getFullYear()}-01-01T00:00:00`;
+
       // 총 글자수
       const charRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count?startDate=${startDate}`,
         {
           method: "GET",
           headers: {
@@ -115,7 +117,7 @@ export default async function HomePage({
 
       // 보낸 응원 포인트
       const cheerRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score?startDate=${startDate}`,
         {
           method: "GET",
           headers: {
@@ -127,7 +129,7 @@ export default async function HomePage({
 
       // 목표 포인트
       const goalRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count?startDate=${startDate}`,
         {
           method: "GET",
           headers: {
