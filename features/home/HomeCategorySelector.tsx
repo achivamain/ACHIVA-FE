@@ -71,7 +71,7 @@ export function HomeCategorySelector({
           </h2>
         }
       >
-        <div className="w-full h-200">
+        <div className="w-full h-200 max-h-[calc(90dvh-8rem)]">
           <div className="flex w-full h-full px-6 pt-8">
             <CategorySelector
               selectedCategories={selectedCategories}
