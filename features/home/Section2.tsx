@@ -68,7 +68,7 @@ export default function HomeSection2() {
       queryKey: ["feed"],
       queryFn: ({ pageParam = 0 }) => fetchPosts(pageParam),
       initialPageParam: 0,
-      getNextPageParam: (lastPage) => {
+      getNextPageParam: (lastPage: PostsData) => {
         if (lastPage.last) return undefined; // 더 없음
         const next = lastPage.number + 1;
         return next < lastPage.totalPages ? next : undefined;
@@ -92,7 +92,7 @@ export default function HomeSection2() {
     return () => io.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const posts = data?.pages.flatMap((p) => p.content) ?? [];
+  const posts = data?.pages.flatMap((p: PostsData) => p.content) ?? [];
 
   return (
     <>
@@ -102,8 +102,8 @@ export default function HomeSection2() {
           <LoadingIcon color="text-theme" />
         </div>
       )}
-      <div className="flex flex-col gap-7">
-        {posts.map((post) => {
+      <div className="flex flex-col gap-7 pb-15">
+        {posts.map((post: PostRes) => {
           return <HomePost key={post.id} post={post} currentUser={currentUser} />;
         })}
       </div>

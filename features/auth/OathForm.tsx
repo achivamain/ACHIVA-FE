@@ -53,7 +53,7 @@ export default function OathForm() {
     setIsLoading(true);
     const payload = {
       profileImageUrl: user.profileImg || null,
-      birth: format(user.birth!, "yyyy-MM-dd"),
+      birth: user.birth ? format(user.birth, "yyyy-MM-dd") : null,
       categories: user.categories,
     };
 
@@ -67,6 +67,8 @@ export default function OathForm() {
       });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Signup server error:", errorData);
         throw new Error("회원가입 중 서버 에러");
       }
 

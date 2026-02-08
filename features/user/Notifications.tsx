@@ -15,10 +15,10 @@ import { useRouter } from "next/navigation";
 const postCache = new Map<string, PostRes | undefined>();
 
 export default function Notifications() {
-  const router = useRouter();
-  useEffect(() => {
-    router.refresh(); // 현재 라우트의 서버 데이터 다시 가져오기
-  }, [router]);
+  // const router = useRouter();
+  // useEffect(() => {
+  //   router.refresh();
+  // }, [router]);
 
   async function fetchNotifications(pageParam: number = 0) {
     const response = await fetch(
