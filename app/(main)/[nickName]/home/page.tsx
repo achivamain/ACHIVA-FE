@@ -169,19 +169,18 @@ export default async function HomePage({
       ]);
     return (
       <div className="w-full flex-1 flex">
-        <div className="flex-1 flex flex-col justify-between">
+        <div className="flex-1 flex flex-col">
           <div className="flex-1 flex justify-center items-end">
-            <div className="w-full h-full max-w-[844px]">
+            <div className="w-full max-w-[844px]">
               <MyCategorys
                 myCategories={user.categories}
                 categoryCounts={categoryCounts}
                 categoryCharCounts={categoryCharCounts}
               />
-              <div className="h-[10%]"></div>
+              <div className="h-10"></div>
               <WebProfileSummary summaryData={mySummaryData} />
             </div>
           </div>
-          {/* Footer 크기 디자인 따라서 다름 -> 문의해봐야 */}
           <Footer />
         </div>
         <div className="bg-[#fafafa] w-60 hidden md:flex justify-center">
