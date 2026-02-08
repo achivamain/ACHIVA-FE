@@ -1,5 +1,4 @@
 // 프로필 요약 정보 컴포넌트
-// TODO: API 연결 아직 안 되었음
 
 type SummaryCardProps = {
   icon: string;
