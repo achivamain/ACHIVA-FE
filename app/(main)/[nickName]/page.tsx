@@ -88,7 +88,6 @@ export default async function Page({
     getMyPendingFriends(),
   ]);
   const myAllFriends = [...myFriends, ...myPendingFriends];
-
   return (
     <div className="flex-1 w-full flex flex-col pb-22 sm:pb-0 sm:pt-15 px-5">
       <div className="flex-1 flex flex-col mx-auto w-full max-w-160">
