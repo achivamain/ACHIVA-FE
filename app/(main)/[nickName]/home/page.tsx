@@ -7,7 +7,6 @@ import { User } from "@/types/User";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import { CategoryCharCount, CategoryCount } from "@/types/Post";
-import { NextResponse } from "next/server";
 
 export default async function HomePage({
   params,
@@ -21,13 +20,13 @@ export default async function HomePage({
   const token = session?.access_token;
 
   if (!token) {
-    return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
+    redirect("/api/auth/logout");
   }
 
-  const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해
+  const { nickName } = await params;
 
+  // 유저 데이터 가져오기
   async function getUser() {
-    // 유저 데이터 가져오기
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
       {
@@ -39,20 +38,18 @@ export default async function HomePage({
       },
     );
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      return redirect("/api/auth/logout");
-      throw new Error(errorData.error || "서버 오류");
+      redirect("/api/auth/logout");
     }
     const { data } = await res.json();
     if (!data) {
-      throw new Error("Invaild user data");
+      throw new Error("Invalid user data");
     }
     return data as User;
   }
 
   const [user] = await Promise.all([getUser()]);
 
-  //카테고리별 게시물 수 받아오기
+  // 카테고리별 게시물 수 받아오기
   async function getPostCategory() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
@@ -70,13 +67,13 @@ export default async function HomePage({
     }
     const { data } = await res.json();
     if (!data) {
-      throw new Error("Invaild post counts of categories data");
+      throw new Error("Invalid post counts of categories data");
     }
     const { categoryCounts } = data;
     return categoryCounts as CategoryCount[];
   }
 
-  //카테고리별 글자수 받아오기
+  // 카테고리별 글자수 받아오기
   async function getCategorysCharCount() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
@@ -94,18 +91,21 @@ export default async function HomePage({
     }
     const { data } = await res.json();
     if (!data) {
-      throw new Error("Invaild character counts of categories data");
+      throw new Error("Invalid character counts of categories data");
     }
     const { categoryCharacterCounts } = data;
     return categoryCharacterCounts as CategoryCharCount[];
   }
 
-  //홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
-  async function getSummeryData() {
+  // 홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
+  async function getSummaryData() {
     try {
+      // 검색 기간을 올해로 지정
+      const startDate = `${new Date().getFullYear()}-01-01T00:00:00`;
+
       // 총 글자수
       const charRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count?startDate=${startDate}`,
         {
           method: "GET",
           headers: {
@@ -117,7 +117,7 @@ export default async function HomePage({
 
       // 보낸 응원 포인트
       const cheerRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score?startDate=${startDate}`,
         {
           method: "GET",
           headers: {
@@ -129,7 +129,7 @@ export default async function HomePage({
 
       // 목표 포인트
       const goalRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count`,
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count?startDate=${startDate}`,
         {
           method: "GET",
           headers: {
@@ -155,8 +155,8 @@ export default async function HomePage({
         points: cheerData.data.totalSendingCheeringScore,
       };
     } catch (err) {
-      console.error("Error in fetch summery data: ", err);
-      throw new Error(`Error in fetch summery data: ${err}`);
+      console.error("Error in fetch summary data: ", err);
+      throw new Error(`Error in fetch summary data: ${err}`);
     }
   }
 
@@ -164,24 +164,23 @@ export default async function HomePage({
     const [categoryCounts, mySummaryData, categoryCharCounts] =
       await Promise.all([
         getPostCategory(),
-        getSummeryData(),
+        getSummaryData(),
         getCategorysCharCount(),
       ]);
     return (
       <div className="w-full flex-1 flex">
-        <div className="flex-1 flex flex-col justify-between">
+        <div className="flex-1 flex flex-col">
           <div className="flex-1 flex justify-center items-end">
-            <div className="w-full h-full max-w-[844px]">
+            <div className="w-full max-w-[844px]">
               <MyCategorys
                 myCategories={user.categories}
                 categoryCounts={categoryCounts}
                 categoryCharCounts={categoryCharCounts}
               />
-              <div className="h-[10%]"></div>
+              <div className="h-10"></div>
               <WebProfileSummary summaryData={mySummaryData} />
             </div>
           </div>
-          {/* Footer 크기 디자인 따라서 다름 -> 문의해봐야 */}
           <Footer />
         </div>
         <div className="bg-[#fafafa] w-60 hidden md:flex justify-center">
