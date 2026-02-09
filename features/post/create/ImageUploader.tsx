@@ -39,6 +39,7 @@ export default function ImageUploader() {
     updateImageZoom,
     setMinZoom,
     removeImage,
+    uploadProgress,
   } = useMultiImageUploader({
     apiUrl: "/api/posts/upload",
     onUploadCompleted: (srcs: string[]) => {
@@ -227,11 +228,12 @@ export default function ImageUploader() {
         <>
           <div className="mt-5 w-full h-[50px]">
             <NextStepButton
-              // disabled={isUploading}
               isLoading={isUploading}
               onClick={onUpload}
             >
-              다음
+              {isUploading
+                ? `업로드 중 (${uploadProgress.current}/${uploadProgress.total})`
+                : "다음"}
             </NextStepButton>
           </div>
           <div className="mt-2 w-full">

@@ -2,6 +2,10 @@ import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
 import { jwtDecode } from "jwt-decode";
 
+if (typeof process !== "undefined" && (!process.env.AUTH_COGNITO_ID || !process.env.AUTH_COGNITO_ISSUER)) {
+  console.warn("⚠️ [Auth Configuration] Missing AUTH_COGNITO_ID or AUTH_COGNITO_ISSUER in environment variables.");
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Cognito({

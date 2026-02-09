@@ -1,7 +1,7 @@
 import type { PostRes } from "@/types/Post";
 import { defaultProfileImg } from "../user/defaultProfileImg";
 
-// 하... 이거 손좀보자
+
 export function getFirstPage(): PostRes {
   return {
     id: "5",

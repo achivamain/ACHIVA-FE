@@ -6,6 +6,22 @@ type Props = {
   onUploadCompleted: (url: string) => void; // 이미지 주소 받아서 상태 등 업데이트
 };
 
+// Image Data Type from App
+type AppImageData = {
+  type: "IMAGE_DATA";
+  data: string; // base64
+};
+
+// Type Guard
+function isAppImageData(data: unknown): data is AppImageData {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    (data as AppImageData).type === "IMAGE_DATA" &&
+    typeof (data as AppImageData).data === "string"
+  );
+}
+
 //단일 이미지 업로드
 export default function useImageUploader({ apiUrl, onUploadCompleted }: Props) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -26,8 +42,8 @@ export default function useImageUploader({ apiUrl, onUploadCompleted }: Props) {
       const message = event.data;
 
       // 약속된 'IMAGE_DATA' 타입인지, 데이터가 있는지 확인합니다.
-      if (message && message.type === "IMAGE_DATA" && message.data) {
-        console.log("앱으로부터 이미지 데이터를 받았습니다.");
+      if (isAppImageData(message)) {
+        // console.log("앱으로부터 이미지 데이터를 받았습니다.");
         const imageBase64 = message.data;
 
         // 1. 받은 Base64 데이터로 Cropper의 이미지 소스를 설정합니다.
@@ -162,11 +178,12 @@ export function useMultiImageUploader({
 }: MultiProps) {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
 
   // 새 이미지 추가
   const addImage = useCallback(
     (image: ImageItem) => {
-      setImages((prev) => {
+      setImages((prev: ImageItem[]) => {
         if (prev.length >= maxImages) {
           alert(`최대 ${maxImages}장까지 업로드할 수 있습니다.`);
           return prev;
@@ -183,8 +200,8 @@ export function useMultiImageUploader({
       const message = event.data;
 
       // 데이터 확인
-      if (message && message.type === "IMAGE_DATA" && message.data) {
-        console.log("앱으로부터 이미지 데이터를 받았습니다.");
+      if (isAppImageData(message)) {
+        // console.log("앱으로부터 이미지 데이터를 받았습니다.");
         const imageBase64 = message.data;
 
         addImage({
@@ -241,30 +258,30 @@ export function useMultiImageUploader({
 
   /** 특정 이미지의 크롭 업데이트 */
   const updateImageCrop = (id: string, crop: { x: number; y: number }) => {
-    setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, crop } : img)),
+    setImages((prev: ImageItem[]) =>
+      prev.map((img: ImageItem) => (img.id === id ? { ...img, crop } : img)),
     );
   };
 
   /** 특정 이미지의 줌 업데이트 */
   const updateImageZoom = (id: string, zoom: number) => {
-    setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, zoom } : img)),
+    setImages((prev: ImageItem[]) =>
+      prev.map((img: ImageItem) => (img.id === id ? { ...img, zoom } : img)),
     );
   };
 
   // 최소 줌 설정 - 이미지가 cropSize보다 작아지는 일 방지
   const setMinZoom = (id: string, minZoom: number) => {
-    setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, minZoom } : img)),
+    setImages((prev: ImageItem[]) =>
+      prev.map((img: ImageItem) => (img.id === id ? { ...img, minZoom } : img)),
     );
   };
 
   /** 크롭 완료 */
   const onCropComplete = useCallback(
     (id: string, _: Area, croppedPixels: Area) => {
-      setImages((prev) =>
-        prev.map((img) =>
+      setImages((prev: ImageItem[]) =>
+        prev.map((img: ImageItem) =>
           img.id === id ? { ...img, croppedAreaPixels: croppedPixels } : img,
         ),
       );
@@ -274,7 +291,7 @@ export function useMultiImageUploader({
 
   //이미지 삭제
   const removeImage = (id: string) => {
-    setImages((prev) => prev.filter((img) => img.id !== id));
+    setImages((prev: ImageItem[]) => prev.filter((img: ImageItem) => img.id !== id));
   };
 
   /** 업로드 처리 */
@@ -289,43 +306,65 @@ export function useMultiImageUploader({
     }
 
     setIsUploading(true);
+    setUploadProgress({ current: 0, total: images.length });
     const uploadedUrls: string[] = [];
+    let hasError = false;
 
     try {
-      for (const image of images) {
-        const blob = await getCroppedBlob(
-          image.imageSrc,
-          image.croppedAreaPixels!,
-          image.originalFile?.type,
-        );
-        const fileNameBase = (image.originalFile?.name ?? "image-from-app")
-          .replace(/\.[^/.]+$/, "")
-          .slice(0, 80);
-        const ext = mimeToExt(blob.type) || "jpg";
-        const croppedFile = new File([blob], `${fileNameBase}-cropped.${ext}`, {
-          type: blob.type,
-        });
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        setUploadProgress((prev) => ({ ...prev, current: i + 1 }));
 
-        const formData = new FormData();
-        formData.append("file", croppedFile);
+        try {
+          const blob = await getCroppedBlob(
+            image.imageSrc,
+            image.croppedAreaPixels!,
+            image.originalFile?.type,
+          );
+          const fileNameBase = (image.originalFile?.name ?? "image-from-app")
+            .replace(/\.[^/.]+$/, "")
+            .slice(0, 80);
+          const ext = mimeToExt(blob.type) || "jpg";
+          const croppedFile = new File([blob], `${fileNameBase}-cropped.${ext}`, {
+            type: blob.type,
+          });
 
-        // 같은 오리진의 Next API 라우트로 업로드 (프록시)
-        const res = await fetch(apiUrl, {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
+          const formData = new FormData();
+          formData.append("file", croppedFile);
 
-        if (!res.ok) throw new Error(data?.error || "업로드 실패");
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            body: formData,
+          });
 
-        uploadedUrls.push(data.url);
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data?.error || `이전 이미지 업로드 실패 (${i + 1}번째)`);
+          }
+
+          const data = await res.json();
+          uploadedUrls.push(data.url);
+        } catch (innerError: unknown) {
+          console.error(`Image ${i + 1} upload error:`, innerError);
+          hasError = true;
+          const errorMessage =
+            innerError instanceof Error
+              ? innerError.message
+              : "일부 이미지 업로드 중 오류가 발생했습니다.";
+          alert(errorMessage);
+          break; // 한 장이라도 실패하면 중단 (트랜잭션처럼 처리하거나, 개별 처리 가능하지만 여기선 중단이 안전)
+        }
       }
-      onUploadCompleted(uploadedUrls);
-      resetAll();
+
+      if (!hasError) {
+        onUploadCompleted(uploadedUrls);
+        resetAll();
+      }
     } catch (e) {
-      alert("업로드 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      console.error("Total upload error:", e);
     } finally {
       setIsUploading(false);
+      setUploadProgress({ current: 0, total: 0 });
     }
   };
 
@@ -343,6 +382,7 @@ export function useMultiImageUploader({
     updateImageZoom,
     removeImage,
     setMinZoom,
+    uploadProgress,
     resetAll,
   };
 }

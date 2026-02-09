@@ -20,5 +20,10 @@ export async function POST(req: NextRequest) {
     }
   );
 
-  return res;
+  const responseData = await res.json();
+
+  return NextResponse.json({
+    data: responseData.data,
+    nickName: session?.user?.nickName,
+  });
 }

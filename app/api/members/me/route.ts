@@ -8,16 +8,30 @@ export async function GET() {
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  return res;
+    if (!res.ok) {
+      const errorText = await res.text();
+      return NextResponse.json(
+        { error: "Backend error", details: errorText },
+        { status: res.status }
+      );
+    }
+
+    const data = await res.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("GET /api/members/me error:", error);
+    return NextResponse.json({ error: "Client fetch error" }, { status: 500 });
+  }
 }

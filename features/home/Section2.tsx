@@ -8,6 +8,7 @@ import type { PostsData } from "@/types/responses";
 import HomePost from "@/features/home/Post";
 import { useSession } from "next-auth/react";
 import { User } from "@/types/User";
+import type { PostRes } from "@/types/Post";
 
 export default function HomeSection2() {
   const { data: currentUser } = useQuery({
@@ -49,18 +50,7 @@ export default function HomeSection2() {
     if (!response.ok) throw new Error("Failed to fetch");
     const json = await response.json();
 
-    const contentWithCheerings = await Promise.all(
-      json.data.content.map(async (post: any) => {
-        const cheeringsRes = await fetch(`/api/cheerings?postId=${post.id}`);
-        const cheeringsJson = await cheeringsRes.json();
-        return { ...post, cheerings: cheeringsJson.data.content };
-      })
-    );
-
-    return {
-      ...json.data,
-      content: contentWithCheerings,
-    } as PostsData;
+    return json.data as PostsData;
   }
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -77,7 +67,7 @@ export default function HomeSection2() {
     });
 
   // 센티넬 IO
-  const loaderRef = useRef(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!loaderRef.current) return;
     const io = new IntersectionObserver(

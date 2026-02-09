@@ -8,6 +8,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import { CaretLeftIcon, CaretRightIcon } from "@/components/Icons";
+import { useRouter } from "next/navigation";
 
 const slides = [
   {
@@ -29,6 +30,7 @@ const slides = [
 ];
 
 export default function OathForm() {
+  const router = useRouter();
   const user = useSignupInfoStore.use.user();
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -81,7 +83,7 @@ export default function OathForm() {
         console.error("기본 목표 생성 실패:", goalError);
       }
 
-      window.location.href = "/";
+      router.push("/");
     } catch (err) {
       console.error(err);
       alert(

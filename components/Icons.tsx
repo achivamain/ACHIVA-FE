@@ -4,7 +4,7 @@
 export function CheckSquareIcon({ checked }: { checked: boolean }) {
   if (checked) {
     return (
-      <svg
+      <svg shapeRendering="geometricPrecision"
         width="35"
         height="35"
         viewBox="0 0 35 35"
@@ -19,7 +19,7 @@ export function CheckSquareIcon({ checked }: { checked: boolean }) {
     );
   }
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="35"
       height="35"
       viewBox="0 0 35 35"
@@ -54,7 +54,7 @@ export function CheckSquareIcon({ checked }: { checked: boolean }) {
 
 export function CaretRight25pxIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="25"
       height="25"
       viewBox="0 0 25 25"
@@ -76,7 +76,7 @@ export function CaretRight25pxIcon() {
 // 전체 동의 체크 아이콘 (25x25)
 export function CheckAllIcon({ checked }: { checked: boolean }) {
   return checked ? (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="25"
       height="25"
       viewBox="0 0 25 25"
@@ -89,7 +89,7 @@ export function CheckAllIcon({ checked }: { checked: boolean }) {
       />
     </svg>
   ) : (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="25"
       height="25"
       viewBox="0 0 25 25"
@@ -106,7 +106,7 @@ export function CheckAllIcon({ checked }: { checked: boolean }) {
 
 export function BackIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="32"
       height="32"
       viewBox="0 0 32 32"
@@ -123,7 +123,7 @@ export function BackIcon() {
 
 export function CheckIcon({ fill }: { fill: string }) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="20"
       height="15"
       viewBox="0 0 20 15"
@@ -146,7 +146,7 @@ export function LoadingIcon({
   color?: string;
 }) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       className={`${size} animate-spin ${color}`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
@@ -171,7 +171,7 @@ export function LoadingIcon({
 
 export function SignupBackIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="32"
       height="32"
       viewBox="0 0 32 32"
@@ -188,7 +188,7 @@ export function SignupBackIcon() {
 
 export function SignupNextIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="32"
       height="32"
       viewBox="0 0 32 32"
@@ -211,7 +211,7 @@ export function HomeIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -226,7 +226,7 @@ export function HomeIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -249,7 +249,7 @@ export function GoalIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -262,7 +262,7 @@ export function GoalIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -283,7 +283,7 @@ export function FeedIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -296,7 +296,7 @@ export function FeedIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -317,7 +317,7 @@ export function SideBarHeartIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -330,7 +330,7 @@ export function SideBarHeartIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -351,7 +351,7 @@ export function MyPageIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -364,7 +364,7 @@ export function MyPageIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="32"
           height="32"
           viewBox="0 0 32 32"
@@ -385,7 +385,7 @@ export function SearchIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -400,7 +400,7 @@ export function SearchIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -423,7 +423,7 @@ export function PostIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -438,7 +438,7 @@ export function PostIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -461,7 +461,7 @@ export function NotificationIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -476,7 +476,7 @@ export function NotificationIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width={32}
           height={32}
           viewBox="0 0 32 32"
@@ -499,7 +499,7 @@ export function SidebarSettingIcon({ fill = false }: NavIconProps) {
   return (
     <>
       {fill ? (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="35"
           height="35"
           viewBox="0 0 35 35"
@@ -512,7 +512,7 @@ export function SidebarSettingIcon({ fill = false }: NavIconProps) {
           />
         </svg>
       ) : (
-        <svg
+        <svg shapeRendering="geometricPrecision"
           width="35"
           height="35"
           viewBox="0 0 35 35"
@@ -532,7 +532,7 @@ export function SidebarSettingIcon({ fill = false }: NavIconProps) {
 // 프로필 ===================================
 export function BellIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       className="cursor-pointer"
       width={24}
       height={25}
@@ -551,7 +551,7 @@ export function BellIcon() {
 
 export function FollowerIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       className="cursor-pointer"
       width={30}
       height={19}
@@ -570,7 +570,7 @@ export function FollowerIcon() {
 
 export function SettingIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width={30}
       height={31}
       viewBox="0 0 30 31"
@@ -590,7 +590,7 @@ export function SettingIcon() {
 // 프로필 관련 모달들 ===========================
 export function CloseIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width={21}
       height={21}
       viewBox="0 0 21 21"
@@ -608,7 +608,7 @@ export function CloseIcon() {
 
 export function ProfileImgUploadIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width={25}
       height={25}
       viewBox="0 0 25 25"
@@ -628,7 +628,7 @@ export function ProfileImgUploadIcon() {
 
 export function EnergyIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="43"
       height="44"
       viewBox="0 0 43 44"
@@ -653,7 +653,7 @@ export function EnergyIcon() {
 
 export function PencilIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="17"
       height="17"
       viewBox="0 0 17 17"
@@ -670,7 +670,7 @@ export function PencilIcon() {
 
 export function XIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="15"
       height="15"
       viewBox="0 0 15 15"
@@ -689,7 +689,7 @@ export function XIcon() {
 // 프로필-목표 ====================
 export function GoalEditIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -708,7 +708,7 @@ export function GoalEditIcon() {
 
 export function GoalArchiveIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -727,7 +727,7 @@ export function GoalArchiveIcon() {
 
 export function HeartIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="33"
       height="33"
       viewBox="0 0 33 33"
@@ -744,7 +744,7 @@ export function HeartIcon() {
 
 export function CaretLeftIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="32"
       height="32"
       viewBox="0 0 32 32"
@@ -762,7 +762,7 @@ export function CaretLeftIcon() {
 
 export function CaretRightIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="32"
       height="33"
       viewBox="0 0 32 33"
@@ -779,7 +779,7 @@ export function CaretRightIcon() {
 
 export function CaretRight24pxIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="24"
       height="24"
       viewBox="0 0 24 24"
@@ -795,7 +795,7 @@ export function CaretRight24pxIcon() {
 }
 export function ThreeDotsIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="26"
       height="26"
       viewBox="0 0 26 26"
@@ -813,7 +813,7 @@ export function ThreeDotsIcon() {
 // 설정 ==========================
 export function SettingAccountIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="36"
       height="35"
       viewBox="0 0 36 35"
@@ -830,7 +830,7 @@ export function SettingAccountIcon() {
 
 export function SettingNotificationIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="27"
       height="29"
       viewBox="0 0 27 29"
@@ -847,7 +847,7 @@ export function SettingNotificationIcon() {
 
 export function SettingPrivateIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="27"
       height="30"
       viewBox="0 0 27 30"
@@ -864,7 +864,7 @@ export function SettingPrivateIcon() {
 
 export function SettingInfoIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="29"
       height="29"
       viewBox="0 0 29 29"
@@ -881,7 +881,7 @@ export function SettingInfoIcon() {
 
 export function SettingNoticeIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="35"
       height="35"
       viewBox="0 0 35 35"
@@ -908,7 +908,7 @@ export function SettingNoticeIcon() {
 
 export function SettingInquiryIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="29"
       height="29"
       viewBox="0 0 29 29"
@@ -925,7 +925,7 @@ export function SettingInquiryIcon() {
 
 export function SettingNextIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="11"
       height="19"
       viewBox="0 0 11 19"
@@ -942,7 +942,7 @@ export function SettingNextIcon() {
 
 export function SettingPasswordIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="35"
       height="35"
       viewBox="0 0 35 35"
@@ -959,7 +959,7 @@ export function SettingPasswordIcon() {
 
 export function SettingBirthdayIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="27"
       height="29"
       viewBox="0 0 27 29"
@@ -977,7 +977,7 @@ export function SettingBirthdayIcon() {
 // 글쓰기================================
 export function SubtitleDragIcon({ selected }: { selected: boolean }) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="12"
       height="20"
       viewBox="0 0 12 20"
@@ -994,7 +994,7 @@ export function SubtitleDragIcon({ selected }: { selected: boolean }) {
 
 export function SubtitleCheckIcon({ selected }: { selected: boolean }) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="25"
       height="18"
       viewBox="0 0 25 18"
@@ -1011,7 +1011,7 @@ export function SubtitleCheckIcon({ selected }: { selected: boolean }) {
 
 export function SubtitlePlusIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="19"
       height="20"
       viewBox="0 0 19 20"
@@ -1028,7 +1028,7 @@ export function SubtitlePlusIcon() {
 
 export function BgColorSelectIcon({ white = false }: { white?: boolean }) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="37"
       height="37"
       viewBox="0 0 37 37"
@@ -1049,7 +1049,7 @@ type CheerProps = {
 };
 export function ThumbUpCheerIcon({ active = false }: CheerProps) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="20"
       height="19"
       viewBox="0 0 20 19"
@@ -1071,7 +1071,7 @@ export function ThumbUpCheerIcon({ active = false }: CheerProps) {
 
 export function FireCheerIcon({ active = false }: CheerProps) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="19"
       height="19"
       viewBox="0 0 19 19"
@@ -1089,7 +1089,7 @@ export function FireCheerIcon({ active = false }: CheerProps) {
 
 export function HeartCheerIcon({ active = false }: CheerProps) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="19"
       height="19"
       viewBox="0 0 19 19"
@@ -1107,7 +1107,7 @@ export function HeartCheerIcon({ active = false }: CheerProps) {
 
 export function CloverCheerIcon({ active = false }: CheerProps) {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="19"
       height="19"
       viewBox="0 0 19 19"
@@ -1126,7 +1126,7 @@ export function CloverCheerIcon({ active = false }: CheerProps) {
 // 피드에 사용하는 아이콘
 export function HorizontalThreeDotsIcon() {
   return (
-    <svg
+    <svg shapeRendering="geometricPrecision"
       width="21"
       height="4"
       viewBox="0 0 21 4"

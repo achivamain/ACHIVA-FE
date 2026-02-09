@@ -9,11 +9,16 @@ import Post from "../post/Post";
 import ProfileImg from "@/components/ProfileImg";
 import Link from "next/link";
 import CheerBtns from "../post/CheerBtns";
-import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { HorizontalThreeDotsIcon } from "@/components/Icons";
+import { useRouter } from "next/navigation";
+import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 
 export default function FeedPost({ post }: { post: PostRes }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
   const { data: currentUser } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
@@ -54,7 +59,7 @@ export default function FeedPost({ post }: { post: PostRes }) {
           >
             <HorizontalThreeDotsIcon />
           </button>
-        </div>  
+        </div>
         <div>
           <Post post={post} />
         </div>
@@ -66,33 +71,56 @@ export default function FeedPost({ post }: { post: PostRes }) {
             <li
               className="py-2 cursor-pointer text-[#DF171B] font-semibold"
               onClick={async () => {
-                await fetch(`/api/report`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    postId: post.id,
-                    reporterName: currentUser?.nickName,
-                  }),
-                });
-                alert("신고가 접수되었습니다.");
-                setIsModalOpen(false);
+                if (isReporting) return;
+                setIsReporting(true);
+                try {
+                  const res = await fetch(`/api/report`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      postId: post.id,
+                      reporterName: currentUser?.nickName,
+                    }),
+                  });
+                  if (!res.ok) throw new Error("Report failed");
+                  alert("신고가 접수되었습니다.");
+                } catch (err) {
+                  console.error(err);
+                  alert("신고 중 오류가 발생했습니다.");
+                } finally {
+                  setIsReporting(false);
+                  setIsModalOpen(false);
+                }
               }}
             >
-              신고
+              {isReporting ? "처리 중..." : "신고"}
             </li>
           )}
           {currentUser?.id === post.memberId && (
             <li
               className="py-2 cursor-pointer text-[#DF171B] font-semibold"
               onClick={async () => {
-                await fetch(`/api/posts?postId=${post.id}`, {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" },
-                });
-                window.location.href = `/${currentUser?.nickName}`;
+                if (isDeleting) return;
+                setIsDeleting(true);
+                try {
+                  const res = await fetch(`/api/posts?postId=${post.id}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                  });
+                  if (!res.ok) throw new Error("Delete failed");
+
+                  await queryClient.invalidateQueries({ queryKey: ["feed"] });
+                  router.push(`/${currentUser?.nickName}`);
+                } catch (err) {
+                  console.error(err);
+                  alert("삭제 중 오류가 발생했습니다.");
+                } finally {
+                  setIsDeleting(false);
+                  setIsModalOpen(false);
+                }
               }}
             >
-              삭제
+              {isDeleting ? "삭제 중..." : "삭제"}
             </li>
           )}
           <li

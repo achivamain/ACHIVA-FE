@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ACHIVA-FE
 
-## Getting Started
+어치바(ACHIVA) 프론트엔드 프로젝트입니다.
 
-First, run the development server:
+## 시작하기 (Getting Started)
+
+### 1. 필수 요구사항
+- Node.js 18+
+- pnpm (패키지 매니저)
+
+### 2. 설치
+의존성 패키지를 설치합니다.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. 환경 변수 설정
+로컬 개발을 위해 환경 변수 설정이 필요합니다.  
+`.env.template` 파일을 복사하여 `.env.local` 파일을 생성하고, 필요한 값을 채워주세요.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.template .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.local` 필수 항목:
+- `AUTH_SECRET`: NextAuth 비밀키
+- `AUTH_COGNITO_ID`: AWS Cognito 클라이언트 ID
+- `AUTH_COGNITO_ISSUER`: AWS Cognito 발급자 URL
+- `NEXT_PUBLIC_SERVER_URL`: 백엔드 API URL
+- `NEXTAUTH_URL`: `http://localhost:3000` (로컬 개발 시)
 
-## Learn More
+### 4. 개발 서버 실행
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev
+```
+브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인하세요.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 주요 스크립트
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `pnpm dev`: 개발 모드로 실행
+- `pnpm build`: 프로덕션 빌드
+- `pnpm start`: 빌드된 애플리케이션 실행
+- `pnpm lint`: 린트 검사
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 기술 스택
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State/Query**: Zustand, TanStack Query
+- **Auth**: NextAuth.js (v5 beta)

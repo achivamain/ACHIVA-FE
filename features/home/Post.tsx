@@ -7,10 +7,37 @@ import dateFormatter from "@/lib/dateFormatter";
 import Post from "../post/Post";
 import ProfileImg from "@/components/ProfileImg";
 import Link from "next/link";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import CheerBtns from "../post/CheerBtns";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
-export default function HomePost({ post, currentUser }: { post: PostRes, currentUser?: User }) {
+import type { Cheering } from "@/types/responses";
+
+export default function HomePost({
+  post,
+  currentUser,
+}: {
+  post: PostRes;
+  currentUser?: User;
+}) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
+
+  // 개별 게시글의 응원 정보 가져오기 (N+1 문제 해결)
+  const { data: cheerings } = useQuery({
+    queryKey: ["cheerings", post.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/cheerings?postId=${post.id}`);
+      if (!res.ok) throw new Error("Failed to fetch cheerings");
+      const json = await res.json();
+      return json.data.content as Cheering[];
+    },
+    enabled: !!post.id,
+    staleTime: 1000 * 60, // 1분간 캐시 유지
+  });
   return (
     <>
       <div className="w-full">
@@ -48,43 +75,68 @@ export default function HomePost({ post, currentUser }: { post: PostRes, current
         <div>
           <Post post={post} />
         </div>
-        <CheerBtns postId={post.id} cheerings={post.cheerings!} />
+        <CheerBtns postId={post.id} cheerings={cheerings || post.cheerings || []} />
       </div>
       {isModalOpen && (
         <ModalWithoutCloseBtn
-          // title={<p className="w-xs">글쓰기를 중단하시겠어요?</p>}
           onClose={() => setIsModalOpen(false)}
         >
           {currentUser?.id !== post.memberId && (
             <li
               className="py-2 cursor-pointer text-[#DF171B] font-semibold"
               onClick={async () => {
-                await fetch(`/api/report`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    postId: post.id,
-                    reporterName: currentUser?.nickName,
-                  }),
-                });
-                alert("신고가 접수되었습니다.");
+                if (isReporting) return;
+                setIsReporting(true);
+                try {
+                  const res = await fetch(`/api/report`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      postId: post.id,
+                      reporterName: currentUser?.nickName,
+                    }),
+                  });
+                  if (!res.ok) throw new Error("Report failed");
+                  alert("신고가 접수되었습니다.");
+                } catch (err) {
+                  console.error(err);
+                  alert("신고 중 오류가 발생했습니다.");
+                } finally {
+                  setIsReporting(false);
+                  setIsModalOpen(false);
+                }
               }}
             >
-              신고
+              {isReporting ? "처리 중..." : "신고"}
             </li>
           )}
           {currentUser?.id === post.memberId && (
             <li
               className="py-2 cursor-pointer text-[#DF171B] font-semibold"
               onClick={async () => {
-                await fetch(`/api/posts?postId=${post.id}`, {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" },
-                });
-                window.location.href = `/${currentUser?.nickName}`;
+                if (isDeleting) return;
+                setIsDeleting(true);
+                try {
+                  const res = await fetch(`/api/posts?postId=${post.id}`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                  });
+                  if (!res.ok) throw new Error("Delete failed");
+
+                  // 캐시 무효화 및 이동
+                  await queryClient.invalidateQueries({ queryKey: ["home"] });
+                  await queryClient.invalidateQueries({ queryKey: ["feed"] });
+                  router.push(`/${currentUser?.nickName}`);
+                } catch (err) {
+                  console.error(err);
+                  alert("삭제 중 오류가 발생했습니다.");
+                } finally {
+                  setIsDeleting(false);
+                  setIsModalOpen(false);
+                }
               }}
             >
-              삭제
+              {isDeleting ? "삭제 중..." : "삭제"}
             </li>
           )}
           <li

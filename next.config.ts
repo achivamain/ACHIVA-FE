@@ -1,32 +1,37 @@
 import type { NextConfig } from "next";
 
+const withPWA = require("@ducanh2912/next-pwa").default({
+  dest: "public",
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  swcMinify: true,
+  disable: false,
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
+
 const nextConfig: NextConfig = {
   /* config options here */
-  compiler: {
-    removeConsole:
-      process.env.NODE_ENV === "production"
-        ? { exclude: ["error", "warn"] }
-        : false, //배포시 console.log 제거
-  },
   images: {
-    domains: ["achivadata.s3.ap-northeast-2.amazonaws.com"],
+    minimumCacheTTL: 60,
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/terms",
-        destination:
-          "https://achivamain.notion.site/?p=247f9799dbb880859f08f64d81bc6335&pm=c", // 이용약관
-        permanent: true,
-      },
-      {
-        source: "/privacy",
-        destination:
-          "https://achivamain.notion.site/?p=247f9799dbb8800b8057d9fe46809e08&pm=c", // 개인정보 처리방침
-        permanent: true,
-      },
-    ];
+  turbopack: {
+    resolveAlias: {
+      canvas: "./empty-module.ts",
+    },
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

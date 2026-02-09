@@ -8,8 +8,10 @@ import { UserSchema } from "../auth/schima";
 import ImageUploader from "./ImageUploader";
 import { LoadingIcon, PencilIcon, XIcon } from "@/components/Icons";
 import { categories as allCategories } from "@/types/Categories";
+import { useRouter } from "next/navigation";
 
 export default function EditProfile() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
   // static한 세션 정보를 사용하지 않고 api 호출해서 사용
@@ -91,7 +93,7 @@ export default function EditProfile() {
       onSuccess: () => {
         // "user" 키를 invalidate해서 refetch 유도
         queryClient.invalidateQueries({ queryKey: ["user"] });
-        window.location.href = `/${nickName}`;
+        router.push(`/${nickName}`);
       },
 
       onError: (err) => {
@@ -176,9 +178,8 @@ export default function EditProfile() {
       <div className="w-full flex flex-col gap-3">
         <InputSection label="닉네임">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${
-              isEditing.nickName ? "hidden" : ""
-            }`}
+            className={`absolute right-5 top-4 cursor-pointer ${isEditing.nickName ? "hidden" : ""
+              }`}
           >
             <PencilIcon />
           </div>
@@ -208,9 +209,8 @@ export default function EditProfile() {
         )}
         <InputSection label="나를 소개하는 한 줄">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${
-              isEditing.bio ? "hidden" : ""
-            }`}
+            className={`absolute right-5 top-4 cursor-pointer ${isEditing.bio ? "hidden" : ""
+              }`}
           >
             <PencilIcon />
           </div>
@@ -228,17 +228,15 @@ export default function EditProfile() {
         </InputSection>
         <InputSection label="관심있는 성취 카테고리">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${
-              isEditing.category ? "hidden" : ""
-            }`}
+            className={`absolute right-5 top-4 cursor-pointer ${isEditing.category ? "hidden" : ""
+              }`}
           >
             <PencilIcon />
           </div>
           <div
             ref={categoryRef}
-            className={`py-2 px-4 w-full h-auto flex flex-wrap gap-1.5 cursor-pointer ${
-              isEditing.category ? "border-2 border-theme rounded-sm" : ""
-            }`}
+            className={`py-2 px-4 w-full h-auto flex flex-wrap gap-1.5 cursor-pointer ${isEditing.category ? "border-2 border-theme rounded-sm" : ""
+              }`}
             onClick={() => {
               setIsEditing((prev) => ({ ...prev, category: true }));
             }}

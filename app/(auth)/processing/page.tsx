@@ -17,10 +17,16 @@ export default function Page() {
       });
 
       // false - 신규 유저(회원가입) / true - 기존 유저(로그인)
-      const isInit = (await res.json()).data;
+      const data = await res.json();
+      const isInit = data.data;
+      const nickName = data.nickName;
 
       if (isInit) {
-        redirect("/");
+        if (nickName) {
+          redirect(`/${nickName}/goals`);
+        } else {
+          redirect("/");
+        }
       } else {
         redirect("/signup");
       }

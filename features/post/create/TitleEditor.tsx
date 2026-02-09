@@ -5,11 +5,12 @@ import { format } from "date-fns";
 import { useState, useRef, useLayoutEffect } from "react";
 import { User } from "@/types/User";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "motion/react";
-import { AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { DraftPost } from "@/types/Post";
+import { useRouter } from "next/navigation";
 
 export default function TitleEditor() {
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const draft = useDraftPostStore.use.post();
@@ -53,12 +54,12 @@ export default function TitleEditor() {
         },
       });
       if (!res.ok) {
-        console.log(res);
+        console.error("게시글 생성 실패:", res.status);
         throw new Error("게시글 작성 중 에러");
       }
-      window.location.href = `/${currentUser?.nickName}`;
+      router.push(`/${currentUser?.nickName}`);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       alert(
         "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
       );
@@ -137,8 +138,9 @@ export default function TitleEditor() {
       <div className="w-full mt-5">
         <NextStepButton
           isLoading={isLoading}
-          // disabled={!draft.title}
+          disabled={isLoading || !draft.title?.trim()}
           onClick={async () => {
+            if (isLoading) return;
             createNewPost(draft);
           }}
         >

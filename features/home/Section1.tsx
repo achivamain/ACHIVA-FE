@@ -9,6 +9,7 @@ import HomePost from "@/features/home/Post";
 import { getFirstPage } from "@/features/post/firstPost";
 import PostSkeleton from "./PostSkeleton";
 import { User } from "@/types/User";
+import type { PostRes } from "@/types/Post";
 
 export default function HomeSection1() {
   const { data: currentUser } = useQuery({
@@ -37,18 +38,7 @@ export default function HomeSection1() {
     if (!response.ok) throw new Error("Failed to fetch");
     const json = await response.json();
 
-    const contentWithCheerings = await Promise.all(
-      json.content.map(async (post: any) => {
-        const cheeringsRes = await fetch(`/api/cheerings?postId=${post.id}`);
-        const cheeringsJson = await cheeringsRes.json();
-        return { ...post, cheerings: cheeringsJson.data.content };
-      })
-    );
-
-    return {
-      ...json,
-      content: contentWithCheerings,
-    } as PostsData;
+    return json as PostsData;
   }
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -64,7 +54,7 @@ export default function HomeSection1() {
     });
 
   // 센티넬 IO
-  const loaderRef = useRef(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!loaderRef.current) return;
     const io = new IntersectionObserver(
@@ -90,9 +80,6 @@ export default function HomeSection1() {
           <PostSkeleton />
           <PostSkeleton />
         </>
-        // <div className="w-full flex justify-center">
-        //   <LoadingIcon color="text-theme" />
-        // </div>
       )}
       {posts.length === 0 && !isLoading && <HomePost post={getFirstPage()} currentUser={currentUser} />}
       <div className="flex flex-col gap-7 pb-15">

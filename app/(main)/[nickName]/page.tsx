@@ -8,6 +8,50 @@ import { auth } from "@/auth";
 import Logout from "@/components/Logout";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata, ResolvingMetadata } from "next";
+
+type Props = {
+  params: Promise<{ nickName: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { nickName } = await params;
+
+  // fetch data
+  try {
+    // Note: This fetch might fail if the API requires authentication and the crawler is not authenticated.
+    // However, for public profiles, an unauthenticated endpoint should ideally be available.
+    // Assuming the current API endpoint requires a token, this might throw or return unauthorized.
+    // We'll implement a fallback.
+    const product = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`
+    ).then((res) => res.json());
+
+    if (product?.data) {
+      return {
+        title: `${product.data.nickname}님의 프로필 | 나는오늘운동한다`,
+        description: `${product.data.nickname}님의 운동 기록을 확인해보세요.`,
+        openGraph: {
+          title: `${product.data.nickname}님의 프로필`,
+          description: `${product.data.nickname}님의 운동 기록을 확인해보세요.`,
+          images: [product.data.profileImageUrl || '/default.png'],
+        },
+      };
+    }
+  } catch (e) {
+    console.error("Failed to fetch user metadata", e);
+  }
+
+  return {
+    title: `${nickName}님의 프로필`,
+    description: "나는오늘운동한다 사용자 프로필입니다.",
+  };
+}
+
 
 export default async function Page({
   params,
