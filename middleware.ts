@@ -41,13 +41,13 @@ export default auth((req) => {
 
   // -------------------------
   // 2. "/" 경로 처리
+  // 로그인 유저만 /feed로 redirect, 비로그인은 app/page.tsx가 처리
   // -------------------------
   if (pathname === "/") {
-    if (!isLoggedIn) {
-      return NextResponse.rewrite(new URL("/onboarding", req.url));
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL("/feed", req.url));
     }
-
-    return NextResponse.redirect(new URL("/feed", req.url));
+    return NextResponse.next();
   }
 
   // -------------------------
