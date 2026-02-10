@@ -14,19 +14,23 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import Drawer from "./Drawer";
-import Notifications from "@/features/user/Notifications";
+import dynamic from "next/dynamic";
+
+const Notifications = dynamic(() => import("@/features/user/Notifications"), {
+  loading: () => <div className="p-4">Loading...</div>,
+});
 
 type NavItem =
   | {
-      label: string;
-      href: string;
-      Icon: React.ComponentType<{ fill: boolean }>;
-    }
+    label: string;
+    href: string;
+    Icon: React.ComponentType<{ fill: boolean }>;
+  }
   | {
-      label: string;
-      onClick: () => void;
-      Icon: React.ComponentType<{ fill: boolean }>;
-    };
+    label: string;
+    onClick: () => void;
+    Icon: React.ComponentType<{ fill: boolean }>;
+  };
 
 export default function Sidebar() {
   // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
@@ -101,23 +105,20 @@ export default function Sidebar() {
     <>
       <motion.nav
         layoutScroll
-        className={`text-theme z-10 h-dvh fixed bottom-0 top-0 flex flex-col items-center w-auto lg:w-[250px] ${
-          isCheerDrawerOpen ? "!w-auto" : ""
-        } py-8 border-r border-r-[#412A2A] bg-white`}
+        className={`text-theme z-10 h-dvh fixed bottom-0 top-0 flex flex-col items-center w-auto lg:w-[250px] ${isCheerDrawerOpen ? "!w-auto" : ""
+          } py-8 border-r border-r-[#412A2A] bg-white`}
       >
         <div
-          className={`mb-15 w-full h-[39.29px] flex px-6 justify-start lg:hidden ${
-            isCheerDrawerOpen ? "!block" : ""
-          }`}
+          className={`mb-15 w-full h-[39.29px] flex px-6 justify-start lg:hidden ${isCheerDrawerOpen ? "!block" : ""
+            }`}
         >
           <Link href="/" className="h-full flex items-end">
             <Logo />
           </Link>
         </div>
         <div
-          className={`mb-15 w-full justify-start px-6 hidden lg:flex ${
-            isCheerDrawerOpen ? "!hidden" : ""
-          }`}
+          className={`mb-15 w-full justify-start px-6 hidden lg:flex ${isCheerDrawerOpen ? "!hidden" : ""
+            }`}
         >
           <Link href="/">
             <TextLogo />
@@ -125,9 +126,8 @@ export default function Sidebar() {
         </div>
         {/* 유저 로딩 미완료 시 클릭 막음 */}
         <ul
-          className={`flex-1 flex flex-col w-full gap-5 ${
-            isUserLoading ? "opacity-75 pointer-events-none" : ""
-          }`}
+          className={`flex-1 flex flex-col w-full gap-5 ${isUserLoading ? "opacity-75 pointer-events-none" : ""
+            }`}
         >
           {navItems.map((item) => {
             const listItem = (
@@ -186,9 +186,8 @@ function ListItem({ isNavFolded, label, Icon, selected }: ListItemProps) {
       <Icon fill={selected} />
 
       <span
-        className={`hidden lg:inline ${isNavFolded ? "!hidden" : ""} text-lg ${
-          selected ? "font-bold" : ""
-        }`}
+        className={`hidden lg:inline ${isNavFolded ? "!hidden" : ""} text-lg ${selected ? "font-bold" : ""
+          }`}
       >
         {label}
       </span>

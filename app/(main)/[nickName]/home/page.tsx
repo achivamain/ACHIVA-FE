@@ -50,12 +50,10 @@ export default async function HomePage({
     return data as User;
   }
 
-  const [user] = await Promise.all([getUser()]);
-
   //카테고리별 게시물 수 받아오기
-  async function getPostCategory() {
+  async function getPostCategory(memberId: number) {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${memberId}`,
       {
         method: "GET",
         headers: {
@@ -155,18 +153,22 @@ export default async function HomePage({
         points: cheerData.data.totalSendingCheeringScore,
       };
     } catch (err) {
-      console.error("Error in fetch summery data: ", err);
-      throw new Error(`Error in fetch summery data: ${err}`);
+      throw new Error(`데이터 처리 실패: ${err}`);
     }
   }
 
+  // 1단계: 유저 정보, 요약 데이터, 카테고리별 글자수를 병렬로 호출
+  // getSummeryData와 getCategorysCharCount는 유저 ID가 아닌 세션 토큰에 의존하므로 병렬화 가능
+  const [user, mySummaryData, categoryCharCounts] = await Promise.all([
+    getUser(),
+    getSummeryData(),
+    getCategorysCharCount(),
+  ]);
+
   try {
-    const [categoryCounts, mySummaryData, categoryCharCounts] =
-      await Promise.all([
-        getPostCategory(),
-        getSummeryData(),
-        getCategorysCharCount(),
-      ]);
+    // 2단계: 위에서 얻은 user.id를 사용하여 카테고리별 게시물 수 호출
+    const categoryCounts = await getPostCategory(user.id);
+
     return (
       <div className="w-full flex-1 flex">
         <div className="flex-1 flex flex-col justify-between">

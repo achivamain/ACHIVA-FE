@@ -56,7 +56,7 @@ export default function Notifications() {
           fetchNextPage();
         }
       },
-      { rootMargin: "100px 0px" }
+      { rootMargin: "800px 0px" }
     );
     io.observe(loaderRef.current);
     return () => io.disconnect();
