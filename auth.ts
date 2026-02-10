@@ -3,6 +3,8 @@ import Cognito from "next-auth/providers/cognito";
 import { jwtDecode } from "jwt-decode";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Vercel은 리버스 프록시 -> Host injection 공격에서 안전함
+  trustHost: true,
   providers: [
     Cognito({
       clientId: process.env.AUTH_COGNITO_ID!,
@@ -17,6 +19,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  pages: {
+    error: "/", // 여기에 나중에 에러 시 페이지 추가해야함 
+  },
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
