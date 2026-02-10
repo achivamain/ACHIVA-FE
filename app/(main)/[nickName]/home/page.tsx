@@ -51,7 +51,7 @@ export default async function HomePage({
   }
 
   //카테고리별 게시물 수 받아오기
-  async function getPostCategory(memberId: number) {
+  async function getPostCategory(memberId: string) {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${memberId}`,
       {

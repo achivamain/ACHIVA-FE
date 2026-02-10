@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import type { PostRes } from "@/types/Post";
-import HomePost from "@/features/home/Post";
+import Post from "@/features/post/Post";
 import { notFound } from "next/navigation";
 import type { Metadata, ResolvingMetadata } from "next";
 
@@ -101,7 +101,7 @@ export default async function Page({
   return (
     <div className="flex-1 flex items-center justify-center">
       <div className="w-xl p-5">
-        <HomePost post={data} />
+        <Post post={data} />
       </div>
     </div>
   );

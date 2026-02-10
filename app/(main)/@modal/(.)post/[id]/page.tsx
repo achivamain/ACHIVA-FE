@@ -1,7 +1,7 @@
 import PostModal from "@/features/post/PostModal";
 import { auth } from "@/auth";
 import type { PostRes } from "@/types/Post";
-import HomePost from "@/features/home/Post";
+import Post from "@/features/post/Post";
 import { notFound } from "next/navigation";
 
 export default async function Page({
@@ -59,7 +59,7 @@ export default async function Page({
   return (
     <PostModal>
       <div className="w-125 p-5">
-        <HomePost post={data} />
+        <Post post={data} />
       </div>
     </PostModal>
   );
