@@ -5,7 +5,6 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  swcMinify: true,
   disable: false,
   workboxOptions: {
     disableDevLogs: true,
@@ -13,6 +12,7 @@ const withPWA = require("@ducanh2912/next-pwa").default({
 });
 
 const nextConfig: NextConfig = {
+  swcMinify: true,
   /* config options here */
   images: {
     minimumCacheTTL: 60,
