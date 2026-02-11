@@ -7,14 +7,14 @@ import Script from "next/script";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 export const metadata: Metadata = {
-  title: "나는오늘운동한다",
-  description: "운동 기록 공유 SNS",
+  title: "나는오늘운동한다 | 운동 기록 SNS",
+  description: "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS, 나는오늘운동한다",
   icons: {
     icon: "/favicon.svg",
   },
   openGraph: {
     title: "나는오늘운동한다",
-    description: "운동 기록 공유 SNS",
+    description: "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS",
     images: ["/logo.png"],
   },
 };
@@ -27,6 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta
+          name="naver-site-verification"
+          content="bd7f12f57eb6ced6c90bbf5c55a9084ef9c6fb8e"
+        />
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"

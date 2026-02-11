@@ -11,6 +11,13 @@ export default auth((req) => {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/robots") ||
+
+      // ✅ 추가: 네이버/구글 크롤러용 파일은 로그인/리다이렉트 없이 통과
+    pathname === "/sitemap.xml" ||
+    pathname.endsWith(".xml") ||
+    pathname.endsWith(".txt") ||
+    pathname.endsWith(".html") ||
+    
     pathname.endsWith(".svg") || // 👈 확장자 기준 예외
     pathname.endsWith(".png") ||
     pathname.endsWith(".jpg")
@@ -70,5 +77,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: "/:path*", // 모든 경로 적용
+  matcher: ["/((?!_next|api|sitemap.xml|robots.txt).*)"],
 };
