@@ -34,7 +34,9 @@ export default auth((req) => {
     pathname !== "/" &&
     pathname !== "/login" &&
     pathname !== "/signup" &&
-    pathname !== "/callback"
+    pathname !== "/signup-test" && // 회원가입 Test Entry Point
+    pathname !== "/callback" &&
+    pathname !== "/onboarding"
   ) {
     return NextResponse.redirect(new URL("/", req.url));
   }
@@ -47,11 +49,7 @@ export default auth((req) => {
       return NextResponse.rewrite(new URL("/onboarding", req.url));
     }
 
-    if (isMobile) {
-      return NextResponse.rewrite(new URL("/m/home", req.url));
-    } else {
-      return NextResponse.rewrite(new URL("/home", req.url));
-    }
+    return NextResponse.redirect(new URL("/feed", req.url));
   }
 
   // -------------------------

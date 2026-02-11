@@ -11,12 +11,12 @@ type CreatePostStepState = {
 };
 
 const useCreatePostStepStoreBase = create<CreatePostStepState>()((set) => ({
-  currentStep: 2,
+  currentStep: 0,
   handlePrevStep: () =>
     set((state) => ({ currentStep: state.currentStep - 1 })),
   handleNextStep: () =>
     set((state) => ({ currentStep: state.currentStep + 1 })),
-  resetStep: () => set({ currentStep: 2 }),
+  resetStep: () => set({ currentStep: 0 }),
 }));
 
 export const useCreatePostStepStore = createSelectors(
@@ -29,7 +29,13 @@ type EnteredDraftState = {
   resetPost: () => void;
 };
 
-const initialPost: DraftPost = {};
+const initialPost: DraftPost = {
+  backgroundColor: "#f9f9f9",
+  pages: [
+    { id: crypto.randomUUID(), subtitle: "오늘의 운동 일지", content: "" },
+    { id: crypto.randomUUID(), subtitle: "느낀 점", content: "" },
+  ],
+};
 
 const useDraftPostStoreBase = create<EnteredDraftState>((set) => ({
   post: initialPost,

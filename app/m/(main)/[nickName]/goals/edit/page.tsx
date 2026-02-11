@@ -1,38 +1,18 @@
-import { notFound, redirect } from "next/navigation";
-import { auth } from "@/auth";
-import Logout from "@/components/Logout";
-import useGoalStore from "@/store/GoalStore";
-import MobileGoalEditPage from "@/features/user/goals/MobileGoalEditPage";
+"use client";
 
-export default async function MobileGoalEditPageRoute({
-  params,
-}: {
-  params: Promise<{ nickName: string }>;
-}) {
-  const session = await auth();
-  if (session?.error) {
-    return <Logout />;
-  }
-  const currentUser = session!.user;
+import { useRouter } from "next/navigation";
+import GoalEditContent from "@/features/user/goals/GoalEditContent";
 
-  const { nickName } = await params;
-  const isOwner = currentUser!.nickName === decodeURIComponent(nickName);
+export default function MobileGoalEditPage() {
+  const router = useRouter();
 
-  if (!isOwner) {
-    redirect(`/${nickName}`);
-  }
-
-  const initialData = useGoalStore.getState();
-
-  if (!initialData) {
-    notFound();
-  }
-
-  const processedInitialData = {
-    vision: initialData.vision,
-    missions: initialData.missions,
-    mindsets: initialData.mindsets,
-  };
-
-  return <MobileGoalEditPage initialData={processedInitialData} />;
+  return (
+    <div className="min-h-dvh bg-[#F9F9F9]">
+      <GoalEditContent
+        onClose={() => router.back()}
+        onSave={() => router.back()}
+        isMobile={true}
+      />
+    </div>
+  );
 }

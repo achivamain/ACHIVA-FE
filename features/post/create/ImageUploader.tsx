@@ -1,12 +1,15 @@
 "use client";
-import { useRef } from "react";
-import useImageUploader from "@/hooks/useImageUploader";
+import { useEffect, useRef, useState } from "react";
+import { useMultiImageUploader } from "@/hooks/useImageUploader";
 import Cropper from "react-easy-crop";
 import { NextStepButton } from "./Buttons";
 import {
   useCreatePostStepStore,
   useDraftPostStore,
 } from "@/store/CreatePostStore";
+import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperType } from "swiper";
+import { Pagination, Navigation } from "swiper/modules";
 
 export default function ImageUploader() {
   const isMobile = window.innerWidth < 640;
@@ -16,29 +19,56 @@ export default function ImageUploader() {
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const input = useRef<HTMLInputElement | null>(null);
 
+  //swiper 관련
+  const swiperPrevRef = useRef<HTMLButtonElement | null>(null);
+  const swiperNextRef = useRef<HTMLButtonElement | null>(null);
+  const swiperPageRef = useRef<HTMLDivElement | null>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isBeginningPage, setIsBeginning] = useState(false);
+  const [isEndPage, setIsEnd] = useState(false);
+
+  //이미지 업로드 및 크롭 기능
   const {
-    imageSrc,
-    crop,
-    zoom,
+    images,
     isUploading,
     onFileChange,
     onCropComplete,
     onUpload,
-    setCrop,
-    setZoom,
-    resetAll,
-  } = useImageUploader({
+    updateImageCrop,
+    updateImageZoom,
+    setMinZoom,
+    removeImage,
+  } = useMultiImageUploader({
     apiUrl: "/api/posts/upload",
-    onUploadCompleted: (src: string) => {
-      setPost({ titleImageUrl: src });
+    onUploadCompleted: (srcs: string[]) => {
+      setPost((draft) => ({
+        ...draft,
+        photoUrls: srcs,
+        /*다음 페이지로 넘어갔다가 다시 되돌아오는 경우 어떻게 되는지(업로드가 중복으로 되나?)
+          확인 필요*/
+      }));
       handleNextStep();
     },
+    maxImages: 5, //최대 5장까지
   });
 
+  //이미지 추가시 추가된 이미지로 페이지 이동
+  useEffect(() => {
+    if (swiperRef.current && images.length > 0) {
+      swiperRef.current.slideTo(images.length - 1);
+    }
+  }, [images.length]);
+
   return (
-    <div className="h-full flex flex-col items-center justify-center">
-      {!imageSrc && (
-        <div className="aspect-square w-full sm:w-120 flex flex-col justify-center items-center gap-2 mb-5">
+    <div className=" flex flex-col items-center justify-center h-full">
+      {images.length == 0 && (
+        <div
+          className="flex flex-col justify-center items-center 
+        aspect-square w-full 
+        gap-4
+        sm:w-120"
+        >
           <svg
             width="72"
             height="72"
@@ -58,61 +88,217 @@ export default function ImageUploader() {
       )}
 
       {/* 크롭 영역 */}
-      {imageSrc && (
-        <div className="w-full sm:w-120">
-          <div className="relative aspect-square bg-black/5 rounded-md">
-            <Cropper
-              image={imageSrc}
-              crop={crop}
-              zoom={zoom}
-              onMediaLoaded={(mediaSize) => {
-                const { width, height } = mediaSize; // 원본 이미지 크기
-                const zoomByWidth = size / width;
-                const zoomByHeight = size / height;
-                setZoom(Math.max(zoomByWidth, zoomByHeight)); // cropSize 꽉 차도록 zoom 조정
-              }}
-              aspect={1} // 정사각형
-              cropSize={{ width: size, height: size }}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              restrictPosition={true}
-              showGrid={true}
-              objectFit="contain"
-            />
-          </div>
+      {images.length > 0 && (
+        <div className="relative w-full sm:w-120 aspect-square">
+          {!isMobile && (
+            <div className="absolute flex justify-between w-full top-1/2 p-3 ">
+              <button
+                ref={swiperPrevRef}
+                className="
+        flex justify-center items-center
+        z-5 -translate-y-1/2
+        w-[30px] h-[30px]
+        bg-white rounded-full opacity-50"
+              >
+                <svg
+                  width="9"
+                  height="15"
+                  viewBox="0 0 9 15"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M7.9375 13.5938L1.84375 7.5L7.9375 1.40625"
+                    stroke="#412A2A"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <button
+                ref={swiperNextRef}
+                className="
+        flex justify-center items-center
+        z-5 -translate-y-1/2
+        w-[30px] h-[30px]
+        bg-white rounded-full opacity-50"
+              >
+                <svg
+                  width="9"
+                  height="15"
+                  viewBox="0 0 9 15"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M1.0625 1.40625L7.15625 7.5L1.0625 13.5937"
+                    stroke="#412A2A"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
+          <Swiper
+            className="w-full sm:w-120 aspect-square"
+            pagination={{
+              el: swiperPageRef.current,
+              type: "fraction",
+            }}
+            navigation={{ prevEl: null, nextEl: null }}
+            modules={[Pagination, Navigation]}
+            onBeforeInit={(swiper) => {
+              if (swiper.params.navigation) {
+                // @ts-ignore
+                swiper.params.navigation.prevEl = swiperPrevRef.current;
+                // @ts-ignore
+                swiper.params.navigation.nextEl = swiperNextRef.current;
+              }
+              if (swiper.params.pagination) {
+                // @ts-ignore
+                swiper.params.pagination.el = swiperPageRef.current;
+              }
+            }}
+            onSwiper={(sw) => {
+              swiperRef.current = sw;
+              setIsBeginning(sw.isBeginning);
+              setIsEnd(sw.isEnd);
+            }}
+            onSlideChange={(sw) => {
+              setCurrentPage(sw.activeIndex + 1);
+              setIsBeginning(sw.isBeginning);
+              setIsEnd(sw.isEnd);
+            }}
+          >
+            <div className="relative aspect-square bg-black/5 rounded-md">
+              {images.map((image, idx) => (
+                <SwiperSlide key={idx}>
+                  <Cropper
+                    image={image.imageSrc}
+                    crop={image.crop}
+                    zoom={image.zoom}
+                    minZoom={image.minZoom || 1}
+                    onMediaLoaded={(mediaSize) => {
+                      const { width, height } = mediaSize; // 원본 이미지 크기
+                      const zoomByWidth = size / width;
+                      const zoomByHeight = size / height;
+
+                      updateImageZoom(
+                        image.id,
+                        Math.max(zoomByWidth, zoomByHeight),
+                      ); // cropSize 꽉 차도록 zoom 조정
+                      setMinZoom(image.id, Math.max(zoomByWidth, zoomByHeight));
+                      // 줌 최솟값 -> cropSize 꽉 차게
+                      // 이미지가 cropSize보다 작아지면 문제가 생길 것 같아서 추가하였음.
+                    }}
+                    aspect={1} // 정사각형
+                    cropSize={{ width: size, height: size }}
+                    onCropChange={(crop) => updateImageCrop(image.id, crop)}
+                    onZoomChange={(zoom) => updateImageZoom(image.id, zoom)}
+                    onCropComplete={(area, pixs) =>
+                      onCropComplete(image.id, area, pixs)
+                    }
+                    restrictPosition={true}
+                    showGrid={true}
+                    objectFit="contain"
+                  />
+                  <button
+                    className="absolute flex justify-center items-center
+                      right-3 top-7 -translate-y-1/2 z-5 
+                      w-[60px] h-[30px]
+                      font-semibold text-theme
+                      bg-white border border-[#D9D9D9] rounded-sm
+                      "
+                    onClick={() => removeImage(image.id)}
+                  >
+                    삭제
+                  </button>
+                </SwiperSlide>
+              ))}
+            </div>
+          </Swiper>
         </div>
       )}
 
-      <div className="mt-5 w-full">
-        <NextStepButton
-          // disabled={isUploading}
-          isLoading={isUploading}
-          onClick={() => {
-            if (!imageSrc) {
-              // RN 환경에서는 카메라 요청, 아니면 파일인풋 클릭
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(
-                  JSON.stringify({ type: "REQUEST_CAMERA" })
-                );
-              } else {
-                input.current?.click();
-              }
-            } else {
-              onUpload();
-            }
-          }}
-        >
-          {imageSrc ? "다음" : isMobile ? "갤러리에서 선택" : "컴퓨터에서 선택"}
-        </NextStepButton>
-      </div>
+      {images.length > 0 ? (
+        <>
+          <div className="mt-5 w-full h-[50px]">
+            <NextStepButton
+              // disabled={isUploading}
+              isLoading={isUploading}
+              onClick={onUpload}
+            >
+              다음
+            </NextStepButton>
+          </div>
+          <div className="mt-2 w-full">
+            <button
+              className="flex items-center justify-center
+            py-2 w-full h-11 
+            font-medium text-lg text-[#5C5C5C]
+            bg-[#E3E3E3] rounded-sm "
+              onClick={() => {
+                // RN 환경에서는 카메라 요청, 아니면 파일인풋 클릭
+                if (window.ReactNativeWebView) {
+                  window.ReactNativeWebView.postMessage(
+                    JSON.stringify({ type: "REQUEST_CAMERA" }),
+                  );
+                } else {
+                  input.current?.click();
+                }
+              }}
+            >
+              사진 더 추가하기
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="mt-5 w-full">
+            <NextStepButton
+              // disabled={isUploading}
+              isLoading={isUploading}
+              onClick={() => {
+                // RN 환경에서는 카메라 요청, 아니면 파일인풋 클릭
+                if (window.ReactNativeWebView) {
+                  window.ReactNativeWebView.postMessage(
+                    JSON.stringify({ type: "REQUEST_CAMERA" }),
+                  );
+                } else {
+                  input.current?.click();
+                }
+              }}
+            >
+              {isMobile ? "갤러리에서 선택" : "컴퓨터에서 선택"}
+            </NextStepButton>
+          </div>
+          <div className="mt-2 w-full">
+            <button
+              className="flex items-center justify-center
+            py-2 w-full h-11 
+            font-medium text-lg text-[#5C5C5C]
+            bg-[#E3E3E3] rounded-sm "
+              onClick={handleNextStep}
+            >
+              건너뛰기
+            </button>
+          </div>
+        </>
+      )}
 
       {/* 파일 입력 */}
       <input
         ref={input}
         type="file"
         accept="image/*"
-        onChange={onFileChange}
+        multiple
+        onChange={(e) => {
+          onFileChange(e);
+          e.target.value = "";
+        }}
         className="hidden"
       />
     </div>

@@ -77,7 +77,7 @@ export default function MobileCreateBookPage({
                   className="relative aspect-[1/1] cursor-pointer"
                   onClick={() => setCoverImage(img)}
                 >
-                  <BookCoverImage name={`${img}`}/>
+                  <BookCoverImage name={`${img}`} />
                 </div>
               ))}
             </div>
@@ -99,29 +99,29 @@ export default function MobileCreateBookPage({
             <CloseIcon />
           </button>
           <h1 className="text-xl font-semibold">표지 미리보기</h1>
-            <button
-              onClick={() => {
-                const newBook = {
-                  id: "",
-                  title: title,
-                  category: draft.category,
-                  count: 0,
-                  coverColor: coverColor,
-                  coverImage: coverImage,
-                };
-                setPost({ book: newBook });
-                if (next != "fin") {
-                  setCurrentStep(next);
-                } else {
-                  handleNextStep();
-                  handleNextStep();
-                }
-              }}
-              disabled={!title}
-              className="absolute right-4 top-1/2 -translate-y-1/2 border-1 border-[#D9D9D9] font-bold text-[#412A2A] px-3 py-[2px] rounded-sm flex-shrink-0"
-            >
-              {next == "fin" ? "완료" : "다음"}
-            </button>
+          <button
+            onClick={() => {
+              const newBook = {
+                id: "",
+                title: title,
+                category: draft.category,
+                count: 0,
+                coverColor: coverColor,
+                coverImage: coverImage,
+              };
+              //setPost({ book: newBook });
+              if (next != "fin") {
+                setCurrentStep(next);
+              } else {
+                handleNextStep();
+                handleNextStep();
+              }
+            }}
+            disabled={!title}
+            className="absolute right-4 top-1/2 -translate-y-1/2 border-1 border-[#D9D9D9] font-bold text-[#412A2A] px-3 py-[2px] rounded-sm flex-shrink-0"
+          >
+            {next == "fin" ? "완료" : "다음"}
+          </button>
         </div>
       </div>
       <div className="w-full h-full flex flex-col pb-15 ">

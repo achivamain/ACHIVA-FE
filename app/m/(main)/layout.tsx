@@ -1,6 +1,7 @@
 import MobileSidebar from "@/components/MobileSidebar";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
+import LoginNotifier from "@/components/LoginNotifier";
 
 export default async function Layout({
   children,
@@ -16,6 +17,7 @@ export default async function Layout({
 
   return (
     <>
+      <LoginNotifier />
       <MobileSidebar />
       <div className="min-h-dvh flex flex-col">{children}</div>
       {modal}

@@ -1,9 +1,8 @@
 import type { Category } from "./Categories";
 import type { Cheering } from "./responses";
-import type { Book } from "./Book";
 
 export type Post = {
-  titleImageUrl: string;
+  photoUrls: string[];
   title: string;
   category: Category;
   backgroundColor: BackgroundColor;
@@ -13,7 +12,7 @@ export type Post = {
 export type DraftPost = Partial<Post> & {
   id?: string;
   categoryCount?: number;
-  book?: Book;
+  //book?: Book;
 }; // 글쓰기 중 타입
 
 export type PostPage = {
@@ -27,6 +26,11 @@ export type CategoryCount = {
   count: number;
 };
 
+export type CategoryCharCount = {
+  category: Category;
+  characterCount: number;
+};
+
 export type BackgroundColor =
   | "#f9f9f9"
   | "#000000"
@@ -38,7 +42,7 @@ export type BackgroundColor =
 // 백엔드에서 응답으로 받는 형태
 export type PostRes = {
   id: string;
-  photoUrl: string;
+  photoUrls: string[];
   title: string;
   category: string;
   question: Question[];

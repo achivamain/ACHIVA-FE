@@ -8,7 +8,7 @@ export function bookResToBook(bookRes: BookRes): Book {
   )!;
 
   const coverColor: string = bookRes.mainArticle.backgroundColor;
-  const coverImage: BookCoverImage = bookCoverImages.find((i) => i == bookRes.mainArticle.photoUrl) || "default"; //없는 이미지 방지
+  const coverImage: BookCoverImage = bookCoverImages.find((i) => i == bookRes.mainArticle.photoUrls[0]) || "default"; //없는 이미지 방지
 
   return {
     id: bookRes.id,

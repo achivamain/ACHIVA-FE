@@ -1,6 +1,7 @@
 import Sidebar from "@/components/Sidebar";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
+import LoginNotifier from "@/components/LoginNotifier";
 
 export default async function Layout({
   children,
@@ -16,6 +17,7 @@ export default async function Layout({
 
   return (
     <>
+      <LoginNotifier />
       <Sidebar />
       <div className="flex flex-col sm:ml-20 lg:ml-60 min-h-dvh">
         {children}

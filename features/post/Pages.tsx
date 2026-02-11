@@ -2,9 +2,6 @@ import { PostRes } from "@/types/Post";
 import type { Question } from "@/types/Post";
 import PostImg from "@/components/PostImg";
 import { format } from "date-fns";
-import { postsBookIdCache } from "@/features/post/PostsBookIdCache"
-import { bookCache } from "../book/BookCache";
-import { useEffect, useState } from "react";
 
 type Props = {
   size: number;
@@ -13,15 +10,6 @@ type Props = {
 
 export function TitlePage({ size, post }: Props) {
   const date = new Date(post.createdAt);
-
-  const [postIndex, setPostIndex] = useState<number|undefined>(undefined);
-  
-  useEffect(() => {
-    const bookId = postsBookIdCache.get(post.id)?.bookId
-    if (bookId) {
-      bookCache.getIndex(bookId, post.id).then((v) => {setPostIndex(v)});
-    }
-  }, [post.id]);
 
   return (
     <div
@@ -37,7 +25,7 @@ export function TitlePage({ size, post }: Props) {
         }}
         className="aspect-square w-[390px] h-[390px] relative"
       >
-        <PostImg url={post.photoUrl!} filtered />
+        <PostImg url={post.photoUrls?.[0] || null} filtered />
         <div className="absolute top-[90px] left-[23px]">
           <div className="font-light text-[16px] text-white/70">
             {format(date, "yyyy.MM.dd")}
@@ -47,13 +35,11 @@ export function TitlePage({ size, post }: Props) {
           </h1>
           <div className="text-[32px] font-light text-white leading-[40px]">
             <div>
-              {/* 책 제목이 로딩되지 않았다면 카테고리를 띄움 */}
-              <span className="font-bold">{post.bookArticle?.[0]?.bookTitle || postsBookIdCache.get(post.id)?.bookTitle || post.category}</span> 기록
+              <span className="font-bold">{post.category}</span> 기록
             </div>
             <div>
-              {/* 책 정보가 로딩되지 않았다면 n번째 이야기를 띄우지 않음 */}
-              {postIndex && <><span className="font-bold">{`${postIndex}`}번째</span>{" "}
-              이야기</>}
+              <span className="font-bold">{post.authorCategorySeq}번째</span>{" "}
+              이야기
             </div>
           </div>
         </div>

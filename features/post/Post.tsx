@@ -149,7 +149,7 @@ export default function Post({
           }}
           className="mySwiper"
         >
-          {post.photoUrl && (
+          {post.createdAt && (
             <SwiperSlide>
               <TitlePage size={containerWidth ?? 0} post={post} />
             </SwiperSlide>
@@ -165,11 +165,11 @@ export default function Post({
               </SwiperSlide>
             );
           })}
-          {post.photoUrl && (
-            <SwiperSlide>
-              <PostImg url={post.photoUrl} />
+          {post.photoUrls.map((photoUrl, idx) => (
+            <SwiperSlide key={`image-${idx}`}>
+              <PostImg url={photoUrl} />
             </SwiperSlide>
-          )}
+          ))}
         </Swiper>
       </div>
     </div>

@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["error", "warn"] }
+        : false, //배포시 console.log 제거
+  },
   images: {
     domains: ["achivadata.s3.ap-northeast-2.amazonaws.com"],
   },

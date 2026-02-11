@@ -1,7 +1,7 @@
 import MobileHeader from "@/components/MobileHeader";
 import { auth } from "@/auth";
 import type { PostRes } from "@/types/Post";
-import HomePost from "@/features/home/Post";
+import FeedPost from "@/features/feed/FeedPost";
 import { notFound } from "next/navigation";
 
 export default async function Page({
@@ -60,7 +60,7 @@ export default async function Page({
     <div className="flex-1 flex flex-col">
       <MobileHeader>게시물</MobileHeader>
       <div className="flex-1 flex pb-22 items-center">
-        <HomePost post={data} />
+        <FeedPost post={data} />
       </div>
     </div>
   );

@@ -4,12 +4,15 @@
 import { useRouter } from "next/navigation";
 import { BackIcon } from "@/components/Icons";
 
+// rightElement: 카테고리 선택 시에 다음 버튼 표시용
+
 type Props = {
   children: React.ReactNode;
   onClick?: () => void | undefined;
+  rightElement?: React.ReactNode;
 };
 
-export default function MobileHeader({ children, onClick = undefined }: Props) {
+export default function MobileHeader({ children, onClick = undefined, rightElement }: Props) {
   const router = useRouter();
 
   return (
@@ -20,7 +23,14 @@ export default function MobileHeader({ children, onClick = undefined }: Props) {
       >
         <BackIcon />
       </div>
-      <p className="font-semibold">{children}</p>
+      <div className="font-semibold flex items-center justify-center">
+        {children}
+      </div>
+      {rightElement && (
+        <div className="absolute top-1/2 -translate-y-1/2 right-4">
+          {rightElement}
+        </div>
+      )}
     </div>
   );
 }

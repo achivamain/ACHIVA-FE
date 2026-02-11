@@ -31,7 +31,7 @@ export default function TitleEditor() {
   const setPost = useDraftPostStore.use.setPost();
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const size = window.innerWidth < 640 ? containerWidth ?? 0 : 480;
+  const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 480;
 
   useLayoutEffect(() => {
     if (containerRef.current) {
@@ -39,7 +39,7 @@ export default function TitleEditor() {
     }
   }, []);
 
-  const addNewPostToBook = async (draft: DraftPost) => {
+  const createNewPost = async (draft: DraftPost) => {
     //게시글 생성
     setIsLoading(true);
     try {
@@ -56,62 +56,14 @@ export default function TitleEditor() {
         console.log(res);
         throw new Error("게시글 작성 중 에러");
       }
-      const data = await res.json();
-      const bookId = draft.book?.id;
-      const postId: string = data.data.id;
-      //책에 게시글 추가
-      const res2 = await fetch(
-        `/api/posts/book?bookId=${bookId}&postId=${postId}`,
-        {
-          method: "POST",
-        }
-      );
-      if (!res2.ok) {
-        console.log(res2);
-        throw new Error("게시글 작성 중 에러");
-      }
-      setIsLoading(false);
       window.location.href = `/${currentUser?.nickName}`;
     } catch (err) {
       console.log(err);
       alert(
-        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
       );
-      setIsLoading(false);
     }
-  };
-
-  //새 책 생성
-  const createBookWithNewPost = async (draft: DraftPost) => {
-    setIsLoading(true);
-    try {
-      //책 생성
-      const res = await fetch("/api/books", {
-        method: "POST",
-        body: JSON.stringify({
-          data: draft,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (!res.ok) {
-        console.log(res);
-        throw new Error("게시글 작성 중 에러");
-      }
-      //게시물 등록 및 책에 추가
-      const data = await res.json();
-      draft.book!.id = data.id;
-      await addNewPostToBook(draft);
-      setIsLoading(false);
-      window.location.href = `/${currentUser?.nickName}`;
-    } catch (err) {
-      console.log(err);
-      alert(
-        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-      );
-      setIsLoading(false);
-    }
+    setIsLoading(false);
   };
 
   return (
@@ -124,18 +76,20 @@ export default function TitleEditor() {
           }}
           className="aspect-square w-[390px] h-[390px] relative z-[60]"
         >
-          <PostImg url={draft.titleImageUrl!} filtered />
+          <PostImg url={draft.photoUrls?.[0] || null} filtered />
           <div className="absolute top-[90px] left-[23px]">
             <div className="font-light text-[16px] text-white/70">
               {format(new Date(), "yyyy.MM.dd")}
             </div>
             <input
               maxLength={18}
-              className={`w-full relative z-[62] ${
-                isEditing ? "text-white" : "text-white/80"
-              } placeholder:text-white/80 font-semibold text-[45px] mb-[24px] leading-[50px] outline-none`}
+              className={`w-full relative mb-[24px] z-[62]
+                font-semibold text-[45px]  leading-[50px] 
+                outline-none 
+                placeholder:text-white/80 
+                ${isEditing ? "text-white" : "text-white/80"} `}
               type="text"
-              placeholder="오늘의 성취"
+              placeholder="오늘의 운동"
               autoFocus
               value={draft.title ?? ""}
               onChange={(e) => {
@@ -148,11 +102,11 @@ export default function TitleEditor() {
             />
             <div className={`text-[32px] font-light text-white leading-[40px]`}>
               <div>
-                <span className="font-bold">{draft.book?.title}</span> 기록
+                <span className="font-bold">{draft.category}</span> 기록
               </div>
               <div>
                 <span className="font-bold">
-                  {(draft.book?.count ?? 0) + 1}번째
+                  {(draft.categoryCount ?? 0) + 1}번째
                 </span>{" "}
                 이야기
               </div>
@@ -185,11 +139,7 @@ export default function TitleEditor() {
           isLoading={isLoading}
           // disabled={!draft.title}
           onClick={async () => {
-            if (draft.book?.id === "") {
-              createBookWithNewPost(draft);
-            } else {
-              addNewPostToBook(draft);
-            }
+            createNewPost(draft);
           }}
         >
           공유하기
