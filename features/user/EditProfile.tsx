@@ -119,10 +119,11 @@ export default function EditProfile() {
   }, []);
 
   async function handleCheckNickName() {
+    if (!nickName) return;
     setIsNickNameCheckLoding(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/auth/check-nickname?nickname=${nickName}`
+        `/api/auth/checkNickname?nickname=${nickName}`
       );
       if (response.ok) {
         const { data } = await response.json();
@@ -132,7 +133,7 @@ export default function EditProfile() {
         } else {
           setNickNameError("이미 사용 중인 닉네임입니다.");
         }
-      } else if (response.status === 400) {
+      } else if (response.status === 409) {
         setNickNameError("이미 사용 중인 닉네임입니다.");
       } else {
         throw new Error("닉네임 중복 체크 중 서버 에러");
@@ -176,9 +177,8 @@ export default function EditProfile() {
       <div className="w-full flex flex-col gap-3">
         <InputSection label="닉네임">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${
-              isEditing.nickName ? "hidden" : ""
-            }`}
+            className={`absolute right-5 top-4 cursor-pointer ${isEditing.nickName ? "hidden" : ""
+              }`}
           >
             <PencilIcon />
           </div>
@@ -208,9 +208,8 @@ export default function EditProfile() {
         )}
         <InputSection label="나를 소개하는 한 줄">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${
-              isEditing.bio ? "hidden" : ""
-            }`}
+            className={`absolute right-5 top-4 cursor-pointer ${isEditing.bio ? "hidden" : ""
+              }`}
           >
             <PencilIcon />
           </div>
@@ -228,17 +227,15 @@ export default function EditProfile() {
         </InputSection>
         <InputSection label="관심있는 성취 카테고리">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${
-              isEditing.category ? "hidden" : ""
-            }`}
+            className={`absolute right-5 top-4 cursor-pointer ${isEditing.category ? "hidden" : ""
+              }`}
           >
             <PencilIcon />
           </div>
           <div
             ref={categoryRef}
-            className={`py-2 px-4 w-full h-auto flex flex-wrap gap-1.5 cursor-pointer ${
-              isEditing.category ? "border-2 border-theme rounded-sm" : ""
-            }`}
+            className={`py-2 px-4 w-full h-auto flex flex-wrap gap-1.5 cursor-pointer ${isEditing.category ? "border-2 border-theme rounded-sm" : ""
+              }`}
             onClick={() => {
               setIsEditing((prev) => ({ ...prev, category: true }));
             }}
