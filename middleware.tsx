@@ -25,6 +25,7 @@ export default auth((req) => {
   if (
     !isLoggedIn &&
     pathname !== "/" &&
+    pathname !== "/auth/error" &&
     pathname !== "/login" &&
     pathname !== "/signup" &&
     pathname !== "/signup-test" && // 회원가입 Test Entry Point

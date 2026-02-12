@@ -28,6 +28,10 @@ export default function FeedPost({ post }: { post: PostRes }) {
       }
       return (await res.json()).data as User;
     },
+    // 중복 호출 방지
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,7 +58,7 @@ export default function FeedPost({ post }: { post: PostRes }) {
           >
             <HorizontalThreeDotsIcon />
           </button>
-        </div>  
+        </div>
         <div>
           <Post post={post} />
         </div>

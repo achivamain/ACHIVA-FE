@@ -17,6 +17,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  pages: {
+    signIn: '/auth/error',
+    error: "/auth/error",
+  },
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
@@ -50,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 client_id: process.env.AUTH_COGNITO_ID!,
                 refresh_token: token.refresh_token!,
               }),
-            }
+            },
           );
 
           const tokensOrError = await response.json();
