@@ -1,7 +1,62 @@
 // 서버에서만 실행
 // 에러명을 잘 짓고 싶다...
 
-import { CategoryCharCount, CategoryCount } from "@/types/Post";
+import { notFound } from "next/navigation";
+import { CategoryCharCount, CategoryCount, PostRes } from "@/types/Post";
+
+export async function getPostData(postId: string, token: string) {
+  async function getPost() {
+    const postRes = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/${postId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const postData = await postRes.json();
+
+    if (postData.code === 2000) {
+      throw new Error("게시물이 존재하지 않습니다");
+    }
+    return postData;
+  }
+
+  async function getCheering() {
+    const cheeringRes = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/${postId}/cheerings`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const cheeringData = await cheeringRes.json();
+    if (!cheeringData.data) {
+      throw new Error("게시물이 존재하지 않습니다");
+    }
+    return cheeringData;
+  }
+  try {
+    const [postData, cheeringData] = await Promise.all([
+      getPost(),
+      getCheering(),
+    ]);
+
+    const data: PostRes = {
+      ...postData.data,
+      cheerings: cheeringData.data.content,
+    };
+
+    return data;
+  } catch {
+    notFound();
+  }
+}
 
 // /[nickName]/home
 export async function getHomeData(userId: string, token: string) {
