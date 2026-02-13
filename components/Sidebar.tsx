@@ -135,7 +135,7 @@ export default function Sidebar() {
         {/* 유저 로딩 미완료 시 클릭 막음 */}
         <ul
           className={`flex-1 flex flex-col w-full gap-5 ${
-            isUserLoading ? "opacity-75 pointer-events-none" : ""
+            (isUserLoading || !user) ? "opacity-75 pointer-events-none" : ""
           }`}
         >
           {navItems.map((item) => {
