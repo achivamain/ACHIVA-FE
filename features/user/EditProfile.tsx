@@ -24,7 +24,7 @@ export default function EditProfile() {
         },
       });
       if (!res.ok) {
-        throw new Error("network error");
+        throw new Error("server error");
       }
       return (await res.json()).data as User;
     },

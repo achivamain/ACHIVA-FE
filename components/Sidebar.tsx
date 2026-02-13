@@ -43,7 +43,7 @@ export default function Sidebar() {
       });
 
       // 인증 실패시 로그아웃
-      if (res.status === 428) {
+      if (res.status === 428 || res.status === 401) {
         window.location.href = "/api/auth/logout";
       }
 

@@ -7,6 +7,8 @@ const handlingResError = (res: Response) => {
   switch (res.status) {
     case 404:
       notFound();
+    case 401:
+      redirect("/api/auth/logout"); //인증 오류시 로그아웃 처리
     case 428:
       redirect("/api/auth/logout"); //인증 오류시 로그아웃 처리
     default:

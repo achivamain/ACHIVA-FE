@@ -58,15 +58,23 @@ export default function Accounts() {
           <li
             className="py-2 cursor-pointer text-[#DF171B] font-semibold"
             onClick={async () => {
-              await fetch("/api/auth", { method: "DELETE" });
-              await handleLogout();
-              const domain =
-                "https://ap-northeast-2mmvclnrmp.auth.ap-northeast-2.amazoncognito.com";
-              const clientId = "a3kaacto97fom3ved1bjivbiu";
-              const logoutUri = `${window.location.origin}/`;
-              window.location.href = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-                logoutUri
-              )}`;
+              try {
+                const res = await fetch("/api/auth", { method: "DELETE" });
+                if (!res.ok) {
+                  throw new Error("계정 삭제 실패");
+                }
+                await handleLogout();
+                const domain =
+                  "https://ap-northeast-2mmvclnrmp.auth.ap-northeast-2.amazoncognito.com";
+                const clientId = "a3kaacto97fom3ved1bjivbiu";
+                const logoutUri = `${window.location.origin}/`;
+                window.location.href = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
+                  logoutUri,
+                )}`;
+              } catch (err) {
+                console.log(err);
+                alert("네트워크 또는 서버 오류가 발생했습니다.");
+              }
             }}
           >
             삭제

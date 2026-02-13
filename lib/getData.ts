@@ -53,7 +53,8 @@ export async function getPostData(postId: string, token: string) {
     };
 
     return data;
-  } catch {
+  } catch (err) {
+    console.error("Server Error: ", err);
     notFound();
   }
 }
@@ -74,6 +75,7 @@ export async function getHomeData(userId: string, token: string) {
     );
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
+      console.error("Error in fetch post counts of categories: ", errorData);
       throw new Error(errorData.error || "서버 오류");
     }
     const { data } = await res.json();
@@ -98,6 +100,7 @@ export async function getHomeData(userId: string, token: string) {
     );
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
+      console.error("Error in fetch character counts of categories: ", errorData);
       throw new Error(errorData.error || "서버 오류");
     }
     const { data } = await res.json();

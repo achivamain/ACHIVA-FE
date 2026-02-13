@@ -24,6 +24,12 @@ export async function GET(req: NextRequest) {
     },
   );
 
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    console.error(`Server Error: GET /api/articles/cheering-feed?page=${pageParam}: [${res.status}] ${errorBody}`);
+    return NextResponse.json({ error: "요청 실패" }, { status: res.status });
+  }
+
   const data = await res.json();
 
   const rawContent = data.data?.content ?? data.content ?? [];
