@@ -75,6 +75,8 @@ export async function GET(req: NextRequest) {
       if (!res.ok) {
         const errorBody = await res.json().catch(() => null);
         console.error(`Server Error: GET /api/member/${friendId}/articles: [${res.status}] ${errorBody}`);
+        // 하나 실패해도 나머지는 정상적으로 나오도록 빈 배열 반환
+        return [];
       }
       const data = await res.json();
       return (data.data?.content ?? data.content ?? []) as PostRes[];

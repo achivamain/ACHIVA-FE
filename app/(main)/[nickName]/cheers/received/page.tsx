@@ -12,7 +12,7 @@ export default async function Page({
 }) {
   const { nickName } = await params;
   const { error, token } = await getAuthSession();
-    if (error) return <Logout />;
+  if (error) return <Logout />;
 
   const user = await getUser(nickName, token)
 
