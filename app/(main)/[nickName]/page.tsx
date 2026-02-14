@@ -1,5 +1,4 @@
 import { Profile } from "@/features/user/Profile";
-import type { User } from "@/types/User";
 import type { FriendData } from "@/types/Friends";
 import Footer from "@/components/Footer";
 import PointSection from "@/features/user/Point";
@@ -8,6 +7,7 @@ import { auth } from "@/auth";
 import Logout from "@/components/Logout";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getUser } from "@/lib/getUser";
 
 export default async function Page({
   params,
@@ -22,26 +22,6 @@ export default async function Page({
   const currentUser = session!.user;
 
   const { nickName } = await params; // 이 페이지 유저 닉네임
-
-  async function getUser() {
-    // 유저 데이터 가져오기
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const { data } = await response.json();
-    if (!data) {
-      notFound();
-    }
-    return data as User;
-  }
 
   async function getMyFriends() {
     // 로그인한 유저의 친구 목록
@@ -83,12 +63,11 @@ export default async function Page({
   }
 
   const [user, myFriends, myPendingFriends] = await Promise.all([
-    getUser(),
+    getUser(nickName, token!),
     getMyFriends(),
     getMyPendingFriends(),
   ]);
   const myAllFriends = [...myFriends, ...myPendingFriends];
-
   return (
     <div className="flex-1 w-full flex flex-col pb-22 sm:pb-0 sm:pt-15 px-5">
       <div className="flex-1 flex flex-col mx-auto w-full max-w-160">

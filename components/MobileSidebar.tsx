@@ -26,11 +26,18 @@ export default function Sidebar() {
           "Content-Type": "application/json",
         },
       });
+      // 인증 실패시 로그아웃
+      if (res.status === 428 || res.status === 401) {
+        window.location.href = "/api/auth/logout";
+      }
       if (!res.ok) {
         throw new Error("network error");
       }
       return (await res.json()).data as User;
     },
+    // 잦은 중복 호출 방지
+    staleTime: 5 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const pathname = decodeURIComponent(usePathname());
@@ -103,7 +110,7 @@ export default function Sidebar() {
       >
         <ul
           className={`flex w-full justify-around px-[7px] py-[19px] ${
-            isUserLoading ? "opacity-75 pointer-events-none" : ""
+            (isUserLoading || !user) ? "opacity-75 pointer-events-none" : ""
           }`}
         >
           {navItems.map((item) => {
