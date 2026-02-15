@@ -4,9 +4,10 @@ import { auth } from "@/auth";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const pageParam = searchParams.get("pageParam");
+  const pageParam = searchParams.get("pageParam") ?? "0";
   const userId = searchParams.get("id");
-  const sort = searchParams.get("sort");
+  const sort = searchParams.get("sort") ?? "DESC";
+  const size = searchParams.get("size") ?? "9";
 
   const session = await auth();
   const token = session?.access_token;
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/member/${userId}/articles?page=${pageParam}&size=9&sort=createdAt,${sort}`,
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/member/${userId}/articles?page=${pageParam}&size=${size}&sort=createdAt,${sort}`,
     {
       method: "GET",
       headers: {
