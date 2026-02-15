@@ -102,7 +102,7 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
               transition-all duration-200 cursor-pointer"
             >
               {/* 카테고리, 날짜 */}
-              <div className="flex items-center gap-[15px]">
+              <div className="flex items-end gap-[15px]">
                 <span
                   className="inline-flex items-center justify-center
                   h-[28px] px-[12px] bg-white border border-[#D9D9D9] rounded-[50px]

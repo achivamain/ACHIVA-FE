@@ -91,7 +91,7 @@ export function MyCategorys({
 
       {/* PC 레이아웃 */}
       <div className="hidden sm:flex sm:flex-col sm:px-5 sm:mt-[36px]">
-        <div className="w-fit">
+        <div className="w-[768px]">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-[26px] font-semibold leading-[31px] text-black">
             운동일지 작성하기
