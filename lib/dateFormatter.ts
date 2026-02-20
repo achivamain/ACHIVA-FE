@@ -26,8 +26,8 @@ export default function dateFormatter(dateString: string) {
   } else if (diffWeeks < 1) {
     return `${diffDays}d`;
   } else if (diffYears < 1) {
-    return format(date, "MMMM d"); // ex: August 13
+    return format(date, "M/d"); // ex: 8/13
   } else {
-    return format(date, "MMMM d, yyyy"); // ex: December 27, 2023
+    return format(date, "yyyy/M/d"); // ex: 2023/8/13
   }
 }
