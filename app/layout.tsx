@@ -29,7 +29,7 @@ export default function RootLayout({
       <head>
         <meta
           name="naver-site-verification"
-          content="bd7f12f57eb6ced6c90bbf5c55a9084ef9c6fb8e"
+          content="69ba2bc07a14fa089a5957ca5d63df95b5571730"
         />
         <link
           rel="stylesheet"
