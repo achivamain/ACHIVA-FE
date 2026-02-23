@@ -1,11 +1,10 @@
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import MobileGoalSummary from "@/features/home/ProfileSummary";
 import { MyCategorys } from "@/features/home/MyCategorys";
+import MyRecordArchive from "@/features/home/MyRecordArchive";
 import { User } from "@/types/User";
 import { notFound, redirect } from "next/navigation";
 import { CategoryCharCount, CategoryCount } from "@/types/Post";
-import { NextResponse } from "next/server";
 
 export default async function MobileHomePageRoute({
   params,
@@ -19,7 +18,7 @@ export default async function MobileHomePageRoute({
   const token = session?.access_token;
 
   if (!token) {
-    return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
+    redirect("/api/auth/logout");
   }
 
   const { nickName } = await params; // 이 페이지 유저 닉네임, 추후 API 사용을 위해
@@ -98,72 +97,11 @@ export default async function MobileHomePageRoute({
     return categoryCharacterCounts as CategoryCharCount[];
   }
 
-  //홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
-  async function getSummeryData() {
-    try {
-      // 총 글자수
-      const charRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      // 보낸 응원 포인트
-      const cheerRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      // 목표 포인트
-      const goalRes = fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      const responses = await Promise.all([charRes, cheerRes, goalRes]);
-      responses.forEach((res) => {
-        if (!res.ok) {
-          throw new Error(`데이터 로딩 실패 (${res.status})`);
-        }
-      });
-      const [charData, cheerData, goalData] = await Promise.all(
-        responses.map((res) => res.json()),
-      );
-
-      return {
-        letters: charData.data.totalCharacterCount,
-        count: goalData.data.totalClickCount,
-        points: cheerData.data.totalSendingCheeringScore,
-      };
-    } catch (err) {
-      throw new Error(`데이터 처리 실패: ${err}`);
-    }
-  }
-
   try {
-    const [categoryCounts, mySummaryData, categoryCharCounts] =
-      await Promise.all([
-        getPostCategory(),
-        getSummeryData(),
-        getCategorysCharCount(),
-      ]);
+    const [categoryCounts, categoryCharCounts] = await Promise.all([
+      getPostCategory(),
+      getCategorysCharCount(),
+    ]);
     return (
       <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
         <MyCategorys
@@ -171,9 +109,8 @@ export default async function MobileHomePageRoute({
           categoryCounts={categoryCounts}
           categoryCharCounts={categoryCharCounts}
         />
-        <div className="h-30">{/* 배너? */}</div>
-        <h1 className="text-[26px] font-semibold mx-5 mb-3">올해의 기록</h1>
-        <MobileGoalSummary summaryData={mySummaryData} />
+        <MyRecordArchive userId={user.id} />
+        <div className="h-10"></div>
       </div>
     );
   } catch (err) {
