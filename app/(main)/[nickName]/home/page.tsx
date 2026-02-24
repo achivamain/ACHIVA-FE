@@ -127,7 +127,7 @@ export default async function HomePage({
             </div>
           </div>
         </div>
-        <div className="bg-[#fafafa] w-60 hidden md:flex justify-center">
+        <div className="bg-[#fafafa] w-[320px] hidden md:flex justify-center">
           <Banner />
         </div>
       </div>
