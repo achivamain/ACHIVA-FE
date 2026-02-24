@@ -1,13 +1,13 @@
+import Image from "next/image";
 import { Category, categoryImages, categoryImageHeights } from "@/types/Categories";
 
 type CategoryCardProps = {
   name: Category;
-  image?: string;
   background: boolean;
 };
 
-export function CategoryCard({ name, image, background }: CategoryCardProps) {
-  const imageSrc = image ?? categoryImages[name];
+export function CategoryCard({ name, background }: CategoryCardProps) {
+  const imageSrc = categoryImages[name];
   const imageHeight = categoryImageHeights[name];
 
   return (
@@ -16,12 +16,12 @@ export function CategoryCard({ name, image, background }: CategoryCardProps) {
         className={`flex items-center justify-center h-18 w-18 ${background ? "bg-[#F3F3F3]" : "bg-white"} rounded-md`}
       >
         {imageSrc && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={imageSrc}
             alt={name}
-            style={{ height: imageHeight }}
+            height={imageHeight}
             className="w-auto object-contain"
+            style={{ height: imageHeight }}
           />
         )}
       </div>

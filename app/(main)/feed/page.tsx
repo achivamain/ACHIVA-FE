@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
 import FeedTabs, { type FeedTab } from "@/features/feed/FeedTabs";
 import FeedList from "@/features/feed/FeedList";
@@ -25,11 +24,10 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <div className="bg-[#fafafa] w-60 hidden md:flex justify-center">
+        <div className="bg-[#fafafa] w-[320px] hidden md:flex justify-center">
           <Banner />
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

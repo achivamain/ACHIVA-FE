@@ -1,8 +1,7 @@
-import { WebProfileSummary } from "@/features/home/ProfileSummary";
-import Footer from "@/components/Footer";
 import Banner from "@/features/event/Banner";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
+import MyRecordArchive from "@/features/home/MyRecordArchive";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
 import { getAuthSession } from "@/lib/getAuthSession";
@@ -20,35 +19,44 @@ export default async function HomePage({
 
   try {
     const user = await getMe(token);
-    if (!(user.nickName === decodeURIComponent(nickName))){
+    if (!(user.nickName === decodeURIComponent(nickName))) {
       redirect(`/${nickName}`);
     }
 
-    const { categoryCounts, mySummaryData, categoryCharCounts } =
+    const { categoryCounts, categoryCharCounts } =
       await getHomeData(user.id, token);
     return (
-      <div className="w-full flex-1 flex">
+      <div className="w-full flex-1 flex bg-[#FAFAFA]">
         <div className="flex-1 flex flex-col">
           <div className="flex-1 flex justify-center">
             <div className="w-full max-w-[844px]">
+              <div className="pt-15 pb-3 px-5">
+                <h2 className="text-[28px] font-extrabold text-black">
+                  안녕하세요, {decodeURIComponent(nickName)} 님! 👍
+                </h2>
+                <p className="text-[16px] leading-[22px] text-[#8E95A9] mt-1">
+                  오늘도 열심히 운동하는 당신을 응원합니다!
+                </p>
+              </div>
               <MyCategorys
                 myCategories={user.categories}
                 categoryCounts={categoryCounts}
                 categoryCharCounts={categoryCharCounts}
               />
               <div className="h-10"></div>
-              <WebProfileSummary summaryData={mySummaryData} />
+              {/* 나의 기록 보관소 */}
+              <MyRecordArchive userId={user.id} />
+              <div className="h-10"></div>
             </div>
           </div>
-          <Footer />
         </div>
-        <div className="bg-[#fafafa] w-60 hidden md:flex justify-center">
+        <div className="bg-[#fafafa] w-[320px] hidden md:flex justify-center">
           <Banner />
         </div>
       </div>
     );
   } catch (err) {
     console.error(err);
-    notFound(); // 에러 종류에 따라 처리를 나눌 필요가 있을지도
+    notFound();
   }
 }

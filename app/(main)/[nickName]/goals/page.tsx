@@ -25,7 +25,7 @@ export default async function GoalsPage({
       <div className="flex-1 flex flex-col justify-between">
         <GoalPage />
       </div>
-      <div className="bg-[#fafafa] w-60 hidden md:flex justify-center">
+      <div className="bg-[#fafafa] w-[320px] hidden md:flex justify-center">
         <Banner />
       </div>
     </div>
