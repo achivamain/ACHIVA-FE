@@ -1,107 +1,30 @@
-import { auth } from "@/auth";
-import Logout from "@/components/Logout";
 import Banner from "@/features/event/Banner";
-import { User } from "@/types/User";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
-import { CategoryCharCount, CategoryCount } from "@/types/Post";
+import Logout from "@/components/Logout";
+import { getHomeData } from "@/lib/getData";
+import { getAuthSession } from "@/lib/getAuthSession";
+import { getMe } from "@/lib/getUser";
 
 export default async function HomePage({
   params,
 }: {
   params: Promise<{ nickName: string }>;
 }) {
-  const session = await auth();
-  if (session?.error) {
-    return <Logout />;
-  }
-  const token = session?.access_token;
-
-  if (!token) {
-    redirect("/api/auth/logout");
-  }
+  const { error, token } = await getAuthSession();
+  if (error) return <Logout />;
 
   const { nickName } = await params;
 
-  // 유저 데이터 가져오기
-  async function getUser() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    if (!res.ok) {
-      redirect("/api/auth/logout");
-    }
-    const { data } = await res.json();
-    if (!data) {
-      throw new Error("Invalid user data");
-    }
-    return data as User;
-  }
-
-  const [user] = await Promise.all([getUser()]);
-
-  // 카테고리별 게시물 수 받아오기
-  async function getPostCategory() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${user.id}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || "서버 오류");
-    }
-    const { data } = await res.json();
-    if (!data) {
-      throw new Error("Invalid post counts of categories data");
-    }
-    const { categoryCounts } = data;
-    return categoryCounts as CategoryCount[];
-  }
-
-  // 카테고리별 글자수 받아오기
-  async function getCategorysCharCount() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || "서버 오류");
-    }
-    const { data } = await res.json();
-    if (!data) {
-      throw new Error("Invalid character counts of categories data");
-    }
-    const { categoryCharacterCounts } = data;
-    return categoryCharacterCounts as CategoryCharCount[];
-  }
-
   try {
-    const [categoryCounts, categoryCharCounts] =
-      await Promise.all([
-        getPostCategory(),
-        getCategorysCharCount(),
-      ]);
+    const user = await getMe(token);
+    if (!(user.nickName === decodeURIComponent(nickName))) {
+      redirect(`/${nickName}`);
+    }
+
+    const { categoryCounts, categoryCharCounts } =
+      await getHomeData(user.id, token);
     return (
       <div className="w-full flex-1 flex bg-[#FAFAFA]">
         <div className="flex-1 flex flex-col">
@@ -134,6 +57,6 @@ export default async function HomePage({
     );
   } catch (err) {
     console.error(err);
-    notFound(); // 에러 종류에 따라 처리를 나눌 필요가 있을지도
+    notFound();
   }
 }

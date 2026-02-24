@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return (await res.json()).data as FriendData[]; // 친구신청 목록 배열
   }
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     return (await res.json()).data as User; // 해당 페이지의 유저 id를 얻기 위해....
   }
@@ -55,12 +55,12 @@ export async function GET(req: NextRequest) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       const userJson = await userRes.json();
 
       return userJson.data;
-    })
+    }),
   );
 
   const response = {
@@ -81,20 +81,38 @@ export async function POST(req: NextRequest) {
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/friendships`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/friendships`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          recieverId: userId,
+        }),
       },
-      body: JSON.stringify({
-        recieverId: userId,
-      }),
+    );
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => null);
+      console.error(
+        `Server Error: POST /api/friendships: [${res.status}] ${errorBody}`,
+      );
+      return NextResponse.json(
+        { error: "친구 신청 요청 실패" },
+        { status: res.status },
+      );
     }
-  );
+    revalidateTag("friends");
 
-  revalidateTag("friends");
-  return res;
+    return res;
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }

@@ -20,7 +20,7 @@ export default function CheerBtns({
   // useMemo 안쓰면 랜더링 오류 나서 넣음
   const types = useMemo(
     () => Object.keys(cheeringMeta) as (keyof typeof cheeringMeta)[],
-    []
+    [],
   );
   const initialCheeringsState = types.reduce<
     Record<
@@ -51,7 +51,7 @@ export default function CheerBtns({
       const cheering = cheerings.find(
         (cheering) =>
           cheering.cheeringCategory === type &&
-          cheering.senderId === currentUserId
+          cheering.senderId === currentUserId,
       );
       acc[type] = {
         active: !!cheering,
@@ -78,49 +78,67 @@ export default function CheerBtns({
             id={type}
             disabled={pending}
             onClick={async () => {
-              setCheeringsState((prev) => ({
-                ...prev,
-                [type]: {
-                  ...prev[type],
-                  active: !prev[type].active,
-                  isPending: true,
-                },
-              }));
-
-              if (active) {
-                // 이미 눌렀으면 취소
-                await fetch(
-                  `/api/cheerings?postId=${postId}&cheeringId=${cheeringsState[type].id}`,
-                  {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                  }
-                );
-              } else {
-                // 누르기
-                animate(
-                  `#${type}`,
-                  { scale: [1, 1.07, 1.1, 1] },
-                  { duration: 0.3 }
-                );
-                const res = await fetch("/api/cheerings", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    postId,
-                    cheeringType: type,
-                  }),
-                });
-                const id = (await res.json()).data.id;
+              try {
                 setCheeringsState((prev) => ({
                   ...prev,
-                  [type]: { ...prev[type], id },
+                  [type]: {
+                    ...prev[type],
+                    isPending: true,
+                  },
                 }));
+                if (active) {
+                  // 이미 눌렀으면 취소
+                  const res = await fetch(
+                    `/api/cheerings?postId=${postId}&cheeringId=${cheeringsState[type].id}`,
+                    {
+                      method: "DELETE",
+                      headers: { "Content-Type": "application/json" },
+                    },
+                  );
+                  if (!res.ok) {
+                    throw new Error("응원 취소 실패");
+                  }
+                  setCheeringsState((prev) => ({
+                    ...prev,
+                    [type]: {
+                      ...prev[type],
+                      active: !prev[type].active,
+                      isPending: false,
+                    },
+                  }));
+                } else {
+                  // 누르기
+                  animate(
+                    `#${type}`,
+                    { scale: [1, 1.07, 1.1, 1] },
+                    { duration: 0.3 },
+                  );
+                  const res = await fetch("/api/cheerings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      postId,
+                      cheeringType: type,
+                    }),
+                  });
+                  if (!res.ok) {
+                    throw new Error("응원 실패");
+                  }
+                  const id = (await res.json()).data.id;
+                  setCheeringsState((prev) => ({
+                    ...prev,
+                    [type]: {
+                      ...prev[type],
+                      active: !prev[type].active,
+                      id,
+                      isPending: false,
+                    },
+                  }));
+                }
+              } catch (err) {
+                console.error(err);
+                alert("네트워크 또는 서버 오류가 발생했습니다.");
               }
-              setCheeringsState((prev) => ({
-                ...prev,
-                [type]: { ...prev[type], isPending: false },
-              }));
             }}
             key={type}
             style={active ? { backgroundColor: color, borderColor: color } : {}}

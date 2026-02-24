@@ -1,7 +1,9 @@
 import CheersTitle from "@/features/user/CheersTitle";
-import { auth } from "@/auth";
 import type { CheerPoint } from "@/types/responses";
 import Cheers from "@/features/user/Cheers";
+import Logout from "@/components/Logout";
+import { getAuthSession } from "@/lib/getAuthSession";
+import { getUser } from "@/lib/getUser";
 
 export default async function Page({
   params,
@@ -9,21 +11,12 @@ export default async function Page({
   params: Promise<{ nickName: string }>;
 }) {
   const { nickName } = await params;
-  const session = await auth();
-  const token = session?.access_token;
+  const { error, token } = await getAuthSession();
+  if (error) return <Logout />;
 
-  const userRes = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const user = await getUser(nickName, token);
 
-  const userId = (await userRes.json()).data.id;
+  const userId = user.id;
   const cheersRes = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/cheerings/sending-category-stats`,
     {
@@ -32,7 +25,7 @@ export default async function Page({
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   const cheersData: CheerPoint[] = (await cheersRes.json()).data;
   return (

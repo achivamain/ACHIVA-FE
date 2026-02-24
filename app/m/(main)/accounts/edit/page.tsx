@@ -1,13 +1,12 @@
 import MobileHeader from "@/components/MobileHeader";
 import EditProfile from "@/features/user/EditProfile";
-import { auth } from "@/auth";
 import Logout from "@/components/Logout";
+import { getAuthSession } from "@/lib/getAuthSession";
 
 export default async function Page() {
-  const session = await auth();
-  if (session?.error) {
-    return <Logout />;
-  }
+  const { error } = await getAuthSession();
+  if (error) return <Logout />;
+
   return (
     <>
       <MobileHeader>프로필 수정</MobileHeader>

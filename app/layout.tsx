@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "나는오늘운동한다",
     description: "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS",
-    images: ["/logo.png"],
+    images: ["/opengraph-image.png"],
   },
 };
 

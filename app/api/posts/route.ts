@@ -20,28 +20,46 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          photoUrls: draft.photoUrls,
+          title: draft.title || "오늘의 운동",
+          category: draft.category,
+          question: draft.pages!.map(({ subtitle, content }) => ({
+            question: subtitle ?? "",
+            content,
+          })),
+          backgroundColor: draft.backgroundColor,
+        }),
       },
-      body: JSON.stringify({
-        photoUrls: draft.photoUrls,
-        title: draft.title || "오늘의 운동",
-        category: draft.category,
-        question: draft.pages!.map(({ subtitle, content }) => ({
-          question: subtitle ?? "",
-          content,
-        })),
-        backgroundColor: draft.backgroundColor,
-      }),
-    },
-  );
+    );
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => null);
+      console.error(
+        `Server Error: POST /api/articles: [${res.status}] ${errorBody}`,
+      );
+      return NextResponse.json(
+        { error: "게시글 업로드 요청 실패" },
+        { status: res.status },
+      );
+    }
 
-  return res;
+    return res;
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
+  }
 }
 
 // 단일 게시물 불러오기 프록시 api
@@ -92,6 +110,17 @@ export async function DELETE(req: NextRequest) {
       },
     },
   );
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => null);
+    console.error(
+      `Server Error: DELETE /api/articles: [${res.status}] ${errorBody}`,
+    );
+    return NextResponse.json(
+      { error: "게시글 삭제 요청 실패" },
+      { status: res.status },
+    );
+  }
 
   return res;
 }

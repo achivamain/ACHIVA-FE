@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { HorizontalThreeDotsIcon } from "@/components/Icons";
 
 export default function FeedPost({ post }: { post: PostRes }) {
-  const { data: currentUser } = useQuery({
+  const { data: currentUser, isError } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const res = await fetch(`/api/members/me`, {
@@ -28,10 +28,17 @@ export default function FeedPost({ post }: { post: PostRes }) {
       }
       return (await res.json()).data as User;
     },
+    // 중복 호출 방지
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  if (isError) {
+    return null;
+  }
   return (
     <>
       <div className="w-full">
@@ -54,7 +61,7 @@ export default function FeedPost({ post }: { post: PostRes }) {
           >
             <HorizontalThreeDotsIcon />
           </button>
-        </div>  
+        </div>
         <div>
           <Post post={post} />
         </div>
@@ -66,7 +73,7 @@ export default function FeedPost({ post }: { post: PostRes }) {
             <li
               className="py-2 cursor-pointer text-[#DF171B] font-semibold"
               onClick={async () => {
-                await fetch(`/api/report`, {
+                const res = await fetch(`/api/report`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -74,7 +81,11 @@ export default function FeedPost({ post }: { post: PostRes }) {
                     reporterName: currentUser?.nickName,
                   }),
                 });
-                alert("신고가 접수되었습니다.");
+                if (res.ok) {
+                  alert("신고가 접수되었습니다.");
+                } else {
+                  alert("신고에 실패했습니다. 다시 시도해 주세요.");
+                }
                 setIsModalOpen(false);
               }}
             >
@@ -85,11 +96,15 @@ export default function FeedPost({ post }: { post: PostRes }) {
             <li
               className="py-2 cursor-pointer text-[#DF171B] font-semibold"
               onClick={async () => {
-                await fetch(`/api/posts?postId=${post.id}`, {
+                const res = await fetch(`/api/posts?postId=${post.id}`, {
                   method: "DELETE",
                   headers: { "Content-Type": "application/json" },
                 });
-                window.location.href = `/${currentUser?.nickName}`;
+                if (res.ok) {
+                  window.location.href = `/${currentUser?.nickName}`;
+                } else {
+                  alert("게시물 삭제에 실패했습니다. 다시 시도해 주세요.");
+                }
               }}
             >
               삭제

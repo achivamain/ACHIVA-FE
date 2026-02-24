@@ -1,4 +1,3 @@
-import MobileHeader from "@/components/MobileHeader";
 import Notifications from "@/features/user/Notifications";
 
 export default function Page() {
