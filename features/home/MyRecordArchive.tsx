@@ -43,21 +43,18 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage) return;
+    if (!observerRef.current) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
-      { threshold: 0.5 },
+      { rootMargin: "1500px 0px" },
     );
-    const el = observerRef.current;
-    if (el) observer.observe(el);
-    return () => {
-      if (el) observer.unobserve(el);
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const allPosts: PostRes[] = data?.pages.flatMap((page) => page.content) ?? [];
 

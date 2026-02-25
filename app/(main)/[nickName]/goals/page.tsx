@@ -15,8 +15,8 @@ export default async function GoalsPage({
 
   const { nickName } = await params;
 
-  // 백엔드 API로 실제 유저 닉네임을 조회하여 본인 확인
-  if (!await isOwner(nickName, token)) {
+  // 본인만 접근 가능
+  if (!(await isOwner(nickName, token))) {
     redirect(`/${nickName}`);
   }
 

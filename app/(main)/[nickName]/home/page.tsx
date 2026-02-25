@@ -5,7 +5,7 @@ import MyRecordArchive from "@/features/home/MyRecordArchive";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
 import { getAuthSession } from "@/lib/getAuthSession";
-import { getMe } from "@/lib/getUser";
+import { getMe, isOwner } from "@/lib/getUser";
 
 export default async function HomePage({
   params,
@@ -17,14 +17,20 @@ export default async function HomePage({
 
   const { nickName } = await params;
 
-  try {
-    const user = await getMe(token);
-    if (!(user.nickName === decodeURIComponent(nickName))) {
-      redirect(`/${nickName}`);
-    }
+  const user = await getMe(token).catch(() => null);
+  if (!user) notFound();
 
-    const { categoryCounts, categoryCharCounts } =
-      await getHomeData(user.id, token);
+  // 본인만 접근 가능
+  if (!(await isOwner(nickName, token))) {
+    redirect(`/${nickName}`);
+  }
+
+  try {
+    const { categoryCounts, categoryCharCounts } = await getHomeData(
+      user.id,
+      token,
+    );
+
     return (
       <div className="w-full flex-1 flex bg-[#FAFAFA]">
         <div className="flex-1 flex flex-col">
