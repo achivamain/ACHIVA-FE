@@ -54,7 +54,7 @@ export default function FeedList({ activeTab }: FeedListProps) {
         const cheeringsRes = await fetch(`/api/cheerings?postId=${post.id}`);
         const cheeringsJson = await cheeringsRes.json();
         return { ...post, cheerings: cheeringsJson.data?.content ?? [] };
-      })
+      }),
     );
 
     return {
@@ -87,7 +87,7 @@ export default function FeedList({ activeTab }: FeedListProps) {
           fetchNextPage();
         }
       },
-      { rootMargin: "100px 0px" }
+      { rootMargin: "1500px 0px" },
     );
     io.observe(loaderRef.current);
     return () => io.disconnect();
