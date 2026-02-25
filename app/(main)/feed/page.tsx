@@ -1,9 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import Banner from "@/features/event/Banner";
+import dynamic from "next/dynamic";
 import FeedTabs, { type FeedTab } from "@/features/feed/FeedTabs";
-import FeedList from "@/features/feed/FeedList";
+import { LoadingIcon } from "@/components/Icons";
+
+const Banner = dynamic(() => import("@/features/event/Banner"), {
+  ssr: false,
+  loading: () => (
+    <div className="sticky top-[135px] mt-[135px] w-[256px] h-[350px] rounded-[10px] bg-gray-100 animate-pulse" />
+  ),
+});
+
+const FeedList = dynamic(() => import("@/features/feed/FeedList"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full flex justify-center py-10">
+      <LoadingIcon color="text-theme" />
+    </div>
+  ),
+});
 
 export default function FeedPage() {
   const [activeTab, setActiveTab] = useState<FeedTab>("전체");

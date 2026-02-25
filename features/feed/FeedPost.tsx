@@ -2,6 +2,7 @@
 
 // 게시글 하나를 처리하는 부분
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import type { PostRes } from "@/types/Post";
 import type { User } from "@/types/User";
 import dateFormatter from "@/lib/dateFormatter";
@@ -9,9 +10,13 @@ import Post from "../post/Post";
 import ProfileImg from "@/components/ProfileImg";
 import Link from "next/link";
 import CheerBtns from "../post/CheerBtns";
-import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useQuery } from "@tanstack/react-query";
 import { HorizontalThreeDotsIcon } from "@/components/Icons";
+
+const ModalWithoutCloseBtn = dynamic(
+  () => import("@/components/ModalWithoutCloseBtn"),
+  { ssr: false },
+);
 
 export default function FeedPost({ post }: { post: PostRes }) {
   const { data: currentUser, isError } = useQuery({
