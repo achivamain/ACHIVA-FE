@@ -41,11 +41,20 @@ export default function Sidebar() {
           "Content-Type": "application/json",
         },
       });
+
+      // 인증 실패시 로그아웃
+      if (res.status === 428 || res.status === 401) {
+        window.location.href = "/api/auth/logout";
+      }
+
       if (!res.ok) {
         throw new Error("network error");
       }
       return (await res.json()).data as User;
     },
+    // 잦은 중복 호출 방지
+    staleTime: 5 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // 사이드바에 drawer로 열리는 다른 것이 들어가지 않을 것 같아서
@@ -126,7 +135,7 @@ export default function Sidebar() {
         {/* 유저 로딩 미완료 시 클릭 막음 */}
         <ul
           className={`flex-1 flex flex-col w-full gap-5 ${
-            isUserLoading ? "opacity-75 pointer-events-none" : ""
+            (isUserLoading || !user) ? "opacity-75 pointer-events-none" : ""
           }`}
         >
           {navItems.map((item) => {

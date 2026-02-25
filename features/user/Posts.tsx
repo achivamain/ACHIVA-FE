@@ -36,8 +36,9 @@ export default function Posts({ userId }: { userId: string }) {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
+      if (!response.ok) throw new Error("Failed to fetch");
       const { data } = await response.json();
 
       setAllcategories([
@@ -96,7 +97,7 @@ export default function Posts({ userId }: { userId: string }) {
           fetchNextPage();
         }
       },
-      { rootMargin: "100px 0px" }
+      { rootMargin: "100px 0px" },
     );
     io.observe(loaderRef.current);
     return () => io.disconnect();

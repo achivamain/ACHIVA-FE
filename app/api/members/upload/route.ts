@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { error: "file 필드가 필요합니다." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -17,15 +17,16 @@ export async function POST(req: NextRequest) {
       `${
         process.env.NEXT_PUBLIC_SERVER_URL
       }/api/members/presigned-url?contentType=${encodeURIComponent(
-        contentType
+        contentType,
       )}`,
-      { method: "GET" }
+      { method: "GET" },
     );
     if (!presignRes.ok) {
       const text = await presignRes.text().catch(() => "");
+      console.error(`presigned-url 실패: ${text}`);
       return NextResponse.json(
-        { error: `presigned-url 실패: ${text}` },
-        { status: 502 }
+        { error: `presigned-url 실패` },
+        { status: 502 },
       );
     }
     const url = (await presignRes.json()).data.url;
@@ -40,10 +41,8 @@ export async function POST(req: NextRequest) {
 
     if (!putRes.ok) {
       const text = await putRes.text().catch(() => "");
-      return NextResponse.json(
-        { error: `S3 PUT 실패: ${text}` },
-        { status: 502 }
-      );
+      console.error(`S3 PUT 실패: ${text}`);
+      return NextResponse.json({ error: `S3 PUT 실패` }, { status: 502 });
     }
 
     // 업로드 성공. 필요하면 퍼블릭 URL 생성 규칙에 맞게 location을 만들어서 내려주세요.

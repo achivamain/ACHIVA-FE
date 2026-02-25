@@ -1,43 +1,14 @@
-import { auth } from "@/auth";
 import Logout from "@/components/Logout";
-import { User } from "@/types/User";
-import { notFound } from "next/navigation";
-import { NextResponse } from "next/server";
 import { HomeCategorySelector } from "@/features/home/HomeCategorySelector";
 import { categories, Category } from "@/types/Categories";
+import { getAuthSession } from "@/lib/getAuthSession";
+import { getMe } from "@/lib/getUser";
 
 export default async function Page() {
-  const session = await auth();
-  if (session?.error) {
-    return <Logout />;
-  }
-  const token = session?.access_token;
+  const { error, token } = await getAuthSession();
+  if (error) return <Logout />;
 
-  if (!token) {
-    return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
-  }
-
-  async function getUser() {
-    // 유저 데이터 가져오기
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const { data } = await response.json();
-    if (!data) {
-      notFound();
-    }
-    return data as User;
-  }
-
-  const [user] = await Promise.all([getUser()]);
+  const [user] = await Promise.all([getMe(token)]);
 
   //필요한 정보만 보내도록 했습니다
   type UserData = Pick<

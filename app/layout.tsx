@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pretendard } from "@/lib/fonts";
+import { pretendard, urbanist } from "@/lib/fonts";
 import "./globals.css";
 import Wrapper from "@/QueryClientProvider";
 import { Analytics } from "@vercel/analytics/next";
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "나는오늘운동한다",
     description: "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS",
-    images: ["/logo.png"],
+    images: ["/opengraph-image.png"],
   },
 };
 
@@ -47,7 +47,7 @@ export default function RootLayout({
     })(window, document, "clarity", "script", "tds01box2e");`}
         </Script>
       </head>
-      <body className={`${pretendard.className} antialiased min-h-dvh`}>
+      <body className={`${pretendard.className} ${pretendard.variable} ${urbanist.variable} antialiased min-h-dvh`}>
         <SessionProviderWrapper>
           <Wrapper>{children}</Wrapper>
         </SessionProviderWrapper>
