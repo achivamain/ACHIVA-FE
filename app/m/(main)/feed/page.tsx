@@ -15,16 +15,12 @@ export default function MobileFeedPage() {
         <div className="flex items-center justify-between px-5 py-4">
           <TextLogo />
         </div>
-          <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
-
-      <div className="flex-1 px-4">
+      <div className="flex-1">
         <FeedList activeTab={activeTab} />
       </div>
-
       <Footer />
     </div>
   );
 }
-
-

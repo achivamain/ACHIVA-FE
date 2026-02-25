@@ -46,7 +46,7 @@ export function Profile({ user, currentUserId, currentUserFriends }: Props) {
         </div>
         <p className="text-[#7F7F7F]">{user.description}</p>
         <div className="flex flex-col gap-1.5">
-          <p className="font-bold text-lg">성취 카테고리</p>
+          <p className="font-bold text-lg">관심 카테고리</p>
           <div className="flex gap-2">
             {user.categories.map((category) => (
               <div
@@ -70,7 +70,7 @@ export default function MobileProfile({
   currentUserFriends,
 }: Props) {
   return (
-    <div className="sm:hidden">
+    <div className="sm:hidden px-5">
       <div className="h-14 flex items-center justify-end gap-3">
         <Link href={`/${user.nickName}/friends`}>
           <FollowerIcon />
@@ -104,7 +104,7 @@ export default function MobileProfile({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <p className="font-bold text-lg">성취 카테고리</p>
+        <p className="font-bold text-lg">관심 카테고리</p>
         <div className="flex gap-2">
           {user.categories.map((category) => (
             <div
