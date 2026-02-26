@@ -217,6 +217,7 @@ export function useMultiImageUploader({
       return;
     }
 
+    // 이 부분은 병렬화하면 swiper 동작이 이상해짐
     for (const file of files) {
       if (!file.type.startsWith("image/")) {
         alert("이미지 파일만 업로드할 수 있습니다.");
@@ -289,10 +290,9 @@ export function useMultiImageUploader({
     }
 
     setIsUploading(true);
-    const uploadedUrls: string[] = [];
 
     try {
-      for (const image of images) {
+      const uploadPromises = images.map(async (image) => {
         const blob = await getCroppedBlob(
           image.imageSrc,
           image.croppedAreaPixels!,
@@ -317,9 +317,10 @@ export function useMultiImageUploader({
         const data = await res.json();
 
         if (!res.ok) throw new Error(data?.error || "업로드 실패");
+        return data.url;
+      });
 
-        uploadedUrls.push(data.url);
-      }
+      const uploadedUrls = await Promise.all(uploadPromises);
       onUploadCompleted(uploadedUrls);
       resetAll();
     } catch (e) {
