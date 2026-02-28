@@ -45,10 +45,7 @@ export default function EditProfile() {
   const remainingCategories = allCategories.filter(
     (category) => !categories.includes(category)
   );
-  const categoryError =
-    categories.length <= 0 || categories.length > 5
-      ? "카테고리는 1개 이상 5개 이하로 선택할 수 있습니다"
-      : "";
+  const categoryError = "";
   const categoryRef = useRef<HTMLDivElement | null>(null);
   const [bio, setBio] = useState(user?.description);
 
