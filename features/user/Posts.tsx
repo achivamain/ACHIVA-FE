@@ -108,7 +108,7 @@ export default function Posts({ userId }: { userId: string }) {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="flex justify-between font-medium text-sm mb-2">
+      <div className="flex justify-between font-medium text-sm mb-2 px-5">
         <p className="text-theme/50">
           게시글 <span>{postsCnt}</span>
         </p>
