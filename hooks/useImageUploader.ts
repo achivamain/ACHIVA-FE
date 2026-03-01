@@ -242,7 +242,7 @@ export function useMultiImageUploader({
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
 
-    if (!files) return;
+    if (files.length === 0) return;
 
     if (images.length + files.length > maxImages) {
       alert(`최대 ${maxImages}장까지 업로드할 수 있습니다.`);
