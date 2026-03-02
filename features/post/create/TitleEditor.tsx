@@ -145,6 +145,10 @@ export default function TitleEditor() {
           공유하기
         </NextStepButton>
       </div>
+      <p className="my-2 text-[#808080] text-[13px]">
+        커뮤니티 가이드라인을 위반한 게시글은 즉각적인 제제가 이루어질 수
+        있습니다.
+      </p>
     </div>
   );
 }
