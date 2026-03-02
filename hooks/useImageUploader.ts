@@ -178,11 +178,13 @@ export function useMultiImageUploader({
   ); //useCallback - maxImages가 바뀔 때에만 새로 생성되도록 함
 
   // 앱으로부터 메시지를 받기 위한 로직 추가
+  // 여러 장 한번에 업로드 가능하게 하려면 앱 측의 수정이 필요할 수 있음
   useEffect(() => {
     const handleMessageFromApp = (event: MessageEvent) => {
       const message = event.data;
 
       // 데이터 확인
+      // 단일 이미지
       if (message && message.type === "IMAGE_DATA" && message.data) {
         console.log("앱으로부터 이미지 데이터를 받았습니다.");
         const imageBase64 = message.data;
@@ -196,6 +198,36 @@ export function useMultiImageUploader({
           croppedAreaPixels: null,
         });
       }
+
+      //복수 이미지
+      if (
+        message &&
+        message.type === "IMAGES_DATA" &&
+        Array.isArray(message.data)
+      ) {
+        console.log(
+          `앱으로부터 ${message.data.length}개 이미지 데이터를 받았습니다.`,
+        );
+
+        const newImages = message.data.map(
+          (imageBase64: string, index: number) => ({
+            id: `${Date.now()}-${index}`,
+            imageSrc: `data:image/jpeg;base64,${imageBase64}`,
+            originalFile: null,
+            crop: { x: 0, y: 0 },
+            zoom: 1,
+            croppedAreaPixels: null,
+          }),
+        );
+
+        setImages((prev) => {
+          if (prev.length + newImages.length > maxImages) {
+            alert(`최대 ${maxImages}장까지 업로드할 수 있습니다.`);
+            return prev;
+          }
+          return [...prev, ...newImages];
+        });
+      }
     };
 
     window.addEventListener("message", handleMessageFromApp);
@@ -204,19 +236,20 @@ export function useMultiImageUploader({
     return () => {
       window.removeEventListener("message", handleMessageFromApp);
     };
-  }, [addImage]); // addImage는 useCallback을 사용하여 maxImages가 바뀌지 않는 한 안 바뀜
+  }, [addImage, maxImages]); // addImage는 useCallback을 사용하여 maxImages가 바뀌지 않는 한 안 바뀜
 
   /** 파일 선택 -> dataURL로 미리보기 세팅 */
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
 
-    if (!files) return;
+    if (files.length === 0) return;
 
     if (images.length + files.length > maxImages) {
       alert(`최대 ${maxImages}장까지 업로드할 수 있습니다.`);
       return;
     }
 
+    // 이 부분은 병렬화하면 swiper 동작이 이상해짐
     for (const file of files) {
       if (!file.type.startsWith("image/")) {
         alert("이미지 파일만 업로드할 수 있습니다.");
@@ -289,10 +322,9 @@ export function useMultiImageUploader({
     }
 
     setIsUploading(true);
-    const uploadedUrls: string[] = [];
 
     try {
-      for (const image of images) {
+      const uploadPromises = images.map(async (image) => {
         const blob = await getCroppedBlob(
           image.imageSrc,
           image.croppedAreaPixels!,
@@ -317,9 +349,10 @@ export function useMultiImageUploader({
         const data = await res.json();
 
         if (!res.ok) throw new Error(data?.error || "업로드 실패");
+        return data.url;
+      });
 
-        uploadedUrls.push(data.url);
-      }
+      const uploadedUrls = await Promise.all(uploadPromises);
       onUploadCompleted(uploadedUrls);
       resetAll();
     } catch (e) {

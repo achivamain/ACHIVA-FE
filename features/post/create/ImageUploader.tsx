@@ -172,6 +172,9 @@ export default function ImageUploader() {
               setIsBeginning(sw.isBeginning);
               setIsEnd(sw.isEnd);
             }}
+            // 마우스 드래그로 슬라이드 이동 비활성화 -> pc에서 드래그로 이미지 위치 이동이 가능하도록
+            simulateTouch={false} 
+            allowTouchMove={true}
           >
             <div className="relative aspect-square bg-black/5 rounded-md">
               {images.map((image, idx) => (
