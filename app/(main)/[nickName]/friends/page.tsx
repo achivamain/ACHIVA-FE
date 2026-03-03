@@ -17,9 +17,6 @@ export default async function Page({
 
   // 백엔드 API로 실제 유저 닉네임을 조회하여 본인 확인
   const isMe = await isOwner(nickName, token);
-  if (!isMe) {
-    redirect(`/${nickName}`);
-  }
 
   return (
     <div className="flex justify-center">
