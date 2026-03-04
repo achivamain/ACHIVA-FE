@@ -27,11 +27,11 @@ const MobileSummaryCard: React.FC<SummaryCardProps> = ({
       <div className="w-11 h-14 text-[43px] flex items-center justify-center">
         {icon}
       </div>
-      <div className="flex flex-row items-end justify-center gap-1">
+      <div className="flex flex-row flex-wrap items-end justify-center gap-1">
         <h3 className="font-semibold text-[18px] text-black">
           {value.toLocaleString()}
         </h3>
-        <span className="text-[#727E8F]">{title}</span>
+        <span className="text-[#727E8F] whitespace-nowrap">{title}</span>
       </div>
       <p className="font-semibold text-[11px] text-[#9A9C9F]">{description}</p>
     </div>
@@ -54,7 +54,7 @@ const WebSummaryCard: React.FC<SummaryCardProps> = ({
         <h3 className="font-semibold text-[18px] text-black">
           {value.toLocaleString()}
         </h3>
-        <span className="text-[#727E8F]">{title}</span>
+        <span className="text-[#727E8F] ">{title}</span>
       </div>
       <p className="font-semibold text-[11px] text-[#9A9C9F]">{description}</p>
     </div>
@@ -66,7 +66,14 @@ export const MobileProfileSummary: React.FC<ProfileSummaryProps> = ({
   summaryData,
 }) => {
   return (
-    <div className="flex flex-row gap-[15px]">
+    <div
+      className="flex flex-row gap-[15px] overflow-x-auto"
+      style={{
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
       <MobileSummaryCard
         icon="📚"
         value={summaryData.letters}
