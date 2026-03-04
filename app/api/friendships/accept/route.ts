@@ -1,6 +1,7 @@
 // 친구신청 수락 프록시 api
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { revalidateTag } from "next/cache";
 
 export async function PATCH(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -34,6 +35,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
+    revalidateTag("friends");
     return res;
   } catch (err) {
     console.error(err);

@@ -48,7 +48,7 @@ export default function FriendShipBtn({ userId, currentUserFriends }: Props) {
       label = "내 친구";
       break;
     case "PENDING":
-      label = "수락 대기 중";
+      label = "요청됨";
       break;
     default:
       label = "친구 신청";
