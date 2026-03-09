@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getSummeryData } from "@/lib/getData";
 import { getUser, isOwner } from "@/lib/getUser";
 import { MobileProfileSummary } from "@/features/home/ProfileSummary";
+import WeeklyCalendar from "@/features/user/WeeklyCalendar";
 
 export default async function Page({
   params,
@@ -91,9 +92,10 @@ export default async function Page({
           {
             /* summaryData는 자신 정보밖에 못 보기 때문에 타인 페이지에서는 숨김*/
             isMyProfile && (
-              <div className="flex flex-col px-5">
+              <div className="flex flex-col px-5 mt-4">
                 <h3 className="font-bold text-[20px]">올해의 기록</h3>
                 <MobileProfileSummary summaryData={mySummaryData} />
+                <WeeklyCalendar userId={user.id} />
               </div>
             )
           }
