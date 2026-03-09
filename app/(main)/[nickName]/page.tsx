@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getUser, isOwner } from "@/lib/getUser";
 import { WebProfileSummary } from "@/features/home/ProfileSummary";
 import { getSummeryData } from "@/lib/getData";
+import WeeklyCalendar from "@/features/user/WeeklyCalendar";
 
 export default async function Page({
   params,
@@ -95,6 +96,7 @@ export default async function Page({
             <div className="flex flex-col">
               <h3 className="font-bold text-[20px]">올해의 기록</h3>
               <WebProfileSummary summaryData={mySummaryData} />
+              <WeeklyCalendar userId={user.id} />
             </div>
           )
         }

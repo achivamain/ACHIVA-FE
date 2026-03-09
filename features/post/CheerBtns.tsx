@@ -141,13 +141,28 @@ export default function CheerBtns({
               }
             }}
             key={type}
-            style={active ? { backgroundColor: color, borderColor: color } : {}}
-            className={`text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border px-1.5 sm:px-3 py-1 ${
-              active ? "text-white" : "border-theme"
-            }`}
+            style={
+              active
+                ? {
+                    backgroundColor: color,
+                    borderColor: color,
+                    color: "#fff",
+                    boxShadow: `0 4px 12px ${color}40`,
+                  }
+                : { color: "#6B7280" }
+            }
+            className={`group flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm sm:text-[15px] font-medium transition-all duration-300 ${
+              active
+                ? "border-transparent text-white"
+                : "border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300"
+            } ${pending ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}`}
           >
+            <div
+              className={`transition-transform duration-300 ${active ? "scale-110" : "group-hover:scale-110 grayscale opacity-70"}`}
+            >
+              <Icon active={active} />
+            </div>
             <p className="line-clamp-1">{type}</p>
-            {<Icon active={active} />}
           </button>
         );
       })}
