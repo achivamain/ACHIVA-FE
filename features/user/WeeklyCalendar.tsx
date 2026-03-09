@@ -82,20 +82,24 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
   }, [userId, weekStart]);
 
   return (
-    <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[16px] py-4 px-3 sm:py-5 sm:px-6 shadow-[4px_4px_10px_0px_rgba(51,38,174,0.04)] mt-4 mb-4">
-      <div className="flex justify-between items-end mb-3 sm:mb-4">
-        <h3 className="font-bold text-[15px] sm:text-[16px] text-[#343330]">
-          이번 주 스트릭
-        </h3>
-        <span className="text-[11px] sm:text-xs text-[#9A9C9F] font-medium">
-          매일매일 꾸준히!
-        </span>
+    <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 mt-4 mb-4 transition-all hover:shadow-md">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h3 className="font-bold text-[16px] sm:text-[18px] text-gray-900 tracking-tight flex items-center gap-1.5">
+            이번 주 스트릭 <span className="text-xl">🔥</span>
+          </h3>
+        </div>
+        <div className="bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+          <span className="text-[12px] text-gray-500 font-medium">
+            매일 꾸준히 기록해봐요!
+          </span>
+        </div>
       </div>
 
-      <div className="flex justify-between items-center w-full relative min-h-[50px] sm:min-h-[60px]">
+      <div className="flex justify-between items-center w-full relative min-h-[60px] sm:min-h-[70px]">
         {isLoading ? (
-          <div className="flex w-full justify-center items-center py-2">
-            <LoadingIcon color="text-theme" />
+          <div className="flex w-full justify-center items-center py-2 h-full">
+            <LoadingIcon color="text-orange-500" />
           </div>
         ) : (
           weekDays.map((day, idx) => {
@@ -107,45 +111,45 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
             return (
               <div
                 key={format(day, "yyyy-MM-dd")}
-                className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 relative z-10"
+                className="flex flex-col items-center justify-center gap-2 relative z-10 w-full"
               >
                 <span
-                  className={`text-[10px] sm:text-[11px] font-semibold ${
-                    isToday ? "text-theme" : "text-[#9A9C9F]"
-                  }`}
+                  className={`text-[11px] sm:text-[12px] font-bold ${isToday ? "text-orange-500" : "text-gray-400"
+                    }`}
                 >
-                  {format(day, "E")}
+                  {format(day, "EE")}
                 </span>
 
                 <div
-                  className={`flex flex-shrink-0 items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-all duration-300 ${
-                    hasWorkout
-                      ? "bg-[#FFF4E5] shadow-[0_0_10px_rgba(255,165,0,0.3)] scale-110"
+                  className={`flex flex-shrink-0 items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 transition-all duration-300 ${hasWorkout
+                      ? "bg-gradient-to-tr from-orange-400 to-amber-300 border-white shadow-[0_4px_12px_rgba(251,146,60,0.4)] scale-110 z-20"
                       : isToday
-                        ? "bg-gray-100 border border-theme border-opacity-30"
-                        : "bg-[#F5F6F8]"
-                  }`}
+                        ? "bg-white border-orange-200 shadow-sm"
+                        : "bg-gray-50 border-gray-100"
+                    }`}
                 >
                   {hasWorkout ? (
-                    <span className="text-base sm:text-lg animate-pulse select-none leading-none">
+                    <span className="text-lg sm:text-xl drop-shadow-md select-none leading-none -mt-[2px]">
                       🔥
                     </span>
+                  ) : isToday ? (
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-orange-300 animate-pulse"></div>
                   ) : (
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#E5E7EB]"></div>
+                    <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-gray-200"></div>
                   )}
                 </div>
 
                 {/* 연결선 표시 */}
                 {idx < 6 && (
                   <div
-                    className="absolute top-[28px] sm:top-[34px] left-[50%] w-full h-[2px] bg-[#F5F6F8] -z-10"
-                    style={{ width: "calc(100% + 5px)" }}
+                    className="absolute top-[34px] sm:top-[42px] left-[50%] w-full h-[3px] bg-gray-100 -z-10 rounded-full"
+                    style={{ width: "calc(100% + 10px)" }}
                   >
                     {hasWorkout &&
                       activeDates.some((a) =>
                         isSameDay(a, addDays(day, 1)),
                       ) && (
-                        <div className="h-full bg-gradient-to-r from-[#FFF4E5] to-[#FFF4E5]"></div>
+                        <div className="h-full rounded-full bg-gradient-to-r from-orange-300 to-amber-300 shadow-[0_0_8px_rgba(251,146,60,0.5)]"></div>
                       )}
                   </div>
                 )}
