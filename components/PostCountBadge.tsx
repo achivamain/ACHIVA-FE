@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { PostsData } from "@/types/responses";
-import { parseISO } from "date-fns";
 
 type PostCountBadgeProps = {
   userId: string;

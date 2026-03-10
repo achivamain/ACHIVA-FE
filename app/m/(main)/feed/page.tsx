@@ -11,7 +11,7 @@ export default function MobileFeedPage() {
 
   return (
     <div className="w-full flex-1 flex flex-col pb-22">
-      <div className="sticky top-0 bg-white px-4 z-10">
+      <div className="sticky top-0 bg-white px-4 z-20">
         <div className="flex items-center justify-between px-5 py-4">
           <TextLogo />
         </div>
