@@ -23,7 +23,7 @@ const MobileSummaryCard: React.FC<SummaryCardProps> = ({
   description,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-between min-h-[110px] bg-white rounded-[16px] py-3 px-2 shadow-[4px_4px_10px_0px_rgba(51,38,174,0.04)] w-full overflow-hidden">
+    <div className="flex flex-col items-center justify-between min-h-[110px] bg-[#fafafa] border border-gray-100 rounded-[16px] py-3 px-2 w-full overflow-hidden">
       <div className="w-9 h-10 text-[32px] sm:text-[43px] flex items-center justify-center">
         {icon}
       </div>
@@ -50,7 +50,7 @@ const WebSummaryCard: React.FC<SummaryCardProps> = ({
   description,
 }) => {
   return (
-    <div className="flex flex-col flex-1 items-center gap-3 w-full max-w-[844px] min-h-[120px] min-w-[120px] bg-white rounded-[16px] py-4 px-6 shadow-[4px_4px_10px_0px_rgba(51,38,174,0.04)]">
+    <div className="flex flex-col flex-1 items-center gap-3 w-full max-w-[844px] min-h-[120px] min-w-[120px] bg-[#fafafa] border border-gray-100 rounded-[16px] py-4 px-6">
       <div className="w-11 h-14 text-[43px] flex items-center justify-center">
         {icon}
       </div>

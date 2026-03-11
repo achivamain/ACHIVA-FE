@@ -90,13 +90,24 @@ export default async function Page({
           currentUserId={currentUser!.id!}
           currentUserFriends={myAllFriends}
         />
+        <WeeklyCalendar userId={user.id} />
         {isMyProfile && (
-          <div className="flex flex-col">
-            <h3 className="font-bold text-[20px]">올해의 기록</h3>
+          <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-bold text-[16px] sm:text-[18px] text-gray-900 tracking-tight flex items-center gap-1.5">
+                  올해의 기록 <span className="text-xl">🏆</span>
+                </h3>
+              </div>
+              <div className="bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
+                <span className="text-[12px] text-orange-600 font-medium">
+                  꾸준한 기록의 발자취!
+                </span>
+              </div>
+            </div>
             <WebProfileSummary summaryData={mySummaryData} />
           </div>
         )}
-        <WeeklyCalendar userId={user.id} />
         <div className="flex-1 flex flex-col">
           <Posts userId={user.id} />
         </div>

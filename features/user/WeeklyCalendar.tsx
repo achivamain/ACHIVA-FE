@@ -82,7 +82,7 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
   }, [userId, weekStart]);
 
   return (
-    <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 mt-4 mb-4 transition-all hover:shadow-md">
+    <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 transition-all hover:shadow-md">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="font-bold text-[16px] sm:text-[18px] text-gray-900 tracking-tight flex items-center gap-1.5">
