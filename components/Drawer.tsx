@@ -46,7 +46,7 @@ export default function Drawer({
   }, [onClose]);
 
   return (
-    <div className="fixed left-20 h-dvh top-0 w-screen max-lg:w-[calc(100vw-80px)] z-50 flex justify-start bg-black/50 overflow-hidden">
+    <div className="fixed left-20 h-dvh top-0 w-screen max-lg:w-[calc(100vw-80px)] z-[100] flex justify-start bg-black/50 overflow-hidden">
       <motion.div
         ref={drawerRef}
         onClick={(e) => e.stopPropagation()}

@@ -28,7 +28,7 @@ export default function FeedPage() {
     <div className="w-full flex-1 flex flex-col">
       <div className="flex-1 flex">
         <div className="mx-auto w-full max-w-140 flex flex-col">
-          <div className="sticky top-0 bg-white z-20">
+          <div className="sticky top-0 bg-white z-50">
             <div className="flex items-center justify-between px-2 py-3"></div>
             <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
           </div>

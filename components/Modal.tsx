@@ -37,7 +37,7 @@ export default function Modal({
 
   const router = useRouter();
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
       <motion.div
         layout
         initial={{ y: 100 }}
