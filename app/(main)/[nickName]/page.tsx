@@ -90,16 +90,13 @@ export default async function Page({
           currentUserId={currentUser!.id!}
           currentUserFriends={myAllFriends}
         />
-        {
-          /* summaryData는 자신 정보밖에 못 보기 때문에 타인 페이지에서는 숨김*/
-          isMyProfile && (
-            <div className="flex flex-col">
-              <h3 className="font-bold text-[20px]">올해의 기록</h3>
-              <WebProfileSummary summaryData={mySummaryData} />
-              <WeeklyCalendar userId={user.id} />
-            </div>
-          )
-        }
+        {isMyProfile && (
+          <div className="flex flex-col">
+            <h3 className="font-bold text-[20px]">올해의 기록</h3>
+            <WebProfileSummary summaryData={mySummaryData} />
+          </div>
+        )}
+        <WeeklyCalendar userId={user.id} />
         <div className="flex-1 flex flex-col">
           <Posts userId={user.id} />
         </div>
