@@ -114,19 +114,21 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
                 className="flex flex-col items-center justify-center gap-2 relative z-10 w-full"
               >
                 <span
-                  className={`text-[11px] sm:text-[12px] font-bold ${isToday ? "text-orange-500" : "text-gray-400"
-                    }`}
+                  className={`text-[11px] sm:text-[12px] font-bold ${
+                    isToday ? "text-orange-500" : "text-gray-400"
+                  }`}
                 >
                   {format(day, "EE")}
                 </span>
 
                 <div
-                  className={`flex flex-shrink-0 items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 transition-all duration-300 ${hasWorkout
+                  className={`flex flex-shrink-0 items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 transition-all duration-300 ${
+                    hasWorkout
                       ? "bg-gradient-to-tr from-orange-400 to-amber-300 border-white shadow-[0_4px_12px_rgba(251,146,60,0.4)] scale-110 z-20"
                       : isToday
                         ? "bg-white border-orange-200 shadow-sm"
                         : "bg-gray-50 border-gray-100"
-                    }`}
+                  }`}
                 >
                   {hasWorkout ? (
                     <span className="text-lg sm:text-xl drop-shadow-md select-none leading-none -mt-[2px]">

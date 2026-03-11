@@ -21,8 +21,10 @@ export default async function MobileHomePageRoute({
     if (!(user.nickName === decodeURIComponent(nickName))) {
       redirect(`/${nickName}`);
     }
-    const { categoryCounts, categoryCharCounts } =
-      await getHomeData(user.id, token);
+    const { categoryCounts, categoryCharCounts } = await getHomeData(
+      user.id,
+      token,
+    );
     return (
       <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
         <MyCategorys

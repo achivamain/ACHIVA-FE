@@ -84,7 +84,7 @@ const GoalArchiveContent: React.FC<GoalArchiveContentProps> = ({
 
   const toggleDropdown = (
     id: string,
-    e: React.MouseEvent<HTMLButtonElement>
+    e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     if (openDropdown === id) {
       setOpenDropdown(null);

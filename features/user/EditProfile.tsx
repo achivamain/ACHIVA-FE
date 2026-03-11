@@ -43,7 +43,7 @@ export default function EditProfile() {
 
   const [categories, setCategories] = useState(user?.categories || []);
   const remainingCategories = allCategories.filter(
-    (category) => !categories.includes(category)
+    (category) => !categories.includes(category),
   );
   const categoryError = "";
   const categoryRef = useRef<HTMLDivElement | null>(null);
@@ -94,7 +94,7 @@ export default function EditProfile() {
       onError: (err) => {
         console.error(err);
         alert(
-          "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+          "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
         );
       },
     });
@@ -120,7 +120,7 @@ export default function EditProfile() {
     setIsNickNameCheckLoding(true);
     try {
       const response = await fetch(
-        `/api/auth/checkNickname?nickname=${nickName}`
+        `/api/auth/checkNickname?nickname=${nickName}`,
       );
       if (response.ok) {
         const { data } = await response.json();
@@ -138,7 +138,7 @@ export default function EditProfile() {
     } catch (err) {
       console.error(err);
       alert(
-        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
       );
     } finally {
       setIsNickNameCheckLoding(false);
@@ -174,8 +174,9 @@ export default function EditProfile() {
       <div className="w-full flex flex-col gap-3">
         <InputSection label="닉네임">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${isEditing.nickName ? "hidden" : ""
-              }`}
+            className={`absolute right-5 top-4 cursor-pointer ${
+              isEditing.nickName ? "hidden" : ""
+            }`}
           >
             <PencilIcon />
           </div>
@@ -205,8 +206,9 @@ export default function EditProfile() {
         )}
         <InputSection label="나를 소개하는 한 줄">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${isEditing.bio ? "hidden" : ""
-              }`}
+            className={`absolute right-5 top-4 cursor-pointer ${
+              isEditing.bio ? "hidden" : ""
+            }`}
           >
             <PencilIcon />
           </div>
@@ -224,15 +226,17 @@ export default function EditProfile() {
         </InputSection>
         <InputSection label="관심있는 성취 카테고리">
           <div
-            className={`absolute right-5 top-4 cursor-pointer ${isEditing.category ? "hidden" : ""
-              }`}
+            className={`absolute right-5 top-4 cursor-pointer ${
+              isEditing.category ? "hidden" : ""
+            }`}
           >
             <PencilIcon />
           </div>
           <div
             ref={categoryRef}
-            className={`py-2 px-4 w-full h-auto flex flex-wrap gap-1.5 cursor-pointer ${isEditing.category ? "border-2 border-theme rounded-sm" : ""
-              }`}
+            className={`py-2 px-4 w-full h-auto flex flex-wrap gap-1.5 cursor-pointer ${
+              isEditing.category ? "border-2 border-theme rounded-sm" : ""
+            }`}
             onClick={() => {
               setIsEditing((prev) => ({ ...prev, category: true }));
             }}

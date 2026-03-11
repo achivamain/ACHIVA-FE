@@ -14,7 +14,7 @@ export default async function Page({
   const { error, token } = await getAuthSession();
   if (error) return <Logout />;
 
-  const user = await getUser(nickName, token)
+  const user = await getUser(nickName, token);
 
   const userId = user.id;
   const cheersRes = await fetch(
@@ -25,7 +25,7 @@ export default async function Page({
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   const cheersData: CheerPoint[] = (await cheersRes.json()).data;
   return (

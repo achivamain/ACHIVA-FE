@@ -44,7 +44,7 @@ export default function ImageUploader({ setProfileImageUrl }: Props) {
         onClick={() => {
           if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(
-              JSON.stringify({ type: "REQUEST_CAMERA" })
+              JSON.stringify({ type: "REQUEST_CAMERA" }),
             );
           } else {
             input.current?.click();

@@ -15,7 +15,7 @@ export default async function MobileGoalsPage({
   const { nickName } = await params;
 
   // 백엔드 API로 실제 유저 닉네임을 조회하여 본인 확인
-  if (!await isOwner(nickName, token)) {
+  if (!(await isOwner(nickName, token))) {
     redirect(`/${nickName}`);
   }
 

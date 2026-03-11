@@ -22,7 +22,7 @@ export default function BookSelector() {
           "Content-Type": "application/json",
         },
         cache: "no-store",
-      }
+      },
     );
     if (!response.ok) throw new Error("Failed to fetch");
     return await response.json();
@@ -52,7 +52,7 @@ export default function BookSelector() {
           return;
         }
       },
-      { rootMargin: "100px" }
+      { rootMargin: "100px" },
     );
     io.observe(currentElem!);
 
@@ -81,7 +81,7 @@ export default function BookSelector() {
               <BookCard book={{ ...book, count: book.count + 1 }} />
             </div>
           ))}
-        {(isFetchingNextPage) &&
+        {isFetchingNextPage &&
           [0, 1, 2, 3, 4].map((i) => (
             <div key={i} className="h-full flex-1 flex flex-col">
               <BookCardSkeleton width={162} />

@@ -47,7 +47,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
   // 분류 과정에서 루프 방지
   const { vision, missions, mindsets } = useMemo(
     () => categorizeGoals(goals),
-    [goals]
+    [goals],
   );
 
   const createGoal = useCreateGoal();
@@ -128,7 +128,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
   const handleListItemChange = (
     index: number,
     value: string,
-    type: "missions" | "mindsets"
+    type: "missions" | "mindsets",
   ) => {
     const newList = [...data[type]];
     newList[index] = { ...newList[index], text: value };
@@ -148,7 +148,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
   // 드롭다운 토글
   const toggleDropdown = (
     id: string,
-    e: React.MouseEvent<HTMLButtonElement>
+    e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     if (openDropdown === id) {
       setOpenDropdown(null);
@@ -233,7 +233,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
               createGoal.mutateAsync({
                 category: "VISION" as GoalCategory,
                 text: trimmedText,
-              })
+              }),
             );
           } else if (trimmedText !== data.vision.originalText) {
             // 기존 수정
@@ -241,7 +241,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
               updateGoal.mutateAsync({
                 goalId: data.vision.id,
                 data: { category: "VISION", text: trimmedText },
-              })
+              }),
             );
           }
         }
@@ -250,21 +250,21 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
       // Mission 처리
       for (const mission of data.missions) {
         const trimmedText = mission.text.trim();
-        if (!trimmedText) continue; 
+        if (!trimmedText) continue;
 
         if (mission.isNew) {
           promises.push(
             createGoal.mutateAsync({
               category: "MISSION" as GoalCategory,
               text: trimmedText,
-            })
+            }),
           );
         } else if (trimmedText !== mission.originalText) {
           promises.push(
             updateGoal.mutateAsync({
               goalId: mission.id,
               data: { category: "MISSION", text: trimmedText },
-            })
+            }),
           );
         }
       }
@@ -279,14 +279,14 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
             createGoal.mutateAsync({
               category: "MINDSET" as GoalCategory,
               text: trimmedText,
-            })
+            }),
           );
         } else if (trimmedText !== mindset.originalText) {
           promises.push(
             updateGoal.mutateAsync({
               goalId: mindset.id,
               data: { category: "MINDSET", text: trimmedText },
-            })
+            }),
           );
         }
       }
@@ -317,7 +317,7 @@ const GoalEditContent: React.FC<GoalEditContentProps> = ({
   const listTypeSection = (
     type: "missions" | "mindsets",
     label: string,
-    addButtonText: string
+    addButtonText: string,
   ) => {
     const items = data[type];
 

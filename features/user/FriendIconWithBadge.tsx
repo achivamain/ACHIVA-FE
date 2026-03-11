@@ -25,7 +25,8 @@ export default function FriendIconWithBadge({ nickName, isMe }: Props) {
     enabled: isMe,
   });
 
-  const hasPendingRequests = isMe && data !== undefined && data.friends.length > 0;
+  const hasPendingRequests =
+    isMe && data !== undefined && data.friends.length > 0;
 
   return (
     <Link href={`/${nickName}/friends`} className="relative inline-flex">
