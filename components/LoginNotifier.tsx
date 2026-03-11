@@ -1,12 +1,11 @@
 "use client";
 
-// 로그인 성공 시 RN 환경으로 LinkToken 전달을 위한 컴포넌트 
+// 로그인 성공 시 RN 환경으로 LinkToken 전달을 위한 컴포넌트
 
 import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 const LOGIN_NOTIFIED_KEY = "login_push_notified";
-
 
 export default function LoginNotifier() {
   const { data: session, status } = useSession();
@@ -20,7 +19,7 @@ export default function LoginNotifier() {
     if (typeof window === "undefined") return;
     if (!(window as any).ReactNativeWebView) return;
 
-    // 중복 방지 
+    // 중복 방지
     if (sentRef.current) return;
 
     // 이 세션에서 보낸 적 있으면 무시
@@ -45,10 +44,10 @@ export default function LoginNotifier() {
             JSON.stringify({
               type: "LOGIN_SUCCESS",
               linkToken,
-            })
+            }),
           );
 
-          // 성공 시 SessionStorage에 기록 
+          // 성공 시 SessionStorage에 기록
           sessionStorage.setItem(LOGIN_NOTIFIED_KEY, "true");
         }
       } catch (e) {
@@ -59,4 +58,3 @@ export default function LoginNotifier() {
 
   return null;
 }
-

@@ -65,7 +65,7 @@ export default function CheerBtns({
 
   return (
     <div
-      className="flex gap-1.5 sm:gap-2 items-center justify-center py-3.5"
+      className="flex flex-nowrap w-full gap-[2px] sm:gap-2 items-center justify-center py-1 sm:py-3.5 overflow-hidden"
       ref={scope}
     >
       {types.map((type) => {
@@ -151,18 +151,18 @@ export default function CheerBtns({
                   }
                 : { color: "#6B7280" }
             }
-            className={`group flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm sm:text-[15px] font-medium transition-all duration-300 ${
+            className={`group flex-1 flex justify-center items-center gap-1 sm:gap-1.5 rounded-full border py-1.5 sm:py-2 px-1 min-[400px]:px-2 text-[11px] min-[375px]:text-[12px] min-[430px]:text-[14px] sm:text-[16px] font-medium transition-all duration-300 ${
               active
                 ? "border-transparent text-white"
                 : "border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300"
             } ${pending ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}`}
           >
             <div
-              className={`transition-transform duration-300 ${active ? "scale-110" : "group-hover:scale-110 grayscale opacity-70"}`}
+              className={`transition-transform duration-300 shrink-0 ${active ? "scale-110" : "group-hover:scale-110 grayscale opacity-70"}`}
             >
               <Icon active={active} />
             </div>
-            <p className="line-clamp-1">{type}</p>
+            <p className="whitespace-nowrap truncate">{type}</p>
           </button>
         );
       })}

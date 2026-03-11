@@ -9,7 +9,9 @@ export default function Private() {
         <br className="sm:hidden" />
         아래를 통해 신고해 주시면 신속히 처리하겠습니다.
       </p>
-      <p className="font-light text-[#808080] underline">iworkouttodayofficial@gmail.com</p>
+      <p className="font-light text-[#808080] underline">
+        iworkouttodayofficial@gmail.com
+      </p>
     </div>
   );
 }

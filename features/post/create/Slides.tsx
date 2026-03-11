@@ -16,7 +16,7 @@ type Props = {
 export default function Slides({ currentPage, setCurrentPage }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
-  const size = window.innerWidth < 640 ? containerWidth ?? 0 : 456;
+  const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 456;
 
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
@@ -150,7 +150,7 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                               pages: prev.pages?.map((p) =>
                                 p.id == page.id
                                   ? { ...p, subtitle: e.target.value }
-                                  : p
+                                  : p,
                               ),
                             }));
                           }}
@@ -173,7 +173,7 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                               pages: prev.pages?.map((p) =>
                                 p.id == page.id
                                   ? { ...p, content: e.target.value }
-                                  : p
+                                  : p,
                               ),
                             }));
                           }

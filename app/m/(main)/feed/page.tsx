@@ -25,14 +25,14 @@ export default function MobileFeedPage() {
   }, [queryClient]);
 
   return (
-    <div className="w-full h-dvh flex flex-col overscroll-y-contain">
-      <div className="bg-white px-4 z-20">
+    <div className="w-full">
+      <div className="sticky top-0 bg-white z-50">
         <div className="flex items-center justify-between px-5 py-4">
           <TextLogo />
         </div>
         <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
-      <div className="flex-1 min-h-0 overscroll-y-contain">
+      <div>
         <PullToRefresh
           onRefresh={handleRefresh}
           pullingContent={refreshIndicator}

@@ -30,7 +30,6 @@ export default function SignupTestPage() {
         </p>
 
         <div className="space-y-4">
-
           <button
             onClick={handleStartTest}
             className="w-full bg-theme text-white font-semibold py-3 px-6 rounded-lg 
@@ -39,12 +38,9 @@ export default function SignupTestPage() {
             Step 2부터 테스트 시작
           </button>
 
-          <p className="text-xs text-gray-400 mt-4">
-            Test Page 
-          </p>
+          <p className="text-xs text-gray-400 mt-4">Test Page</p>
         </div>
       </div>
     </div>
   );
 }
-

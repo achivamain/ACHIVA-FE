@@ -22,7 +22,7 @@ export default function BookSelector() {
           "Content-Type": "application/json",
         },
         cache: "no-store",
-      }
+      },
     );
     if (!response.ok) throw new Error("Failed to fetch");
     return await response.json();
@@ -52,7 +52,7 @@ export default function BookSelector() {
           return;
         }
       },
-      { root: document.getElementById("viewport"), rootMargin: "100px" }
+      { root: document.getElementById("viewport"), rootMargin: "100px" },
     );
     io.observe(currentElem!);
     return () => {

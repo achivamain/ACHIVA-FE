@@ -73,10 +73,12 @@ export default function FeedPost({ post }: { post: PostRes }) {
             <HorizontalThreeDotsIcon />
           </button>
         </div>
-        <div>
+        <div className="w-full">
           <Post post={post} />
         </div>
-        <CheerBtns postId={post.id} cheerings={post.cheerings ?? []} />
+        <div className="w-full px-2">
+          <CheerBtns postId={post.id} cheerings={post.cheerings ?? []} />
+        </div>
       </div>
       {isModalOpen && (
         <ModalWithoutCloseBtn onClose={() => setIsModalOpen(false)}>

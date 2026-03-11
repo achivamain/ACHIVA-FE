@@ -9,7 +9,7 @@ import {
   CheckAllIcon,
 } from "@/components/Icons";
 
-// 약관 데이터 Type 
+// 약관 데이터 Type
 type TermItem = {
   id: number;
   title: string;
@@ -154,7 +154,7 @@ export default function Terms() {
 
   // 전체 동의 여부
   const allAgreed = [...requiredTerms, ...optionalTerms].every(
-    (term) => agreements[term.id]
+    (term) => agreements[term.id],
   );
 
   // 전체 동의 토글
@@ -189,7 +189,6 @@ export default function Terms() {
 
   return (
     <div className="flex flex-col w-full bg-white">
-
       {/* 헤더 섹션 */}
       <div className="flex flex-col gap-2.5 mb-8">
         <h1 className="text-2xl font-semibold text-black leading-[29px]">
@@ -278,7 +277,7 @@ export default function Terms() {
   );
 }
 
-// 한 줄을 처리하는 컴포넌트 
+// 한 줄을 처리하는 컴포넌트
 type TermRowProps = {
   term: TermItem;
   checked: boolean;
