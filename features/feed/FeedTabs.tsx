@@ -13,7 +13,10 @@ const tabs: FeedTab[] = ["전체", "관심", "응원", "친구"];
 
 export default function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
   return (
-    <div className="flex flex-nowrap overflow-x-auto gap-x-2 gap-y-[15px] px-4 py-3 hide-scrollbar w-full" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+    <div
+      className="flex flex-nowrap overflow-x-auto gap-x-2 gap-y-[15px] px-4 py-3 hide-scrollbar w-full"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+    >
       {tabs.map((tab) => (
         <button
           key={tab}

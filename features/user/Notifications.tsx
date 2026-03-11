@@ -28,7 +28,7 @@ export default function Notifications() {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
     if (!response.ok) throw new Error("Failed to fetch");
     const json = await response.json();
@@ -38,13 +38,13 @@ export default function Notifications() {
         if (!postCache.has(notification.articleId)) {
           postCache.set(notification.articleId, undefined);
           const postRes = await fetch(
-            `/api/posts?postId=${notification.articleId}`
+            `/api/posts?postId=${notification.articleId}`,
           );
           const postJson = await postRes.json();
           postCache.set(notification.articleId, postJson.data);
           return postJson;
         }
-      })
+      }),
     );
 
     return json.data as NotificationsRes;
@@ -72,7 +72,7 @@ export default function Notifications() {
           fetchNextPage();
         }
       },
-      { rootMargin: "100px 0px" }
+      { rootMargin: "100px 0px" },
     );
     io.observe(loaderRef.current);
     return () => io.disconnect();

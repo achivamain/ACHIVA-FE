@@ -52,7 +52,7 @@ export default function ProfileImageForm() {
   function handleImageClick() {
     if (window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(
-        JSON.stringify({ type: "REQUEST_CAMERA" })
+        JSON.stringify({ type: "REQUEST_CAMERA" }),
       );
     } else {
       input.current?.click();
@@ -155,4 +155,3 @@ export default function ProfileImageForm() {
     </div>
   );
 }
-

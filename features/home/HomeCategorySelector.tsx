@@ -55,7 +55,7 @@ export function HomeCategorySelector({
     } catch (err) {
       console.log(err);
       alert(
-        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
       );
     }
     setIsLoading(false);
@@ -64,7 +64,11 @@ export function HomeCategorySelector({
   return (
     <>
       <Modal
-        onClose={() => user?.categories === selectedCategories? router.back() : setIsCloseModalOpen(true)}
+        onClose={() =>
+          user?.categories === selectedCategories
+            ? router.back()
+            : setIsCloseModalOpen(true)
+        }
         title={
           <h2 className="font-semibold py-3">
             기록하고 싶은 운동을 선택해주세요
@@ -163,7 +167,7 @@ export function MobileHomeCategorySelector({
     } catch (err) {
       console.log(err);
       alert(
-        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
       );
     }
     setIsLoading(false);
@@ -171,7 +175,13 @@ export function MobileHomeCategorySelector({
 
   return (
     <div className="w-full h-full bg-white">
-      <MobileHeader onClick={() => user?.categories === selectedCategories? router.back() : setIsCloseModalOpen(true)}>
+      <MobileHeader
+        onClick={() =>
+          user?.categories === selectedCategories
+            ? router.back()
+            : setIsCloseModalOpen(true)
+        }
+      >
         <></>
       </MobileHeader>
       <h1 className="font-semibold text-[24px] px-4">

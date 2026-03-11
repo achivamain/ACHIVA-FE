@@ -31,7 +31,7 @@ export default function Page() {
         </>
       );
       break;
-    case 3: // 생일 
+    case 3: // 생일
       content = (
         <>
           <div className="hidden sm:block mb-10">
@@ -79,7 +79,9 @@ export default function Page() {
           <div className="w-full fixed top-0 left-0 z-50">
             <MobileHeader
               onClick={currentStep !== 0 ? handlePrevStep : undefined}
-              rightElement={currentStep === 5 ? <CategoryNextButton /> : undefined}
+              rightElement={
+                currentStep === 5 ? <CategoryNextButton /> : undefined
+              }
             >
               <ProgressIndicator currentStep={currentStep} />
             </MobileHeader>
@@ -91,8 +93,8 @@ export default function Page() {
                 initial={
                   currentStep !== 0
                     ? {
-                      opacity: 0,
-                    }
+                        opacity: 0,
+                      }
                     : false
                 }
                 animate={{

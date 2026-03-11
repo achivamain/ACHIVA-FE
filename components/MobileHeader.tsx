@@ -12,7 +12,11 @@ type Props = {
   rightElement?: React.ReactNode;
 };
 
-export default function MobileHeader({ children, onClick = undefined, rightElement }: Props) {
+export default function MobileHeader({
+  children,
+  onClick = undefined,
+  rightElement,
+}: Props) {
   const router = useRouter();
 
   return (

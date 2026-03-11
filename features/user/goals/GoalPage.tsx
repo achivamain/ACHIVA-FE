@@ -103,4 +103,3 @@ const GoalPage: React.FC = () => {
 };
 
 export default GoalPage;
-
