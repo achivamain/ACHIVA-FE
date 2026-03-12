@@ -76,43 +76,49 @@ export default function CheerBtns({
         return (
           <button
             id={type}
-            disabled={pending}
             onClick={async () => {
-              try {
+              if (pending) return;
+
+              const prevState = cheeringsState[type];
+
+              if (active) {
+                // 낙관적 업데이트: 즉시 비활성화
                 setCheeringsState((prev) => ({
                   ...prev,
-                  [type]: {
-                    ...prev[type],
-                    isPending: true,
-                  },
+                  [type]: { active: false, id: undefined, isPending: true },
                 }));
-                if (active) {
-                  // 이미 눌렀으면 취소
+                try {
                   const res = await fetch(
-                    `/api/cheerings?postId=${postId}&cheeringId=${cheeringsState[type].id}`,
+                    `/api/cheerings?postId=${postId}&cheeringId=${prevState.id}`,
                     {
                       method: "DELETE",
                       headers: { "Content-Type": "application/json" },
                     },
                   );
-                  if (!res.ok) {
-                    throw new Error("응원 취소 실패");
-                  }
+                  if (!res.ok) throw new Error("응원 취소 실패");
                   setCheeringsState((prev) => ({
                     ...prev,
-                    [type]: {
-                      ...prev[type],
-                      active: !prev[type].active,
-                      isPending: false,
-                    },
+                    [type]: { ...prev[type], isPending: false },
                   }));
-                } else {
-                  // 누르기
-                  animate(
-                    `#${type}`,
-                    { scale: [1, 1.07, 1.1, 1] },
-                    { duration: 0.3 },
-                  );
+                } catch (err) {
+                  console.error(err);
+                  setCheeringsState((prev) => ({
+                    ...prev,
+                    [type]: { ...prevState, isPending: false },
+                  }));
+                }
+              } else {
+                // 낙관적 업데이트: 즉시 활성화
+                animate(
+                  `#${type}`,
+                  { scale: [1, 1.07, 1.1, 1] },
+                  { duration: 0.3 },
+                );
+                setCheeringsState((prev) => ({
+                  ...prev,
+                  [type]: { active: true, id: undefined, isPending: true },
+                }));
+                try {
                   const res = await fetch("/api/cheerings", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -121,23 +127,19 @@ export default function CheerBtns({
                       cheeringType: type,
                     }),
                   });
-                  if (!res.ok) {
-                    throw new Error("응원 실패");
-                  }
+                  if (!res.ok) throw new Error("응원 실패");
                   const id = (await res.json()).data.id;
                   setCheeringsState((prev) => ({
                     ...prev,
-                    [type]: {
-                      ...prev[type],
-                      active: !prev[type].active,
-                      id,
-                      isPending: false,
-                    },
+                    [type]: { active: true, id, isPending: false },
+                  }));
+                } catch (err) {
+                  console.error(err);
+                  setCheeringsState((prev) => ({
+                    ...prev,
+                    [type]: { ...prevState, isPending: false },
                   }));
                 }
-              } catch (err) {
-                console.error(err);
-                alert("네트워크 또는 서버 오류가 발생했습니다.");
               }
             }}
             key={type}
@@ -155,7 +157,7 @@ export default function CheerBtns({
               active
                 ? "border-transparent text-white"
                 : "border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300"
-            } ${pending ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}`}
+            } cursor-pointer`}
           >
             <div
               className={`transition-transform duration-300 shrink-0 ${active ? "scale-110" : "group-hover:scale-110 grayscale opacity-70"}`}
