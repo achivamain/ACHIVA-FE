@@ -38,7 +38,7 @@ export default function ModalWithoutCloseBtn({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
     >
       <motion.div
         initial={{ y: 100 }}

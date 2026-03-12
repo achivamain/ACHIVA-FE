@@ -22,7 +22,7 @@ export function MobileBookSection() {
           "Content-Type": "application/json",
         },
         cache: "no-store",
-      }
+      },
     );
     if (!response.ok) throw new Error("Failed to fetch");
     return await response.json();
@@ -50,7 +50,7 @@ export function MobileBookSection() {
           return;
         }
       },
-      { root: viewportRef.current, rootMargin: "0px" }
+      { root: viewportRef.current, rootMargin: "0px" },
     );
     io.observe(currentElem!);
 

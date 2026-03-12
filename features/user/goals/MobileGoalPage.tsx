@@ -44,7 +44,7 @@ const MobileGoalPage: React.FC<MobileGoalPageProps> = ({ nickName }) => {
     <div className="min-h-dvh bg-[#F9F9F9] pb-[104px]">
       {/* Header */}
       <div className="px-[24px] pt-[20px] pb-[24px] flex justify-between items-center">
-          <TextLogo/>
+        <TextLogo />
         <div className="flex items-center gap-4">
           <button
             onClick={handleArchiveClick}

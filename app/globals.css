@@ -57,3 +57,8 @@ input:focus {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* react-simple-pull-to-refresh 컴포넌트 */
+.ptr {
+  height: 100%;
+}

@@ -23,17 +23,21 @@ const MobileSummaryCard: React.FC<SummaryCardProps> = ({
   description,
 }) => {
   return (
-    <div className="flex flex-col flex-1 items-center gap-3 min-h-[120px] min-w-[120px] bg-white rounded-[16px] py-4 px-4 shadow-[4px_4px_10px_0px_rgba(51,38,174,0.04)]">
-      <div className="w-11 h-14 text-[43px] flex items-center justify-center">
+    <div className="flex flex-col items-center justify-between min-h-[110px] bg-[#fafafa] border border-gray-100 rounded-[16px] py-3 px-2 w-full overflow-hidden">
+      <div className="w-9 h-10 text-[32px] sm:text-[43px] flex items-center justify-center">
         {icon}
       </div>
-      <div className="flex flex-row items-end justify-center gap-1">
-        <h3 className="font-semibold text-[18px] text-black">
+      <div className="flex flex-col sm:flex-row items-center sm:items-end justify-center gap-0 sm:gap-1 w-full">
+        <h3 className="font-semibold text-[15px] sm:text-[18px] text-black leading-tight">
           {value.toLocaleString()}
         </h3>
-        <span className="text-[#727E8F]">{title}</span>
+        <span className="text-[#727E8F] text-[11px] sm:text-[13px] whitespace-nowrap">
+          {title}
+        </span>
       </div>
-      <p className="font-semibold text-[11px] text-[#9A9C9F]">{description}</p>
+      <p className="font-medium text-[9px] sm:text-[11px] text-[#9A9C9F] text-center leading-tight truncate w-full">
+        {description}
+      </p>
     </div>
   );
 };
@@ -46,7 +50,7 @@ const WebSummaryCard: React.FC<SummaryCardProps> = ({
   description,
 }) => {
   return (
-    <div className="flex flex-col flex-1 items-center gap-3 w-full max-w-[844px] min-h-[120px] min-w-[120px] bg-white rounded-[16px] py-4 px-6 shadow-[4px_4px_10px_0px_rgba(51,38,174,0.04)]">
+    <div className="flex flex-col flex-1 items-center gap-3 w-full max-w-[844px] min-h-[120px] min-w-[120px] bg-[#fafafa] border border-gray-100 rounded-[16px] py-4 px-6">
       <div className="w-11 h-14 text-[43px] flex items-center justify-center">
         {icon}
       </div>
@@ -54,19 +58,18 @@ const WebSummaryCard: React.FC<SummaryCardProps> = ({
         <h3 className="font-semibold text-[18px] text-black">
           {value.toLocaleString()}
         </h3>
-        <span className="text-[#727E8F]">{title}</span>
+        <span className="text-[#727E8F] ">{title}</span>
       </div>
       <p className="font-semibold text-[11px] text-[#9A9C9F]">{description}</p>
     </div>
   );
 };
 
-// 모바일 전체 영역
 export const MobileProfileSummary: React.FC<ProfileSummaryProps> = ({
   summaryData,
 }) => {
   return (
-    <div className="flex flex-row gap-[15px]">
+    <div className="grid grid-cols-3 gap-2 sm:gap-[15px] w-full">
       <MobileSummaryCard
         icon="📚"
         value={summaryData.letters}

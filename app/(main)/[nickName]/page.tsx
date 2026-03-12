@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getUser, isOwner } from "@/lib/getUser";
 import { WebProfileSummary } from "@/features/home/ProfileSummary";
 import { getSummeryData } from "@/lib/getData";
+import WeeklyCalendar from "@/features/user/WeeklyCalendar";
 
 export default async function Page({
   params,
@@ -33,6 +34,7 @@ export default async function Page({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        cache: "no-store",
       },
     );
     const { data } = await response.json();
@@ -53,6 +55,7 @@ export default async function Page({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        cache: "no-store",
       },
     );
     const { data } = await response.json();
@@ -87,15 +90,24 @@ export default async function Page({
           currentUserId={currentUser!.id!}
           currentUserFriends={myAllFriends}
         />
-        {
-          /* summaryData는 자신 정보밖에 못 보기 때문에 타인 페이지에서는 숨김*/
-          isMyProfile && (
-            <div className="flex flex-col">
-              <h3 className="font-bold text-[20px]">올해의 기록</h3>
-              <WebProfileSummary summaryData={mySummaryData} />
+        <WeeklyCalendar userId={user.id} />
+        {isMyProfile && (
+          <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 transition-all hover:shadow-md">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-bold text-[16px] sm:text-[18px] text-gray-900 tracking-tight flex items-center gap-1.5">
+                  올해의 기록 <span className="text-xl">🏆</span>
+                </h3>
+              </div>
+              <div className="bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
+                <span className="text-[12px] text-orange-600 font-medium">
+                  꾸준한 기록의 발자취!
+                </span>
+              </div>
             </div>
-          )
-        }
+            <WebProfileSummary summaryData={mySummaryData} />
+          </div>
+        )}
         <div className="flex-1 flex flex-col">
           <Posts userId={user.id} />
         </div>

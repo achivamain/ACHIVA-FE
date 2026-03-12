@@ -51,7 +51,8 @@ const GoalCard: React.FC<GoalCardProps> = ({
     ? "w-9 h-9 text-[32px] flex items-center"
     : "w-9 h-9 text-[36px] flex items-center justify-center overflow-hidden";
 
-  const listEmojiStyle = "w-9 h-9 text-[36px] flex items-center justify-center overflow-hidden";
+  const listEmojiStyle =
+    "w-9 h-9 text-[36px] flex items-center justify-center overflow-hidden";
 
   // 빈 상태 렌더링
   if (isEmpty) {

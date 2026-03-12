@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { User } from "@/types/User";
 import ProfileImg from "@/components/ProfileImg";
-import { SettingIcon, FollowerIcon } from "@/components/Icons";
+import { SettingIcon } from "@/components/Icons";
 import FriendShipBtn from "../friends/FriendshipBtn";
 import { FriendData } from "@/types/Friends";
+import FriendIconWithBadge from "./FriendIconWithBadge";
+import PostCountBadge from "@/components/PostCountBadge";
 
 type Props = {
   user: User;
@@ -15,7 +17,12 @@ type Props = {
 export function Profile({ user, currentUserId, currentUserFriends }: Props) {
   return (
     <div className="w-full flex gap-12">
-      <ProfileImg url={user.profileImageUrl!} size={160} />
+      <div className="relative shrink-0">
+        <ProfileImg url={user.profileImageUrl!} size={160} />
+        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 scale-125 origin-bottom">
+          <PostCountBadge userId={user.id} />
+        </div>
+      </div>
       <div className="flex-1 flex flex-col items-start justify-center gap-3">
         <div className="w-full flex items-center gap-10">
           <h1 className="font-semibold text-2xl">{user.nickName}</h1>
@@ -34,9 +41,10 @@ export function Profile({ user, currentUserId, currentUserFriends }: Props) {
             />
           )}
           <div className="ml-auto flex gap-4 items-center">
-            <Link href={`/${user.nickName}/friends`}>
-              <FollowerIcon />
-            </Link>
+            <FriendIconWithBadge
+              nickName={user.nickName}
+              isMe={user.id === currentUserId}
+            />
             {user.id === currentUserId && (
               <Link href={`/settings/accounts/password`}>
                 <SettingIcon />
@@ -72,9 +80,10 @@ export default function MobileProfile({
   return (
     <div className="sm:hidden px-5">
       <div className="h-14 flex items-center justify-end gap-3">
-        <Link href={`/${user.nickName}/friends`}>
-          <FollowerIcon />
-        </Link>
+        <FriendIconWithBadge
+          nickName={user.nickName}
+          isMe={user.id === currentUserId}
+        />
         {user.id === currentUserId && (
           <Link href={`/settings`}>
             <SettingIcon />
@@ -82,8 +91,11 @@ export default function MobileProfile({
         )}
       </div>
       <div className="flex gap-5 mb-7">
-        <div className="shrink-0">
+        <div className="relative shrink-0">
           <ProfileImg url={user.profileImageUrl!} size={125} />
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-10 scale-110 origin-bottom">
+            <PostCountBadge userId={user.id} />
+          </div>
         </div>
         <div className="flex flex-col justify-center">
           <h1 className="font-semibold text-2xl">{user.nickName}</h1>

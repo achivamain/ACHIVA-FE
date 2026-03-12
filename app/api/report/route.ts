@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   try {
     await transporter.sendMail({
       from: process.env.MAIL_USER,
-      to: "contact@achiva.kr",
+      to: "iworkouttodayofficial@gmail.com",
       subject: `게시물 신고`,
       text: `https://www.iworkouttoday.com/post/${postId} 게시물에 대한 신고가 접수되었습니다.
       신고자: ${reporterName}`,

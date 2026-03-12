@@ -110,7 +110,7 @@ export default function Sidebar() {
       >
         <ul
           className={`flex w-full justify-around px-[7px] py-[19px] ${
-            (isUserLoading || !user) ? "opacity-75 pointer-events-none" : ""
+            isUserLoading || !user ? "opacity-75 pointer-events-none" : ""
           }`}
         >
           {navItems.map((item) => {

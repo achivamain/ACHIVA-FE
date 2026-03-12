@@ -12,6 +12,7 @@ import Link from "next/link";
 import CheerBtns from "../post/CheerBtns";
 import { useQuery } from "@tanstack/react-query";
 import { HorizontalThreeDotsIcon } from "@/components/Icons";
+import PostCountBadge from "@/components/PostCountBadge";
 
 const ModalWithoutCloseBtn = dynamic(
   () => import("@/components/ModalWithoutCloseBtn"),
@@ -52,7 +53,12 @@ export default function FeedPost({ post }: { post: PostRes }) {
             href={`/${post.memberNickName}`}
             className="flex gap-2.5 items-center"
           >
-            <ProfileImg size={32} url={post.memberProfileUrl} />
+            <div className="relative flex-shrink-0">
+              <ProfileImg size={38} url={post.memberProfileUrl} />
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 z-10 scale-[0.85] origin-bottom">
+                <PostCountBadge userId={post.memberId} />
+              </div>
+            </div>
             <p className="font-medium">{post.memberNickName}</p>
           </Link>
           {post.createdAt && (
@@ -67,10 +73,12 @@ export default function FeedPost({ post }: { post: PostRes }) {
             <HorizontalThreeDotsIcon />
           </button>
         </div>
-        <div>
+        <div className="w-full">
           <Post post={post} />
         </div>
-        <CheerBtns postId={post.id} cheerings={post.cheerings ?? []} />
+        <div className="w-full px-2">
+          <CheerBtns postId={post.id} cheerings={post.cheerings ?? []} />
+        </div>
       </div>
       {isModalOpen && (
         <ModalWithoutCloseBtn onClose={() => setIsModalOpen(false)}>

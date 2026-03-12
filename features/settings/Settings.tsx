@@ -80,7 +80,7 @@ export default function Settings() {
             const clientId = "a3kaacto97fom3ved1bjivbiu";
             const logoutUri = `${window.location.origin}/`;
             window.location.href = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
-              logoutUri
+              logoutUri,
             )}`;
           }}
         >

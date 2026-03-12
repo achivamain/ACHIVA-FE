@@ -1,5 +1,9 @@
 import Image from "next/image";
-import { Category, categoryImages, categoryImageHeights } from "@/types/Categories";
+import {
+  Category,
+  categoryImages,
+  categoryImageHeights,
+} from "@/types/Categories";
 
 type CategoryCardProps = {
   name: Category;
@@ -25,9 +29,7 @@ export function CategoryCard({ name, background }: CategoryCardProps) {
           />
         )}
       </div>
-      <span className="font-medium text-[15px] text-center mt-1">
-        {name}
-      </span>
+      <span className="font-medium text-[15px] text-center mt-1">{name}</span>
     </div>
   );
 }

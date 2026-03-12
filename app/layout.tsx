@@ -8,7 +8,8 @@ import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 export const metadata: Metadata = {
   title: "나는오늘운동한다 | 운동 기록 SNS",
-  description: "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS, 나는오늘운동한다",
+  description:
+    "오늘 한 운동을 기록하고 공유하는 운동 기록 SNS, 나는오늘운동한다",
   icons: {
     icon: "/favicon.svg",
   },
@@ -47,7 +48,9 @@ export default function RootLayout({
     })(window, document, "clarity", "script", "tds01box2e");`}
         </Script>
       </head>
-      <body className={`${pretendard.className} ${pretendard.variable} ${urbanist.variable} antialiased min-h-dvh`}>
+      <body
+        className={`${pretendard.className} ${pretendard.variable} ${urbanist.variable} antialiased min-h-dvh`}
+      >
         <SessionProviderWrapper>
           <Wrapper>{children}</Wrapper>
         </SessionProviderWrapper>

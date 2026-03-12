@@ -25,7 +25,7 @@ export default async function Page({
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   const cheersData: CheerPoint[] = (await cheersRes.json()).data;
   return (

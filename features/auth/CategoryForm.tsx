@@ -19,7 +19,6 @@ export default function CategoryForm() {
     });
   };
 
-
   return (
     <div className="w-full h-full flex flex-col">
       {/* 제목 영역 */}
