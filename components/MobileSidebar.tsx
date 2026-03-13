@@ -47,8 +47,8 @@ export default function Sidebar() {
     initialSelectedItem = "응원";
   } else if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
     initialSelectedItem = "홈";
-  } else if (pathname.endsWith("/goals")) {
-    initialSelectedItem = "목표";
+  } else if (pathname.startsWith("/moim") || pathname.startsWith("/m/moim")) {
+    initialSelectedItem = "모임";
   } else if (pathname === "/feed" || pathname.startsWith("/post")) {
     initialSelectedItem = "피드";
   } else {
@@ -68,7 +68,9 @@ export default function Sidebar() {
     pathname === "/post/create" ||
     pathname.startsWith("/settings") ||
     pathname === "/accounts/edit" ||
-    pathname.startsWith("/post");
+    pathname.startsWith("/post") ||
+    pathname.startsWith("/moim/create") ||
+    pathname.startsWith("/m/moim/create");
 
   if (isInvisible) {
     return null; // 렌더링 안 함
@@ -81,8 +83,8 @@ export default function Sidebar() {
       Icon: HomeIcon,
     },
     {
-      label: "목표",
-      href: `/${user?.nickName}/goals`,
+      label: "모임",
+      href: `/moim`,
       Icon: GoalIcon,
     },
     {
