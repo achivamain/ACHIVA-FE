@@ -3,10 +3,12 @@ import { auth } from "@/auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   const token = session?.access_token;
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
 
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
@@ -18,7 +20,7 @@ export async function GET(
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/moim/${params.id}/feed?page=${page}&size=${size}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/moim/${id}/feed?page=${page}&size=${size}`,
       {
         method: "GET",
         headers: {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { type Category } from "@/types/Categories";
 import { CloseIcon } from "@/components/Icons";
 
@@ -24,6 +24,7 @@ const getCategoryIcon = (cat: string) => CATEGORY_ICONS[cat] || "🎯";
 export default function MoimDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [nudgedMembers, setNudgedMembers] = useState<Set<string>>(new Set());
@@ -78,20 +79,81 @@ export default function MoimDetailPage() {
     }
   });
 
+  const leaveMoimMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/moim/${id}/members/me`, { method: "DELETE" });
+      if (!res.ok) throw new Error("탈퇴 실패");
+      return res.json();
+    },
+    onSuccess: () => {
+      alert("모임에서 탈퇴했습니다.");
+      queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
+      queryClient.invalidateQueries({ queryKey: ["moims"] });
+      queryClient.invalidateQueries({ queryKey: ["myMoims"] });
+      router.push("/moim");
+    },
+    onError: () => {
+      alert("탈퇴 중 오류가 발생했습니다.");
+    }
+  });
+
+  const joinMoimMutation = useMutation({
+    mutationFn: async (password?: string) => {
+      const res = await fetch(`/api/moim/${id}/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: password ? JSON.stringify(password) : undefined,
+      });
+      if (!res.ok) throw new Error("가입 실패");
+      return res.json();
+    },
+    onSuccess: () => {
+      alert("모임에 가입했습니다!");
+      queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
+      queryClient.invalidateQueries({ queryKey: ["myMoims"] });
+    },
+    onError: () => {
+      alert("가입 중 오류가 발생했습니다.");
+    }
+  });
+
+  const deleteMoimMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`/api/moim/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("삭제 실패");
+      return res.json();
+    },
+    onSuccess: () => {
+      alert("모임이 삭제되었습니다.");
+      queryClient.invalidateQueries({ queryKey: ["moims"] });
+      queryClient.invalidateQueries({ queryKey: ["myMoims"] });
+      router.push("/moim");
+    },
+    onError: () => {
+      alert("모임 삭제 중 오류가 발생했습니다.");
+    }
+  });
+
+
   if (isLoading) return <div className="p-10 text-center">불러오는 중...</div>;
   if (!detail) return <div className="p-10 text-center">모임을 찾을 수 없습니다.</div>;
 
   // 프론트엔드에서 세션 기반으로 isLeader 판별
   const currentUserId = session?.user?.id; // Cognito sub (UUID)
 
+  const isJoined = detail.members?.some((m: any) =>
+    (m.isMe || (currentUserId && m.id === currentUserId))
+  );
+
   // 백엔드 isMe가 실패하더라도 세션 ID 기반으로 직접 판단
   const isLeader = detail.members?.some((m: any) =>
     (m.role === "LEADER") && (m.isMe || (currentUserId && m.id === currentUserId))
   );
 
+  const achieverCount = detail.members?.filter((m: any) => m.weeklyStreak >= 3).length || 0;
   const progressPercentage = Math.min(
     100,
-    detail.groupGoalTarget > 0 ? (detail.groupGoalCurrent / detail.groupGoalTarget) * 100 : 0
+    detail.memberCount > 0 ? (achieverCount / detail.memberCount) * 100 : 0
   );
 
   return (
@@ -104,18 +166,78 @@ export default function MoimDetailPage() {
           </Link>
           <h1 className="text-lg font-bold text-gray-800 line-clamp-1">{detail?.name || '로딩 중...'}</h1>
         </div>
-        {isLeader && (
-          <button 
-            onClick={() => {
-              setEditTarget(detail.groupGoalTarget || 100);
-              setEditPokeDays(detail.pokeDays || 5);
-              setIsSettingModalOpen(true);
-            }}
-            className="text-sm font-semibold text-white bg-theme px-4 py-1.5 rounded-lg shadow-sm shadow-theme/30 hover:bg-theme/90 transition-colors"
-          >
-            ⚙️ 설정
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* 미가입 시: 가입하기 버튼 */}
+          {!isJoined && (
+            <button
+              onClick={() => {
+                if (detail.isPrivate) {
+                  const pw = window.prompt("비공개 모임입니다. 비밀번호를 입력하세요:");
+                  if (pw !== null) joinMoimMutation.mutate(pw);
+                } else {
+                  if (window.confirm("이 모임에 가입하시겠습니까?")) joinMoimMutation.mutate(undefined);
+                }
+              }}
+              className="text-sm font-semibold text-white bg-theme px-4 py-1.5 rounded-lg shadow-sm hover:bg-theme/90 transition-colors"
+              disabled={joinMoimMutation.isPending}
+            >
+              ✅ 가입하기
+            </button>
+          )}
+          {/* 일반 멤버: 탈퇴하기 */}
+          {isJoined && !isLeader && (
+            <button
+              onClick={() => {
+                if (window.confirm("정말로 모임에서 탈퇴하시겠습니까?")) {
+                  leaveMoimMutation.mutate();
+                }
+              }}
+              className="text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-lg transition-colors"
+              disabled={leaveMoimMutation.isPending}
+            >
+              🚪 탈퇴하기
+            </button>
+          )}
+          {/* 방장: 탈퇴(방장위임) + 삭제 + 설정 버튼 */}
+          {isLeader && (
+            <>
+              <button
+                onClick={() => {
+                  if (window.confirm("방장 권한을 다음 멤버에게 위임하고 탈퇴하시겠습니까?")) {
+                    leaveMoimMutation.mutate();
+                  }
+                }}
+                className="text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-lg transition-colors"
+                disabled={leaveMoimMutation.isPending}
+              >
+                🚪 탈퇴
+              </button>
+              {!detail.isOfficial && (
+                <button
+                  onClick={() => {
+                    if (window.confirm("정말로 이 모임을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+                      deleteMoimMutation.mutate();
+                    }
+                  }}
+                  className="text-sm font-semibold text-white bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-lg transition-colors"
+                  disabled={deleteMoimMutation.isPending}
+                >
+                  🗑 삭제
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setEditTarget(detail.groupGoalTarget || 100);
+                  setEditPokeDays(detail.pokeDays || 5);
+                  setIsSettingModalOpen(true);
+                }}
+                className="text-sm font-semibold text-white bg-theme px-4 py-1.5 rounded-lg shadow-sm shadow-theme/30 hover:bg-theme/90 transition-colors"
+              >
+                ⚙️ 설정
+              </button>
+            </>
+          )}
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto xl:max-w-4xl 2xl:max-w-5xl px-0 sm:px-4 py-0 sm:py-6 space-y-2 sm:space-y-6">
@@ -146,16 +268,16 @@ export default function MoimDetailPage() {
                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                  🎯 공동 목표 달성
                </h3>
-               <p className="text-sm text-gray-500 mt-1">이번 달 모임원 총합 게시글 {detail.groupGoalTarget}개 작성 달성하기!</p>
+               <p className="text-sm text-gray-500 mt-1">이번 주 3회 운동 달성하기!</p>
              </div>
              <div className="bg-red-50 text-red-500 text-xs font-bold px-3 py-1.5 rounded-full">
-               D-{detail.deadlineDaysLeft}
+               주간 미션
              </div>
           </div>
           
           <div className="w-full bg-gray-100 rounded-full h-5 mb-2 relative overflow-hidden">
              <div 
-               className="bg-theme h-5 rounded-full transition-all duration-1000 ease-out flex items-center justify-end px-2"
+               className="bg-orange-500 h-5 rounded-full transition-all duration-1000 ease-out flex items-center justify-end px-2"
                style={{ width: `${progressPercentage}%` }}
              >
                 {progressPercentage > 10 && <span className="text-[10px] text-white font-bold">{Math.round(progressPercentage)}%</span>}
@@ -163,8 +285,8 @@ export default function MoimDetailPage() {
           </div>
           
           <div className="flex justify-between text-sm font-semibold text-gray-700">
-             <span>현재 {detail.groupGoalCurrent}개</span>
-             <span>목표 {detail.groupGoalTarget}개</span>
+             <span>현재 달성 {achieverCount}명</span>
+             <span>전체 {detail.memberCount}명</span>
           </div>
         </section>
 
@@ -178,14 +300,25 @@ export default function MoimDetailPage() {
           </div>
 
           <div className="space-y-3">
-            {detail.members.map((member: any) => {
+            {[...(detail.members || [])]
+              .sort((a: any, b: any) => (b.monthlyPosts || 0) - (a.monthlyPosts || 0))
+              .map((member: any, index: number) => {
               const needsNudge = member.lastActiveDaysAgo >= (detail.pokeDays || 5);
               const isNudged = nudgedMembers.has(member.id);
+              const rank = index + 1;
 
               return (
-                <div key={member.id} className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-100 shadow-sm flex items-center justify-center text-lg">
+                <div key={member.id} className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl relative overflow-hidden shadow-sm border border-gray-100 hover:border-theme/30 transition-colors">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {/* 랭킹 뱃지 */}
+                    <div className="w-6 sm:w-8 flex justify-center shrink-0">
+                      {rank === 1 ? <span className="text-xl sm:text-2xl" title="1위">🥇</span> : 
+                       rank === 2 ? <span className="text-xl sm:text-2xl" title="2위">🥈</span> : 
+                       rank === 3 ? <span className="text-xl sm:text-2xl" title="3위">🥉</span> : 
+                       <span className="text-sm sm:text-base font-black italic text-gray-400">{rank}</span>}
+                    </div>
+                    
+                    <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-100 shadow-sm flex items-center justify-center text-lg z-10 shrink-0">
                       {member.isMe ? "😎" : "👤"}
                     </div>
                     <div>
@@ -194,9 +327,11 @@ export default function MoimDetailPage() {
                         {member.name}
                         {member.isMe && <span className="bg-theme text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5">ME</span>}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                        이번 달 게시글 <span className="text-theme font-bold">{member.monthlyPosts}개</span> 작성!
-                        {member.lastActiveDaysAgo > 0 && <span className="text-gray-400">({member.lastActiveDaysAgo}일 전)</span>}
+                      <div className="text-xs text-gray-500 mt-1 flex gap-1 flex-wrap">
+                        이번 주 스트릭 <span className="text-theme font-bold flex items-center">🔥 {member.weeklyStreak || 0}일</span>
+                        <span className="text-gray-300 mx-1">|</span>
+                        이번 달 <span className="text-gray-700 font-medium">{member.monthlyPosts}개</span>
+                        {member.lastActiveDaysAgo > 0 && <span className="text-gray-400 ml-1">({member.lastActiveDaysAgo}일 전)</span>}
                       </div>
                     </div>
                   </div>

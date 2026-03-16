@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -20,30 +20,24 @@ export type Moim = {
   isOfficial: boolean;
 };
 
-// Official moims can be mocked for now until DB has them
-const MOCK_OFFICIAL_MOIMS = [
-  {
-    id: "off-1",
-    name: "아치바 공인 30일 매일 걷기",
-    description: "하루라도 빠지면 탈락! 30일 완주하고 전용 배지 받자 🏆",
-    imageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=600&auto=format&fit=crop",
-    memberCount: 1240,
-  },
-  {
-    id: "off-2",
-    name: "나이키 10km 마라톤 대비반",
-    description: "한 달 뒤 마라톤을 위한 체계적인 러닝 플랜 🏃‍♂️",
-    imageUrl: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=600&auto=format&fit=crop",
-    memberCount: 890,
-  }
-];
 
 export default function MoimExplorePage() {
   const router = useRouter();
 
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categoryTab, setCategoryTab] = useState<"MY" | "ALL">("MY");
+
+  // 검색창 디바운스 (500ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const isSearching = debouncedSearch.length > 0;
 
   const { data: user } = useQuery({
     queryKey: ["user"],
@@ -68,16 +62,25 @@ export default function MoimExplorePage() {
     }
   };
 
+  const { data: officialMoimsData } = useQuery({
+    queryKey: ["officialMoims"],
+    queryFn: async () => {
+      const res = await fetch(`/api/moim?size=10&isOfficial=true`);
+      if (!res.ok) throw new Error("Failed to fetch official moims");
+      return (await res.json()).data.content as Moim[];
+    },
+  });
+
   const { data: moimsData, isLoading } = useQuery({
-    queryKey: ["moims", searchQuery, selectedCategories, categoryTab],
+    queryKey: ["moims", debouncedSearch, selectedCategories, categoryTab],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (searchQuery) params.append("keyword", searchQuery);
+      if (debouncedSearch) params.append("keyword", debouncedSearch);
       
-      const catsToFetch = displayedCategories; // 백엔드에 보낼 카테고리 필터
-      if (categoryTab === "MY" && catsToFetch.length > 0) {
+      const catsToFetch = displayedCategories;
+      if (categoryTab === "MY" && catsToFetch.length > 0 && !debouncedSearch) {
         catsToFetch.forEach(c => params.append("categories", c));
-      } else if (selectedCategories.length > 0) {
+      } else if (selectedCategories.length > 0 && !debouncedSearch) {
         selectedCategories.forEach(c => params.append("categories", c));
       }
       
@@ -96,6 +99,7 @@ export default function MoimExplorePage() {
     },
   });
 
+  const officialMoims = officialMoimsData || [];
   const filteredMoims = moimsData || [];
   const myMoims = myMoimsData || [];
 
@@ -134,36 +138,75 @@ export default function MoimExplorePage() {
           )}
         </div>
 
-        {/* 공식 챌린지 모임 (가로 슬라이드) */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-             <h2 className="text-lg font-bold text-theme flex items-center gap-2">
-               🔥 공식 챌린지
-               <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">HOT</span>
-             </h2>
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 snap-x">
-            {MOCK_OFFICIAL_MOIMS.map((moim) => (
-              <div 
-                key={moim.id} 
-                onClick={() => router.push(`/moim/${moim.id}`)}
-                className="snap-center relative min-w-[280px] w-[280px] h-[160px] rounded-2xl overflow-hidden shadow-md shrink-0 cursor-pointer group"
-              >
-                 <img src={moim.imageUrl} alt={moim.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 flex flex-col justify-end">
-                    <span className="bg-theme text-white text-[10px] font-bold px-2 py-1 rounded w-max mb-2">OFFICIAL</span>
-                    <h3 className="text-white font-bold text-lg leading-tight mb-1 truncate">{moim.name}</h3>
-                    <p className="text-gray-200 text-xs line-clamp-2 mb-2">{moim.description}</p>
-                    <div className="flex items-center text-white text-xs font-medium">
-                       <span className="mr-1">👤</span> {moim.memberCount.toLocaleString()}명 참여 중
+        {/* 검색 중일 때: 검색 결과를 최상단에 표시 */}
+        {isSearching && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-theme flex items-center gap-2">
+                🔍 검색 결과
+              </h2>
+              <span className="text-xs text-gray-400">{isLoading ? "검색 중..." : `${filteredMoims.length}개`}</span>
+            </div>
+            {isLoading ? (
+              <div className="py-8 text-center text-gray-400">검색 중...</div>
+            ) : filteredMoims.length === 0 ? (
+              <div className="py-8 text-center text-gray-400">'{debouncedSearch}'에 대한 검색 결과가 없습니다.</div>
+            ) : (
+              <div className="space-y-3">
+                {filteredMoims.map((moim) => (
+                  <div
+                    key={moim.id}
+                    onClick={() => router.push(`/moim/${moim.id}`)}
+                    className="p-4 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer bg-white"
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-bold text-theme flex items-center gap-1.5">
+                        {moim.isPrivate && <span className="text-gray-400">🔒</span>}
+                        {moim.isOfficial && <span className="text-[10px] bg-black text-white px-1.5 py-0.5 rounded font-bold">OFFICIAL</span>}
+                        {moim.name}
+                      </h3>
+                      <span className="text-xs text-gray-500">👤 {moim.memberCount}/{moim.maxMember}</span>
                     </div>
-                 </div>
+                    <p className="text-sm text-gray-500 line-clamp-1">{moim.description}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
+        )}
 
-        {/* 나의 크루 (가로 슬라이드) */}
-        {myMoims.length > 0 && (
+        {/* 공식 챌린지 모임 (가로 슬라이드) - 검색 중엔 숨김 */}
+        {!isSearching && officialMoims.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+               <h2 className="text-lg font-bold text-theme flex items-center gap-2">
+                 🔥 공식 챌린지
+                 <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">HOT</span>
+               </h2>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 snap-x">
+              {officialMoims.map((moim) => (
+                <div 
+                  key={moim.id} 
+                  onClick={() => router.push(`/moim/${moim.id}`)}
+                  className="snap-center relative min-w-[280px] w-[280px] h-[160px] rounded-2xl overflow-hidden shadow-md shrink-0 cursor-pointer group"
+                >
+                   <img src={"https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=600&auto=format&fit=crop"} alt={moim.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 flex flex-col justify-end">
+                      <span className="bg-theme text-white text-[10px] font-bold px-2 py-1 rounded w-max mb-2">OFFICIAL</span>
+                      <h3 className="text-white font-bold text-lg leading-tight mb-1 truncate">{moim.name}</h3>
+                      <p className="text-gray-200 text-xs line-clamp-2 mb-2">{moim.description}</p>
+                      <div className="flex items-center text-white text-xs font-medium">
+                         <span className="mr-1">👤</span> {moim.memberCount.toLocaleString()}명 참여 중
+                      </div>
+                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* 나의 크루 (가로 슬라이드) - 검색 중엔 숨김 */}
+        {!isSearching && myMoims.length > 0 && (
           <div className="mb-10">
             <div className="flex items-center justify-between mb-4">
                <h2 className="text-lg font-bold text-theme flex items-center gap-2">
@@ -195,13 +238,12 @@ export default function MoimExplorePage() {
             </div>
           </div>
         )}
-        </div>
 
         {/* ================= 구분선 ================= */}
         <div className="h-2 bg-gray-50 -mx-5 mb-8"></div>
 
-        {/* 카테고리 필터 영역 */}
-        <div className="mb-6">
+        {/* 카테고리 필터 영역 - 검색 중엔 숨김 */}
+        {!isSearching && <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-theme">크루 탐색</h2>
             <div className="flex bg-gray-100 p-1 rounded-lg">
@@ -239,10 +281,10 @@ export default function MoimExplorePage() {
               ))
             )}
           </div>
-        </div>
+        </div>}
 
-        {/* 모임 리스트 */}
-        <div className="space-y-4">
+        {/* 모임 리스트 - 검색 중엔 숨김 */}
+        {!isSearching && <div className="space-y-4">
           <div className="mb-2 flex justify-between items-center">
              <span className="text-gray-500 text-sm">총 {filteredMoims.length}개의 일반 모임</span>
           </div>
@@ -287,7 +329,7 @@ export default function MoimExplorePage() {
               </div>
             ))
           )}
-        </div>
+        </div>}
       </main>
 
       {/* 모임 만들기 FAB */}
