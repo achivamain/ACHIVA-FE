@@ -12,71 +12,6 @@ import { MyCrewCard, OfficialChallengeCard } from "@/features/moim/moimCard";
 import Banner from "@/features/event/Banner";
 import useDragScroll from "@/hooks/useDragScroll";
 
-const dummyMoims: Moim[] = [
-  {
-    id: 1001,
-    name: "새벽 러닝 크루 5AM",
-    description:
-      "출근 전 가볍게 뛰는 아침 러너 모임입니다. 주 3회 한강 러닝을 진행합니다.",
-    categories: ["러닝", "걷기"],
-    leaderName: "민준",
-    memberCount: 18,
-    maxMember: 30,
-    isPrivate: false,
-    isOfficial: true,
-  },
-  {
-    id: 1002,
-    name: "주말 풋살 한판",
-    description:
-      "토요일 오전마다 모여 풋살 경기와 친선전을 즐기는 소규모 크루입니다.",
-    categories: ["풋살"],
-    leaderName: "서연",
-    memberCount: 12,
-    maxMember: 20,
-    isPrivate: false,
-    isOfficial: false,
-  },
-  {
-    id: 1003,
-    name: "클라이밍 입문자 모임",
-    description:
-      "볼더링이 처음이어도 괜찮습니다. 장비 정보부터 기본 동작까지 함께 익혀요.",
-    categories: ["클라이밍"],
-    leaderName: "도윤",
-    memberCount: 9,
-    maxMember: 15,
-    isPrivate: true,
-    isOfficial: false,
-  },
-  {
-    id: 1004,
-    name: "오피셜 여름 바디 챌린지",
-    description:
-      "8주 동안 인증과 운동 루틴을 함께 달성하는 시즌형 공식 챌린지입니다.",
-    categories: ["헬스", "러닝"],
-    leaderName: "ACHIVA",
-    memberCount: 142,
-    maxMember: 300,
-    isPrivate: false,
-    isOfficial: true,
-  },
-  {
-    id: 1005,
-    name: "퇴근 후 요가&필라테스",
-    description:
-      "저녁 시간대에 모여 스트레칭과 코어 운동 중심으로 진행하는 힐링 모임입니다.",
-    categories: ["요가", "필라테스"],
-    leaderName: "지우",
-    memberCount: 14,
-    maxMember: 24,
-    isPrivate: false,
-    isOfficial: false,
-  },
-];
-
-const dummyMyMoimIds = [1002, 1003];
-
 const createMoimFabIcon = (
   <svg
     fill="none"
@@ -92,24 +27,6 @@ const createMoimFabIcon = (
     />
   </svg>
 );
-
-function getFallbackMoims(keyword: string, selected: readonly Category[]) {
-  const normalizedKeyword = keyword.trim().toLowerCase();
-
-  return dummyMoims.filter((moim) => {
-    const matchesKeyword =
-      !normalizedKeyword ||
-      moim.name.toLowerCase().includes(normalizedKeyword) ||
-      moim.description.toLowerCase().includes(normalizedKeyword) ||
-      moim.leaderName.toLowerCase().includes(normalizedKeyword);
-
-    const matchesCategory =
-      selected.length === 0 ||
-      selected.some((category) => moim.categories.includes(category));
-
-    return matchesKeyword && matchesCategory;
-  });
-}
 
 export default function MoimExplorePage() {
   const router = useRouter();
@@ -167,18 +84,10 @@ export default function MoimExplorePage() {
   const { data: officialMoimsData } = useQuery({
     queryKey: ["officialMoims"],
     queryFn: async () => {
-      try {
-        const res = await fetch(`/api/moim?size=10&isOfficial=true`);
-        if (!res.ok) throw new Error("Failed to fetch official moims");
-        const data = (await res.json()).data.content as Moim[];
-        return data.length > 0
-          ? data
-          : dummyMoims.filter((moim) => moim.isOfficial);
-      } catch {
-        return dummyMoims.filter((moim) => moim.isOfficial);
-      }
+      const res = await fetch(`/api/moim?size=10&isOfficial=true`);
+      if (!res.ok) throw new Error("Failed to fetch official moims");
+      return (await res.json()).data.content as Moim[];
     },
-    retry: false,
   });
 
   const { data: moimsData, isLoading } = useQuery({
@@ -194,40 +103,19 @@ export default function MoimExplorePage() {
         selectedCategories.forEach((c) => params.append("categories", c));
       }
 
-      const fallbackCategories =
-        categoryTab === "MY" && catsToFetch.length > 0 && !debouncedSearch
-          ? catsToFetch
-          : selectedCategories;
-
-      try {
-        const res = await fetch(`/api/moim?${params.toString()}`);
-        if (!res.ok) throw new Error("Failed to fetch moims");
-        const data = (await res.json()).data.content as Moim[];
-        return data.length > 0
-          ? data
-          : getFallbackMoims(debouncedSearch, fallbackCategories);
-      } catch {
-        return getFallbackMoims(debouncedSearch, fallbackCategories);
-      }
+      const res = await fetch(`/api/moim?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch moims");
+      return (await res.json()).data.content as Moim[];
     },
-    retry: false,
   });
 
   const { data: myMoimsData } = useQuery({
     queryKey: ["myMoims"],
     queryFn: async () => {
-      try {
-        const res = await fetch(`/api/moim/my`);
-        if (!res.ok) throw new Error("Failed to fetch my moims");
-        const data = (await res.json()).data as Moim[];
-        return data.length > 0
-          ? data
-          : dummyMoims.filter((moim) => dummyMyMoimIds.includes(moim.id));
-      } catch {
-        return dummyMoims.filter((moim) => dummyMyMoimIds.includes(moim.id));
-      }
+      const res = await fetch(`/api/moim/my`);
+      if (!res.ok) throw new Error("Failed to fetch my moims");
+      return (await res.json()).data as Moim[];
     },
-    retry: false,
   });
 
   const officialMoims = officialMoimsData || [];
