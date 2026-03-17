@@ -198,8 +198,11 @@ export default function MoimExplorePage() {
                           )}
                           {moim.name}
                         </h3>
-                        <span className="text-xs text-gray-500">
-                          👤 {moim.memberCount}/{moim.maxMember}
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                            <path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" />
+                          </svg>
+                          {moim.memberCount}{!moim.isOfficial && `/${moim.maxMember}`}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 line-clamp-1">
@@ -235,25 +238,42 @@ export default function MoimExplorePage() {
             </div>
           )}
           {/* 나의 크루 (가로 슬라이드) - 검색 중엔 숨김 */}
-          {!isSearching && myMoims.length > 0 && (
+          {!isSearching && (
             <div className="mb-10">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-theme flex items-center gap-2">
-                  🏃 나의 크루
-                  <span className="bg-theme/10 text-theme text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">
-                    {myMoims.length}
-                  </span>
-                </h2>
+                <div className="flex items-center">
+                  <h2 className="text-lg font-bold text-theme flex items-center gap-2">
+                    🏃 나의 크루
+                    <span className="bg-theme/10 text-theme text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">
+                      {myMoims.length}
+                    </span>
+                  </h2>
+                </div>
+                <Link
+                  href="/moim/create"
+                  className="flex items-center gap-1 bg-theme/10 text-theme text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-theme hover:text-white transition-colors"
+                >
+                  <svg fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                  새로 만들기
+                </Link>
               </div>
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 snap-x">
-                {myMoims.map((moim) => (
-                  <MyCrewCard
-                    key={moim.id}
-                    moim={moim}
-                    onClick={() => router.push(`/moim/${moim.id}`)}
-                  />
-                ))}
-              </div>
+              
+              {myMoims.length > 0 ? (
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 snap-x">
+                  {myMoims.map((moim) => (
+                    <MyCrewCard
+                      key={moim.id}
+                      moim={moim}
+                      onClick={() => router.push(`/moim/${moim.id}`)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center">
+                  <span className="text-3xl mb-2">🏃‍♀️</span>
+                  <p className="text-gray-500 text-sm">아직 소속된 크루가 없어요.<br/>새로운 크루를 만들어보세요!</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -378,23 +398,6 @@ export default function MoimExplorePage() {
         </main>
 
         <div className="lg:hidden pb-10"></div>
-        {/* 모임 만들기 FAB */}
-        <Link
-          href={`/moim/create`}
-          className="fixed bottom-[110px] right-5 w-14 h-14 bg-theme text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all transform hover:scale-105 z-20 md:hidden"
-        >
-          {createMoimFabIcon}
-        </Link>
-        <div className="pointer-events-none fixed bottom-10 left-20 right-[320px] z-20 hidden md:block lg:left-60">
-          <div className="mx-auto flex w-full max-w-[844px] justify-end px-5">
-            <Link
-              href={`/moim/create`}
-              className="pointer-events-auto w-14 h-14 bg-theme text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-            >
-              {createMoimFabIcon}
-            </Link>
-          </div>
-        </div>
       </div>
       <div className="bg-[#fafafa] w-[320px] hidden md:flex justify-center">
         <Banner />

@@ -167,6 +167,22 @@ export default function MoimDetailPage() {
           <h1 className="text-lg font-bold text-gray-800 line-clamp-1">{detail?.name || '로딩 중...'}</h1>
         </div>
         <div className="flex items-center gap-2">
+          {/* 공유/초대 버튼 */}
+          <button
+            onClick={() => {
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(window.location.href);
+                alert("크루 초대 링크가 복사되었습니다! 🎉");
+              }
+            }}
+            className="p-1.5 text-gray-400 hover:text-theme hover:bg-theme/5 rounded-full transition-colors"
+            title="초대 링크 복사"
+          >
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+            </svg>
+          </button>
+
           {/* 미가입 시: 가입하기 버튼 */}
           {!isJoined && (
             <button
@@ -184,58 +200,24 @@ export default function MoimDetailPage() {
               ✅ 가입하기
             </button>
           )}
-          {/* 일반 멤버: 탈퇴하기 */}
-          {isJoined && !isLeader && (
+          {/* 가입 멤버 (방장/일반 공통): 설정 모달 열기 */}
+          {isJoined && (
             <button
               onClick={() => {
-                if (window.confirm("정말로 모임에서 탈퇴하시겠습니까?")) {
-                  leaveMoimMutation.mutate();
-                }
-              }}
-              className="text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-lg transition-colors"
-              disabled={leaveMoimMutation.isPending}
-            >
-              🚪 탈퇴하기
-            </button>
-          )}
-          {/* 방장: 탈퇴(방장위임) + 삭제 + 설정 버튼 */}
-          {isLeader && (
-            <>
-              <button
-                onClick={() => {
-                  if (window.confirm("방장 권한을 다음 멤버에게 위임하고 탈퇴하시겠습니까?")) {
-                    leaveMoimMutation.mutate();
-                  }
-                }}
-                className="text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-1.5 rounded-lg transition-colors"
-                disabled={leaveMoimMutation.isPending}
-              >
-                🚪 탈퇴
-              </button>
-              {!detail.isOfficial && (
-                <button
-                  onClick={() => {
-                    if (window.confirm("정말로 이 모임을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
-                      deleteMoimMutation.mutate();
-                    }
-                  }}
-                  className="text-sm font-semibold text-white bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-lg transition-colors"
-                  disabled={deleteMoimMutation.isPending}
-                >
-                  🗑 삭제
-                </button>
-              )}
-              <button
-                onClick={() => {
+                if (isLeader) {
                   setEditTarget(detail.groupGoalTarget || 100);
                   setEditPokeDays(detail.pokeDays || 5);
-                  setIsSettingModalOpen(true);
-                }}
-                className="text-sm font-semibold text-white bg-theme px-4 py-1.5 rounded-lg shadow-sm shadow-theme/30 hover:bg-theme/90 transition-colors"
-              >
-                ⚙️ 설정
-              </button>
-            </>
+                }
+                setIsSettingModalOpen(true);
+              }}
+              className="p-1.5 text-gray-400 hover:text-theme hover:bg-theme/5 rounded-full transition-colors"
+              title="모임 설정"
+            >
+              <svg fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              </svg>
+            </button>
           )}
         </div>
       </header>
@@ -257,38 +239,34 @@ export default function MoimDetailPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{detail.name}</h2>
           <p className="text-gray-600 mb-4">{detail.description}</p>
           <div className="flex items-center gap-4 text-sm font-medium text-gray-500 bg-gray-50 p-3 rounded-xl">
-             <div className="flex items-center gap-1.5"><span className="text-lg">👥</span> {detail.memberCount} / {detail.maxMember}명</div>
+             <div className="flex items-center gap-1.5">
+               <span className="text-lg">👥</span> 
+               {detail.memberCount}{!detail.isOfficial && ` / ${detail.maxMember}`}명
+             </div>
           </div>
         </section>
 
-        {/* 킬러 피처 1: 모임 공동 게이지 */}
-        <section className="bg-white p-5 sm:rounded-2xl shadow-sm border-y sm:border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
-             <div>
+        {/* 킬러 피처 1: 주간 활동 비교 (주석 처리하여 임시 숨김) */}
+        {/*
+        <section className="bg-white p-5 sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-theme/10 to-transparent rounded-bl-full pointer-events-none" />
+          
+          <div className="flex items-start justify-between mb-2">
+             <div className="z-10 relative">
                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                 🎯 공동 목표 달성
+                 🔥 주간 활동 리포트
                </h3>
-               <p className="text-sm text-gray-500 mt-1">이번 주 3회 운동 달성하기!</p>
+               <p className="text-sm text-gray-600 mt-2 font-medium">
+                 이번 주는 저번 주 이 시간보다 <span className="text-theme font-bold text-base bg-theme/10 px-1.5 py-0.5 rounded mx-0.5">{feedData?.content?.length || 0}번</span> 더 운동했어요!
+               </p>
+               <p className="text-xs text-gray-400 mt-1">저번 주 대비 상승세를 타볼까요?</p>
              </div>
-             <div className="bg-red-50 text-red-500 text-xs font-bold px-3 py-1.5 rounded-full">
-               주간 미션
+             <div className="bg-orange-50 text-theme text-xs font-bold px-3 py-1.5 rounded-full z-10 shrink-0">
+               활동 비교
              </div>
-          </div>
-          
-          <div className="w-full bg-gray-100 rounded-full h-5 mb-2 relative overflow-hidden">
-             <div 
-               className="bg-orange-500 h-5 rounded-full transition-all duration-1000 ease-out flex items-center justify-end px-2"
-               style={{ width: `${progressPercentage}%` }}
-             >
-                {progressPercentage > 10 && <span className="text-[10px] text-white font-bold">{Math.round(progressPercentage)}%</span>}
-             </div>
-          </div>
-          
-          <div className="flex justify-between text-sm font-semibold text-gray-700">
-             <span>현재 달성 {achieverCount}명</span>
-             <span>전체 {detail.memberCount}명</span>
           </div>
         </section>
+        */}
 
         {/* 킬러 피처 2: 멤버 현황 & 넛지 시스템 */}
         <section className="bg-white p-5 sm:rounded-2xl shadow-sm border-y sm:border border-gray-100">
@@ -318,8 +296,16 @@ export default function MoimDetailPage() {
                        <span className="text-sm sm:text-base font-black italic text-gray-400">{rank}</span>}
                     </div>
                     
-                    <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-100 shadow-sm flex items-center justify-center text-lg z-10 shrink-0">
-                      {member.isMe ? "😎" : "👤"}
+                    <div className="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-lg z-10 shrink-0 overflow-hidden">
+                      {member.profileImageUrl ? (
+                        <img src={member.profileImageUrl} alt="profile" className="w-full h-full object-cover" />
+                      ) : (
+                        member.isMe ? "😎" : (
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-gray-400">
+                            <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                          </svg>
+                        )
+                      )}
                     </div>
                     <div>
                       <div className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
@@ -327,33 +313,33 @@ export default function MoimDetailPage() {
                         {member.name}
                         {member.isMe && <span className="bg-theme text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5">ME</span>}
                       </div>
-                      <div className="text-xs text-gray-500 mt-1 flex gap-1 flex-wrap">
-                        이번 주 스트릭 <span className="text-theme font-bold flex items-center">🔥 {member.weeklyStreak || 0}일</span>
-                        <span className="text-gray-300 mx-1">|</span>
+                      <div className="text-xs text-gray-500 mt-1 flex gap-1 flex-wrap items-center">
                         이번 달 <span className="text-gray-700 font-medium">{member.monthlyPosts}개</span>
-                        {member.lastActiveDaysAgo > 0 && <span className="text-gray-400 ml-1">({member.lastActiveDaysAgo}일 전)</span>}
+                        {member.lastActiveDaysAgo > 0 && <span className="text-gray-400 ml-1 opacity-80">({member.lastActiveDaysAgo}일 전)</span>}
                       </div>
                     </div>
                   </div>
 
-                  {needsNudge && !member.isMe && (
-                    <button
-                      onClick={() => handleNudge(member.id)}
-                      disabled={isNudged}
-                      className={`text-xs font-bold px-3 py-2 rounded-lg transition-colors flex items-center gap-1 ${
-                        isNudged 
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed" 
-                        : "bg-orange-50 text-orange-600 hover:bg-orange-100 border border-orange-200"
-                      }`}
-                    >
-                      {isNudged ? "콕 찌름 완료!" : "🔥 찌르기"}
-                    </button>
-                  )}
-                  {(!needsNudge || member.isMe) && (
-                    <div className="text-xs font-bold text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-100">
-                      👍 훌륭해요
+                  <div className="flex items-center gap-3">
+                    <div className="text-xs flex flex-col items-end justify-center">
+                      <span className="text-gray-400 font-medium text-[10px] sm:text-xs">이번 주 스트릭</span>
+                      <span className="text-theme font-bold text-sm flex items-center mt-0.5">🔥 {member.weeklyStreak || 0}일</span>
                     </div>
-                  )}
+
+                    {needsNudge && !member.isMe && (
+                      <button
+                        onClick={() => handleNudge(member.id)}
+                        disabled={isNudged}
+                        className={`text-xs font-bold px-3 py-2 rounded-lg transition-colors flex items-center gap-1 shrink-0 ${
+                          isNudged 
+                          ? "bg-gray-200 text-gray-400 cursor-not-allowed" 
+                          : "bg-orange-50 text-orange-600 hover:bg-orange-100 border border-orange-200"
+                        }`}
+                      >
+                        {isNudged ? "완료" : "찌르기"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -391,29 +377,66 @@ export default function MoimDetailPage() {
 
       {isSettingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl max-h-[90vh] overflow-y-auto scrollbar-hide">
             <h2 className="text-xl font-bold text-gray-900 mb-4">모임 설정</h2>
             
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">월 공동 목표 개수</label>
-                <input 
-                  type="number" 
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
-                  value={editTarget}
-                  onChange={(e) => setEditTarget(Number(e.target.value))}
-                  min={1}
-                />
+            {isLeader && (
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">월 공동 목표 개수</label>
+                  <input 
+                    type="number" 
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
+                    value={editTarget}
+                    onChange={(e) => setEditTarget(Number(e.target.value))}
+                    min={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">찌르기 기준 (미활동 일수)</label>
+                  <input 
+                    type="number" 
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
+                    value={editPokeDays}
+                    onChange={(e) => setEditPokeDays(Number(e.target.value))}
+                    min={1}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">찌르기 기준 (미활동 일수)</label>
-                <input 
-                  type="number" 
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
-                  value={editPokeDays}
-                  onChange={(e) => setEditPokeDays(Number(e.target.value))}
-                  min={1}
-                />
+            )}
+
+            <div className={`pt-2 border-t border-gray-100 mb-6 ${!isLeader && 'border-t-0'}`}>
+              <h3 className="text-sm font-bold text-red-500 mb-3 mt-4">위험 구역</h3>
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    const msg = isLeader 
+                      ? "방장 권한을 다음 멤버에게 위임하고 탈퇴하시겠습니까?" 
+                      : "정말로 모임에서 탈퇴하시겠습니까?";
+                    if (window.confirm(msg)) {
+                      leaveMoimMutation.mutate();
+                    }
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm"
+                  disabled={leaveMoimMutation.isPending}
+                >
+                  <span>🚪 모임 탈퇴{isLeader ? " (방장 위임)" : ""}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>
+                </button>
+                {isLeader && !detail.isOfficial && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm("정말로 이 모임을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+                        deleteMoimMutation.mutate();
+                      }
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm"
+                    disabled={deleteMoimMutation.isPending}
+                  >
+                    <span>🗑 모임 삭제</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -422,15 +445,17 @@ export default function MoimDetailPage() {
                 className="flex-1 py-3.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
                 onClick={() => setIsSettingModalOpen(false)}
               >
-                취소
+                닫기
               </button>
-              <button 
-                className="flex-1 py-3.5 bg-theme text-white font-bold rounded-xl shadow-md shadow-theme/30 disabled:opacity-50"
-                onClick={() => updateSettingsMutation.mutate({ targetAmount: editTarget, pokeDays: editPokeDays })}
-                disabled={updateSettingsMutation.isPending}
-              >
-                {updateSettingsMutation.isPending ? "저장 중..." : "저장"}
-              </button>
+              {isLeader && (
+                <button 
+                  className="flex-1 py-3.5 bg-theme text-white font-bold rounded-xl shadow-md shadow-theme/30 disabled:opacity-50"
+                  onClick={() => updateSettingsMutation.mutate({ targetAmount: editTarget, pokeDays: editPokeDays })}
+                  disabled={updateSettingsMutation.isPending}
+                >
+                  {updateSettingsMutation.isPending ? "저장 중..." : "저장"}
+                </button>
+              )}
             </div>
           </div>
         </div>
