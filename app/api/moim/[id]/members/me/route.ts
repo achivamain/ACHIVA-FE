@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 // 모임 탈퇴 (DELETE /api/moim/[id]/members/me)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
   const token = session?.access_token;
@@ -15,13 +15,16 @@ export async function DELETE(
   }
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/moim/${id}/members/me`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/moim/${id}/members/me`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -32,6 +35,9 @@ export async function DELETE(
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error leaving moim:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

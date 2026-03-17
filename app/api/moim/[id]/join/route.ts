@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 // 모임 가입 (POST /api/moim/[id]/join)
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
   const token = session?.access_token;
@@ -20,14 +20,17 @@ export async function POST(
   } catch {}
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/moim/${id}/join`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/moim/${id}/join`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: body || undefined,
       },
-      body: body || undefined,
-    });
+    );
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -38,6 +41,9 @@ export async function POST(
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error joining moim:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

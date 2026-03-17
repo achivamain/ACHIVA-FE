@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth();
   const token = session?.access_token;
@@ -28,20 +28,26 @@ export async function GET(
           Authorization: `Bearer ${token}`,
         },
         cache: "no-store",
-      }
+      },
     );
 
     if (!res.ok) {
-        // 백엔드 에러 발생 시 상세 정보 로깅
-        const errorText = await res.text();
-        console.error(`Backend error (${res.status}):`, errorText);
-        return NextResponse.json({ error: "모임 피드 조회 실패" }, { status: res.status });
+      // 백엔드 에러 발생 시 상세 정보 로깅
+      const errorText = await res.text();
+      console.error(`Backend error (${res.status}):`, errorText);
+      return NextResponse.json(
+        { error: "모임 피드 조회 실패" },
+        { status: res.status },
+      );
     }
 
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error in fetching moim feed:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
