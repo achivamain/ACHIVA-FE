@@ -1,37 +1,41 @@
 "use client";
 
 import { useDraftPostStore } from "@/store/CreatePostStore";
-import {
-  categories,
-  categoryImages,
-  categoryImageHeights,
-} from "@/types/Categories";
+import { categories, categoryImages } from "@/types/Categories";
 import { CategoryCharCount, CategoryCount } from "@/types/Post";
 import Image from "next/image";
 import Link from "next/link";
 import { Category } from "@/types/Categories";
-import { inter } from "@/lib/fonts";
 
 export function MyCategorys({
   myCategories,
   categoryCounts,
+  weeklyCategoryCounts,
   categoryCharCounts = [],
 }: {
   myCategories: string[];
   categoryCounts: CategoryCount[];
+  weeklyCategoryCounts: CategoryCount[];
   categoryCharCounts?: CategoryCharCount[];
 }) {
   const resetPost = useDraftPostStore.use.resetPost();
   const setPost = useDraftPostStore.use.setPost();
+  const draft = useDraftPostStore.use.post();
   const categorysData = myCategories.map((cat) => {
     const countData = categoryCounts.find((i) => i.category == cat);
     const charCountData = categoryCharCounts.find((i) => i.category == cat);
+    const weeklyCountData = weeklyCategoryCounts.find((i) => i.category == cat);
 
     return {
       category: cat,
       count: countData?.count ?? 0,
       charCount: charCountData?.characterCount ?? 0,
+      weeklyCount: weeklyCountData?.count ?? 0,
     };
+  }).sort((a, b) => {
+    if (b.count !== a.count) return b.count - a.count;
+    if (b.charCount !== a.charCount) return b.charCount - a.charCount;
+    return a.category.localeCompare(b.category, "ko");
   });
 
   const handleCategoryClick = (cat: { category: string; count: number }) => {
@@ -43,143 +47,94 @@ export function MyCategorys({
   };
 
   return (
-    <div className="flex flex-col w-full pb-8 sm:pb-12">
-      {/* 모바일: 타이틀 */}
-      <h1 className="text-[26px] font-semibold leading-[31px] text-black mx-9 mt-12 mb-8 sm:hidden">
-        운동 일지 작성하기
-      </h1>
+    <div className="flex flex-col w-full pb-8 sm:pb-12 overflow-hidden">
+      {/* 상단 타이틀 구역 */}
+      <div className="flex items-center justify-between px-5 sm:px-9 mt-8 sm:mt-12 mb-6">
+        <h1 className="text-[20px] sm:text-[24px] font-bold leading-[31px] text-black tracking-tight">
+          오늘의 운동 기록
+        </h1>
+        <Link
+          href="/categories"
+          className="flex items-center justify-center px-4 py-1.5 bg-white rounded-full border border-gray-200 text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+        >
+          종목 설정
+        </Link>
+      </div>
 
-      {/* 모바일 레이아웃 */}
-      <div className="flex flex-col px-5 sm:hidden">
-        <div className="grid grid-cols-2 gap-[14px]">
+      {/* 종목 빠른 기록 영역 */}
+      <div className="w-full overflow-x-auto pl-5 pr-0 pb-4 sm:px-9 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex min-w-max items-start gap-4 pr-5 sm:gap-5 sm:pr-0">
+          {/* 내 종목 카드들 */}
           {categorysData.map((cat) => {
             const imageSrc = categoryImages[cat.category as Category];
-            const imageHeight = categoryImageHeights[cat.category as Category];
-            const imageWidth = Math.round(
-              (imageSrc.width / imageSrc.height) * imageHeight,
-            );
+            const isDrafting = draft.category === cat.category;
+            const isActiveThisWeek = cat.weeklyCount > 0;
+            const ringClass = isDrafting
+              ? "from-[#56341A] via-[#C76B22] to-[#F3BA6A]"
+              : isActiveThisWeek
+                ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
+                : "from-[#8A94A3] to-[#E2E8F0]";
+            const badgeLabel = isActiveThisWeek || isDrafting
+              ? `🔥 ${Math.max(cat.count, cat.weeklyCount, 1)}`
+              : "New";
             return (
               <Link
                 key={cat.category}
                 href="/post/create"
                 onClick={() => handleCategoryClick(cat)}
+                className="flex flex-col items-center gap-2.5 group cursor-pointer w-[76px] sm:w-[92px]"
               >
                 <div
-                  className="h-[164px] bg-white border border-[#F3F4F6]
-                  rounded-[16px] shadow-[4px_4px_10px_rgba(51,38,174,0.04)]
-                  flex flex-col items-center pt-[27px]
-                  active:shadow-[4px_4px_10px_rgba(51,38,174,0.12)]
-                  transition-all duration-200"
+                  className={`relative flex items-center justify-center w-[76px] h-[76px] sm:w-[92px] sm:h-[92px] rounded-full bg-gradient-to-br ${ringClass} p-[2.5px] group-hover:scale-105 group-active:scale-95 transition-transform duration-300 shadow-[0_10px_24px_rgba(0,0,0,0.10)]`}
                 >
-                  <div className="h-[44px] flex items-end justify-center">
+                  <div
+                    className={`absolute left-1/2 bottom-0 z-20 -translate-x-1/2 translate-y-[24%] whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-extrabold leading-none shadow-md ring-2 ring-white sm:px-3.5 sm:py-1.5 sm:text-[15px] ${
+                      isActiveThisWeek || isDrafting
+                        ? "bg-[#FFF2E8] text-[#C75B12]"
+                        : "bg-[#F6F7F9] text-[#7C8696]"
+                    }`}
+                  >
+                    {badgeLabel}
+                  </div>
+
+                  <div className="relative z-10 flex items-center justify-center w-full h-full bg-[#FCFCFA] rounded-full p-2.5 sm:p-3 shadow-inner">
                     {imageSrc && (
                       <Image
                         src={imageSrc}
                         alt={cat.category}
-                        width={imageWidth}
-                        height={imageHeight}
-                        className="object-contain"
-                        style={{
-                          height: Math.min(imageHeight, 44),
-                          width: "auto",
-                        }}
+                        width={60}
+                        height={60}
+                        className="object-contain w-full h-full drop-shadow-sm"
                       />
                     )}
                   </div>
-                  <span className="font-medium text-[17px] leading-[20px] text-black mt-[12px]">
+
+                  <div className="absolute right-[2px] top-[2px] z-20 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#1F1A14] text-white shadow-md ring-2 ring-white transition-colors duration-300 group-hover:bg-[#D96B2B] sm:h-6 sm:w-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2.5}
+                      stroke="currentColor"
+                      className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4.5v15m7.5-7.5h-15"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center">
+                  <span className="w-full truncate text-[13px] sm:text-[14px] font-semibold text-gray-800 leading-tight text-center">
                     {cat.category}
                   </span>
-                  <div
-                    className={`w-full px-[19px] mt-auto pb-[4px] ${inter.className}`}
-                  >
-                    <p className="font-medium text-[17px] leading-[22px] text-[#1C2A53]">
-                      {cat.count > 0
-                        ? `${cat.count}번째 이야기🔥`
-                        : `새로운 이야기`}
-                    </p>
-                    <p className="font-medium text-[13px] leading-[22px] text-[#8E95A9]">
-                      {`${cat.charCount}자 기록`}
-                    </p>
-                  </div>
                 </div>
               </Link>
             );
           })}
-        </div>
-        <Link
-          href="/categories"
-          className="flex items-center justify-center
-          w-[192px] h-[35px] mt-5 bg-white rounded-[20px] border border-[#D9D9D9]
-          shadow-[4px_4px_10px_rgba(51,38,174,0.04)]
-          font-medium text-[18px] leading-[21px] text-[#412A2A]"
-        >
-          새로운 종목 추가
-        </Link>
-      </div>
-
-      {/* PC 레이아웃 */}
-      <div className="hidden sm:flex sm:flex-col sm:px-5 sm:mt-[36px]">
-        <div className="w-[768px]">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-[26px] font-semibold leading-[31px] text-black">
-              운동 일지 작성하기
-            </h1>
-            <Link
-              href="/categories"
-              className="flex items-center justify-center
-            w-[192px] h-[35px] bg-white rounded-[20px] border border-[#D9D9D9]
-            font-medium text-[18px] leading-[21px] text-[#412A2A]
-            hover:bg-[#F3F4F6] transition-colors"
-            >
-              새로운 종목 추가
-            </Link>
-          </div>
-          <div className="flex flex-wrap gap-[12px]">
-            {categorysData.map((cat) => {
-              const imageSrc = categoryImages[cat.category as Category];
-              return (
-                <Link
-                  key={cat.category}
-                  href="/post/create"
-                  onClick={() => handleCategoryClick(cat)}
-                >
-                  <div
-                    className={`w-[248px] h-[311px] bg-white border border-[#F3F4F6]
-                  rounded-[16px] shadow-[0px_4px_32px_rgba(51,38,174,0.04)]
-                  flex flex-col cursor-pointer
-                  hover:shadow-[0px_8px_40px_rgba(51,38,174,0.12)] hover:-translate-y-1
-                  transition-all duration-200 ${inter.className}`}
-                  >
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                      {imageSrc && (
-                        <Image
-                          src={imageSrc}
-                          alt={cat.category}
-                          width={76}
-                          height={69}
-                          className="w-[76px] h-[69px] object-contain"
-                        />
-                      )}
-                      <span className="font-bold text-[20px] leading-[30px] text-[#1C2A53] mt-3">
-                        {cat.category}
-                      </span>
-                    </div>
-
-                    <div className="px-5 pb-[28px]">
-                      <p className="font-medium text-[21px] leading-[22px] text-[#1C2A53]">
-                        {cat.count > 0
-                          ? `${cat.count}번째 이야기`
-                          : `새로운 이야기`}
-                      </p>
-                      <p className="font-medium text-[16px] leading-[22px] text-[#8E95A9] mt-[7px]">
-                        {`${cat.charCount}자 기록`}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
         </div>
       </div>
     </div>

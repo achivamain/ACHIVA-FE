@@ -1,5 +1,7 @@
 import Logout from "@/components/Logout";
+import { Category } from "@/types/Categories";
 import { MyCategorys } from "@/features/home/MyCategorys";
+import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
@@ -16,12 +18,13 @@ export default async function MobileHomePageRoute({
 
   const { nickName } = await params;
 
+  const user = await getMe(token);
+  if (!(user.nickName === decodeURIComponent(nickName))) {
+    redirect(`/${nickName}`);
+  }
+
   try {
-    const user = await getMe(token);
-    if (!(user.nickName === decodeURIComponent(nickName))) {
-      redirect(`/${nickName}`);
-    }
-    const { categoryCounts, categoryCharCounts } = await getHomeData(
+    const { categoryCounts, weeklyCategoryCounts, categoryCharCounts } = await getHomeData(
       user.id,
       token,
     );
@@ -30,7 +33,14 @@ export default async function MobileHomePageRoute({
         <MyCategorys
           myCategories={user.categories}
           categoryCounts={categoryCounts}
+          weeklyCategoryCounts={weeklyCategoryCounts}
           categoryCharCounts={categoryCharCounts}
+        />
+        <div className="h-8" />
+        <HomeWeeklyPlanner
+          userId={user.id}
+          categories={user.categories as Category[]}
+          categoryCounts={categoryCounts}
         />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>
