@@ -1,6 +1,8 @@
 import Banner from "@/features/event/Banner";
+import { Category } from "@/types/Categories";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
+import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
@@ -26,7 +28,7 @@ export default async function HomePage({
   }
 
   try {
-    const { categoryCounts, categoryCharCounts } = await getHomeData(
+    const { categoryCounts, weeklyCategoryCounts, categoryCharCounts } = await getHomeData(
       user.id,
       token,
     );
@@ -47,7 +49,14 @@ export default async function HomePage({
               <MyCategorys
                 myCategories={user.categories}
                 categoryCounts={categoryCounts}
+                weeklyCategoryCounts={weeklyCategoryCounts}
                 categoryCharCounts={categoryCharCounts}
+              />
+              <div className="h-8"></div>
+              <HomeWeeklyPlanner
+                userId={user.id}
+                categories={user.categories as Category[]}
+                categoryCounts={categoryCounts}
               />
               <div className="h-10"></div>
               {/* 나의 기록 보관소 */}
