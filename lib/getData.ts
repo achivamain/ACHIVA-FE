@@ -156,6 +156,30 @@ export async function getHomeData(userId: string, token: string) {
     return categoryCounts as CategoryCount[];
   }
 
+  async function getWeeklyPostCategory() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/weekly-count-by-category?memberId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Error in fetch weekly post counts of categories: ", errorData);
+      throw new Error(errorData.error || "서버 오류");
+    }
+    const { data } = await res.json();
+    if (!data) {
+      throw new Error("Invalid weekly post counts of categories data");
+    }
+    const { categoryCounts } = data;
+    return categoryCounts as CategoryCount[];
+  }
+
   // 카테고리별 글자수 받아오기
   async function getCategorysCharCount() {
     const res = await fetch(
@@ -184,9 +208,9 @@ export async function getHomeData(userId: string, token: string) {
     return categoryCharacterCounts as CategoryCharCount[];
   }
 
-  const [categoryCounts, mySummaryData, categoryCharCounts] = await Promise.all(
-    [getPostCategory(), getSummaryData(token), getCategorysCharCount()],
+  const [categoryCounts, weeklyCategoryCounts, mySummaryData, categoryCharCounts] = await Promise.all(
+    [getPostCategory(), getWeeklyPostCategory(), getSummaryData(token), getCategorysCharCount()],
   );
 
-  return { categoryCounts, mySummaryData, categoryCharCounts };
+  return { categoryCounts, weeklyCategoryCounts, mySummaryData, categoryCharCounts };
 }
