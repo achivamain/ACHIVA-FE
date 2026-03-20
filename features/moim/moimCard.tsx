@@ -10,11 +10,12 @@ export function OfficialChallengeCard({ moim, onClick }: MoimCardProps) {
   return (
     <div
       onClick={onClick}
-      className="snap-center relative min-w-[280px] w-[280px] h-[160px] rounded-2xl overflow-hidden shadow-md shrink-0 cursor-pointer group"
+      className="relative min-w-[280px] w-[280px] h-[160px] rounded-2xl overflow-hidden shadow-md shrink-0 cursor-pointer group"
     >
       <img
         src="https://images.unsplash.com/photo-1606335543042-57c525922933?q=80&w=600&auto=format&fit=crop"
         alt={moim.name}
+        draggable={false}
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
 
@@ -49,7 +50,7 @@ export function MyCrewCard({ moim, onClick }: MoimCardProps) {
   return (
     <div
       onClick={onClick}
-      className="snap-center relative min-w-[280px] w-[280px] h-[160px] rounded-2xl overflow-hidden shadow-md shrink-0 cursor-pointer group"
+      className="relative min-w-[280px] w-[280px] h-[160px] rounded-2xl overflow-hidden shadow-md shrink-0 cursor-pointer group"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-500 p-5 flex flex-col">
         <div className="flex items-center gap-1.5 mb-1.5">

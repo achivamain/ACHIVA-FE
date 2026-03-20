@@ -17,8 +17,20 @@ export default function MoimExplorePage() {
   const {
     scrollRef: categoryScrollRef,
     isDragging: isCategoryDragging,
-    onMouseDown: handleCategoryMouseDown,
-    shouldSuppressClick,
+    dragProps: categoryDragProps,
+    shouldSuppressClick: shouldSuppressCategoryClick,
+  } = useDragScroll<HTMLDivElement>();
+  const {
+    scrollRef: officialMoimsScrollRef,
+    isDragging: isOfficialMoimsDragging,
+    dragProps: officialMoimsDragProps,
+    shouldSuppressClick: shouldSuppressOfficialMoimClick,
+  } = useDragScroll<HTMLDivElement>();
+  const {
+    scrollRef: myMoimsScrollRef,
+    isDragging: isMyMoimsDragging,
+    dragProps: myMoimsDragProps,
+    shouldSuppressClick: shouldSuppressMyMoimClick,
   } = useDragScroll<HTMLDivElement>();
 
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
@@ -61,8 +73,18 @@ export default function MoimExplorePage() {
   };
 
   const handleCategoryClick = (cat: Category) => {
-    if (shouldSuppressClick()) return;
+    if (shouldSuppressCategoryClick()) return;
     toggleCategory(cat);
+  };
+
+  const handleOfficialMoimClick = (moimId: number) => {
+    if (shouldSuppressOfficialMoimClick()) return;
+    router.push(`/moim/${moimId}`);
+  };
+
+  const handleMyMoimClick = (moimId: number) => {
+    if (shouldSuppressMyMoimClick()) return;
+    router.push(`/moim/${moimId}`);
   };
 
   const { data: officialMoimsData } = useQuery({
@@ -218,12 +240,18 @@ export default function MoimExplorePage() {
                     </span>
                   </h2>
                 </div>
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 snap-x">
+                <div
+                  ref={officialMoimsScrollRef}
+                  {...officialMoimsDragProps}
+                  className={`flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 select-none ${
+                    isOfficialMoimsDragging ? "cursor-grabbing" : "cursor-grab"
+                  }`}
+                >
                   {officialMoims.map((moim) => (
                     <OfficialChallengeCard
                       key={moim.id}
                       moim={moim}
-                      onClick={() => router.push(`/moim/${moim.id}`)}
+                      onClick={() => handleOfficialMoimClick(moim.id)}
                     />
                   ))}
                 </div>
@@ -263,12 +291,18 @@ export default function MoimExplorePage() {
                 </div>
 
                 {myMoims.length > 0 ? (
-                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 snap-x">
+                  <div
+                    ref={myMoimsScrollRef}
+                    {...myMoimsDragProps}
+                    className={`flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-5 px-5 select-none ${
+                      isMyMoimsDragging ? "cursor-grabbing" : "cursor-grab"
+                    }`}
+                  >
                     {myMoims.map((moim) => (
                       <MyCrewCard
                         key={moim.id}
                         moim={moim}
-                        onClick={() => router.push(`/moim/${moim.id}`)}
+                        onClick={() => handleMyMoimClick(moim.id)}
                       />
                     ))}
                   </div>
@@ -317,7 +351,7 @@ export default function MoimExplorePage() {
 
                 <div
                   ref={categoryScrollRef}
-                  onMouseDown={handleCategoryMouseDown}
+                  {...categoryDragProps}
                   className={`flex gap-2 overflow-x-auto pb-2 scrollbar-hide select-none ${
                     isCategoryDragging ? "cursor-grabbing" : "cursor-grab"
                   }`}

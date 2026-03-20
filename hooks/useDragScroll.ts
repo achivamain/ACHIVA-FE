@@ -10,8 +10,10 @@ export default function useDragScroll<T extends HTMLElement>({
   dragThreshold = 4,
 }: UseDragScrollOptions = {}) {
   const scrollRef = useRef<T | null>(null);
-  const dragStateRef = useRef({
-    isDragging: false,
+  const dragStateRef = useRef<{
+    startX: number;
+    scrollLeft: number;
+  }>({
     startX: 0,
     scrollLeft: 0,
   });
@@ -19,46 +21,41 @@ export default function useDragScroll<T extends HTMLElement>({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
+    if (!isDragging) return;
+
     const handleMouseMove = (event: MouseEvent) => {
       const container = scrollRef.current;
-      const dragState = dragStateRef.current;
+      if (!container) return;
 
-      if (!container || !dragState.isDragging) return;
-
-      const deltaX = event.clientX - dragState.startX;
+      const deltaX = event.clientX - dragStateRef.current.startX;
 
       if (Math.abs(deltaX) > dragThreshold) {
         suppressClickRef.current = true;
       }
 
-      container.scrollLeft = dragState.scrollLeft - deltaX;
+      container.scrollLeft = dragStateRef.current.scrollLeft - deltaX;
     };
 
     const stopDragging = () => {
-      if (!dragStateRef.current.isDragging) return;
-
-      dragStateRef.current.isDragging = false;
       setIsDragging(false);
-
       window.setTimeout(() => {
         suppressClickRef.current = false;
       }, 0);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", stopDragging);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", stopDragging);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", stopDragging);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", stopDragging);
     };
-  }, [dragThreshold]);
+  }, [dragThreshold, isDragging]);
 
   const handleMouseDown = (event: React.MouseEvent<T>) => {
     if (event.button !== 0 || !scrollRef.current) return;
 
     dragStateRef.current = {
-      isDragging: true,
       startX: event.clientX,
       scrollLeft: scrollRef.current.scrollLeft,
     };
@@ -72,7 +69,9 @@ export default function useDragScroll<T extends HTMLElement>({
   return {
     scrollRef,
     isDragging,
-    onMouseDown: handleMouseDown,
+    dragProps: {
+      onMouseDown: handleMouseDown,
+    },
     shouldSuppressClick,
   };
 }

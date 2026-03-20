@@ -39,12 +39,12 @@ export default function MoimDetailPage() {
   const [editTarget, setEditTarget] = useState(100);
   const [editPokeDays, setEditPokeDays] = useState(5);
 
-  const { data: moimDetail, isLoading } = useQuery({
+  const { data: moimDetail, isLoading } = useQuery<Moim>({
     queryKey: ["moimDetail", id],
     queryFn: async () => {
       const res = await fetch(`/api/moim/${id}`);
       if (!res.ok) throw new Error("Failed to fetch moim detail");
-      return (await res.json()).data;
+      return (await res.json()).data as Moim;
     },
   });
 
@@ -108,12 +108,16 @@ export default function MoimDetailPage() {
 
   const joinMoimMutation = useMutation({
     mutationFn: async (password?: string) => {
+      if (moimDetail?.memberCount === moimDetail?.maxMember)
+        throw new Error("최대 인원이 초과되어 가입할 수 없습니다.");
+
       const res = await fetch(`/api/moim/${id}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: password ? JSON.stringify(password) : undefined,
       });
-      if (!res.ok) throw new Error("가입 실패");
+      if (res.status === 401) throw new Error("비밀번호가 다릅니다.");
+      else if (!res.ok) throw new Error("모임 가입 중 오류가 발생했습니다.");
       return res.json();
     },
     onSuccess: () => {
@@ -121,8 +125,8 @@ export default function MoimDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
       queryClient.invalidateQueries({ queryKey: ["myMoims"] });
     },
-    onError: () => {
-      alert("가입 중 오류가 발생했습니다.");
+    onError: (e: Error) => {
+      alert(e.message);
     },
   });
 
@@ -162,7 +166,7 @@ export default function MoimDetailPage() {
   );
   const isSoloLeader = isLeader && moimDetail.memberCount === 1;
 
-  // 이거 하드코딩된 거 같은데 나중에 체크 필요 
+  // 이거 하드코딩된 거 같은데 나중에 체크 필요
   const achieverCount: number =
     moimDetail.members?.filter((m: any) => m.weeklyStreak >= 3).length || 0;
   const progressPercentage = Math.min(
