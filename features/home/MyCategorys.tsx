@@ -7,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Category } from "@/types/Categories";
 
+import LiveActivityTicker from "@/features/home/LiveActivityTicker";
+
 export function MyCategorys({
   myCategories,
   categoryCounts,
@@ -47,7 +49,7 @@ export function MyCategorys({
   };
 
   return (
-    <div className="flex flex-col w-full pb-8 sm:pb-12 overflow-hidden">
+    <div className="flex flex-col w-full pb-0 overflow-hidden">
       {/* 상단 타이틀 구역 */}
       <div className="flex items-center justify-between px-5 sm:px-9 mt-8 sm:mt-12 mb-6">
         <h1 className="text-[20px] sm:text-[24px] font-bold leading-[31px] text-black tracking-tight">
@@ -68,14 +70,15 @@ export function MyCategorys({
           {categorysData.map((cat) => {
             const imageSrc = categoryImages[cat.category as Category];
             const isDrafting = draft.category === cat.category;
+            const hasAnyPost = cat.count > 0;
             const isActiveThisWeek = cat.weeklyCount > 0;
             const ringClass = isDrafting
               ? "from-[#56341A] via-[#C76B22] to-[#F3BA6A]"
-              : isActiveThisWeek
+              : hasAnyPost
                 ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
                 : "from-[#8A94A3] to-[#E2E8F0]";
-            const badgeLabel = isActiveThisWeek || isDrafting
-              ? `🔥 ${Math.max(cat.count, cat.weeklyCount, 1)}`
+            const badgeLabel = hasAnyPost || isDrafting
+              ? `🔥 ${Math.max(cat.count, 1)}`
               : "New";
             return (
               <Link
@@ -108,23 +111,6 @@ export function MyCategorys({
                       />
                     )}
                   </div>
-
-                  <div className="absolute right-[2px] top-[2px] z-20 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-[#1F1A14] text-white shadow-md ring-2 ring-white transition-colors duration-300 group-hover:bg-[#D96B2B] sm:h-6 sm:w-6">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2.5}
-                      stroke="currentColor"
-                      className="h-3 w-3 sm:h-3.5 sm:w-3.5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 4.5v15m7.5-7.5h-15"
-                      />
-                    </svg>
-                  </div>
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -136,6 +122,10 @@ export function MyCategorys({
             );
           })}
         </div>
+      </div>
+      {/* 전광판: 카테고리 라벨 바로 아래 */}
+      <div className="mt-2">
+        <LiveActivityTicker />
       </div>
     </div>
   );
