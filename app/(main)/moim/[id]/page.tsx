@@ -37,7 +37,7 @@ export default function MoimDetailPage() {
   const { data: session } = useSession();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
   const [editName, setEditName] = useState("");
-  const [editMaxMember, setEditMaxMember] = useState(10);
+  const [editMaxMember, setEditMaxMember] = useState("10");
   const [editIsPrivate, setEditIsPrivate] = useState(false);
   const [editPassword, setEditPassword] = useState("");
 
@@ -199,6 +199,16 @@ export default function MoimDetailPage() {
       ? (achieverCount / moimDetail.memberCount) * 100
       : 0,
   );
+  const parsedEditMaxMember = Number(editMaxMember);
+  const isMaxMemberInvalid =
+    !editMaxMember.trim() ||
+    !Number.isInteger(parsedEditMaxMember) ||
+    parsedEditMaxMember < moimDetail.memberCount;
+  const isPrivatePasswordInvalid = editIsPrivate && !editPassword.trim();
+  const isUpdateDisabled =
+    updateSettingsMutation.isPending ||
+    isMaxMemberInvalid ||
+    isPrivatePasswordInvalid;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 pb-20 lg:pb-0">
@@ -268,7 +278,7 @@ export default function MoimDetailPage() {
               onClick={() => {
                 if (isLeader) {
                   setEditName(moimDetail.name || "");
-                  setEditMaxMember(moimDetail.maxMember || 10);
+                  setEditMaxMember(String(moimDetail.maxMember || 10));
                   setEditIsPrivate(moimDetail.isPrivate || false);
                   setEditPassword(""); // 비밀번호는 초기화해 둠
                 }
@@ -640,10 +650,7 @@ export default function MoimDetailPage() {
                     type="number"
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
                     value={editMaxMember}
-                    onChange={(e) => setEditMaxMember(Number(e.target.value))}
-                    min={
-                      moimDetail.memberCount > 0 ? moimDetail.memberCount : 2
-                    }
+                    onChange={(e) => setEditMaxMember(e.target.value)}
                   />
                   <p className="text-xs text-gray-400 mt-1">
                     현재 모임 인원({moimDetail.memberCount}명)보다 작게 설정할
@@ -670,17 +677,17 @@ export default function MoimDetailPage() {
                   {editIsPrivate && (
                     <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
                       <label className="block text-sm font-bold text-gray-700 mb-1">
-                        초대 비밀번호 변경 (선택)
+                        초대 비밀번호
                       </label>
                       <input
                         type="password"
                         className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
                         value={editPassword}
                         onChange={(e) => setEditPassword(e.target.value)}
-                        placeholder="새 비밀번호를 입력"
+                        placeholder="비밀번호를 입력하세요"
                       />
                       <p className="text-xs text-theme mt-1.5 font-medium">
-                        * 비워두면 기존 비밀번호가 유지됩니다.
+                        * 비공개 모임은 비밀번호 입력이 필요합니다.
                       </p>
                     </div>
                   )}
@@ -770,12 +777,12 @@ export default function MoimDetailPage() {
                   onClick={() =>
                     updateSettingsMutation.mutate({
                       name: editName,
-                      maxMember: editMaxMember,
+                      maxMember: parsedEditMaxMember,
                       isPrivate: editIsPrivate,
                       ...(editPassword && { password: editPassword }),
                     })
                   }
-                  disabled={updateSettingsMutation.isPending}
+                  disabled={isUpdateDisabled}
                 >
                   {updateSettingsMutation.isPending ? "저장 중..." : "저장"}
                 </button>
