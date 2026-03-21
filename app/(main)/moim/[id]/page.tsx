@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { CloseIcon } from "@/components/Icons";
 import type { Moim } from "@/types/moim";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { parseISO, isSameWeek, subWeeks } from "date-fns";
 import FeedPost from "@/features/feed/FeedPost";
 import type { PostRes } from "@/types/Post";
 
@@ -34,10 +35,11 @@ export default function MoimDetailPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
-  const [nudgedMembers, setNudgedMembers] = useState<Set<string>>(new Set());
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState(100);
-  const [editPokeDays, setEditPokeDays] = useState(5);
+  const [editName, setEditName] = useState("");
+  const [editMaxMember, setEditMaxMember] = useState(10);
+  const [editIsPrivate, setEditIsPrivate] = useState(false);
+  const [editPassword, setEditPassword] = useState("");
 
   const { data: moimDetail, isLoading } = useQuery<Moim>({
     queryKey: ["moimDetail", id],
@@ -47,15 +49,6 @@ export default function MoimDetailPage() {
       return (await res.json()).data as Moim;
     },
   });
-
-  const handleNudge = (memberId: string) => {
-    setNudgedMembers((prev) => {
-      const newSet = new Set(prev);
-      newSet.add(memberId);
-      return newSet;
-    });
-    // 실제로는 여기에 푸시 알림 API 호출이 들어감
-  };
 
   const { data: feedData, isLoading: isFeedLoading } = useQuery({
     queryKey: ["moimFeed", id],
@@ -67,7 +60,7 @@ export default function MoimDetailPage() {
   });
 
   const updateSettingsMutation = useMutation({
-    mutationFn: async (payload: { targetAmount: number; pokeDays: number }) => {
+    mutationFn: async (payload: { name: string; maxMember: number; isPrivate: boolean; password?: string }) => {
       const res = await fetch(`/api/moim/${id}/settings`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -83,6 +76,23 @@ export default function MoimDetailPage() {
     },
     onError: () => {
       alert("설정 변경 중 오류가 발생했습니다.");
+    },
+  });
+
+  const kickMemberMutation = useMutation({
+    mutationFn: async (memberId: string) => {
+      const res = await fetch(`/api/moim/${id}/members/${memberId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("내보내기 실패");
+      return res.json();
+    },
+    onSuccess: () => {
+      alert("멤버를 내보냈습니다.");
+      queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
+    },
+    onError: () => {
+      alert("멤버 내보내기 중 오류가 발생했습니다.");
     },
   });
 
@@ -243,8 +253,10 @@ export default function MoimDetailPage() {
             <button
               onClick={() => {
                 if (isLeader) {
-                  setEditTarget(moimDetail.groupGoalTarget || 100);
-                  setEditPokeDays(moimDetail.pokeDays || 5);
+                  setEditName(moimDetail.name || "");
+                  setEditMaxMember(moimDetail.maxMember || 10);
+                  setEditIsPrivate(moimDetail.isPrivate || false);
+                  setEditPassword(""); // 비밀번호는 초기화해 둠
                 }
                 setIsSettingModalOpen(true);
               }}
@@ -276,69 +288,107 @@ export default function MoimDetailPage() {
 
       <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto xl:max-w-4xl 2xl:max-w-5xl px-0 sm:px-4 py-0 sm:py-6 space-y-2 sm:space-y-6">
         {/* 모임 기본 정보 카드 */}
-        <section className="bg-white p-5 sm:rounded-2xl shadow-sm border-y sm:border border-gray-100">
+        <section className="bg-white p-6 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100 flex flex-col justify-center">
           <div className="flex gap-2 flex-wrap mb-3">
             {moimDetail.categories.map((cat: string) => (
               <span
                 key={cat}
-                className="flex items-center gap-1 text-xs bg-theme/10 text-theme px-2.5 py-1 rounded-full font-bold"
+                className="flex items-center gap-1 text-xs bg-theme/10 text-theme px-3 py-1.5 rounded-full font-bold"
               >
                 <span>{getCategoryIcon(cat)}</span> {cat}
               </span>
             ))}
             {moimDetail.isOfficial && (
-              <span className="text-xs bg-black text-white px-2.5 py-1 rounded-full font-bold">
+              <span className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold shadow-sm">
                 OFFICIAL
               </span>
             )}
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">
             {moimDetail.name}
           </h2>
-          <p className="text-gray-600 mb-4">{moimDetail.description}</p>
-          <div className="flex items-center gap-4 text-sm font-medium text-gray-500 bg-gray-50 p-3 rounded-xl">
-            <div className="flex items-center gap-1.5">
-              <span className="text-lg">👥</span>
-              {moimDetail.memberCount}
-              {!moimDetail.isOfficial && ` / ${moimDetail.maxMember}`}명
-            </div>
-          </div>
+          <p className="text-gray-600 font-medium leading-relaxed">{moimDetail.description}</p>
         </section>
 
-        {/* 킬러 피처 1: 주간 활동 비교 (주석 처리하여 임시 숨김) */}
-        {/*
-        <section className="bg-white p-5 sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-theme/10 to-transparent rounded-bl-full pointer-events-none" />
-          
-          <div className="flex items-start justify-between mb-2">
-             <div className="z-10 relative">
-               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                 🔥 주간 활동 리포트
-               </h3>
-               <p className="text-sm text-gray-600 mt-2 font-medium">
-                 이번 주는 저번 주 이 시간보다 <span className="text-theme font-bold text-base bg-theme/10 px-1.5 py-0.5 rounded mx-0.5">{feedData?.content?.length || 0}번</span> 더 운동했어요!
-               </p>
-               <p className="text-xs text-gray-400 mt-1">저번 주 대비 상승세를 타볼까요?</p>
-             </div>
-             <div className="bg-orange-50 text-theme text-xs font-bold px-3 py-1.5 rounded-full z-10 shrink-0">
-               활동 비교
-             </div>
-          </div>
-        </section>
-        */}
+        {/* 킬러 피처: 모임 열정 온도 */}
+        <section className="bg-white p-5 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100">
+          <h3 className="text-base font-bold text-gray-900 flex items-center gap-1.5 mb-2">
+            🔥 우리 모임 열정 온도
+          </h3>
+          {(() => {
+            const now = new Date();
+            const thisWeekCount = feedData?.content?.filter((post: PostRes) => isSameWeek(parseISO(post.createdAt), now, { weekStartsOn: 1 })).length || 0;
+            const lastWeekCount = feedData?.content?.filter((post: PostRes) => isSameWeek(parseISO(post.createdAt), subWeeks(now, 1), { weekStartsOn: 1 })).length || 0;
+            
+            // 온도 계산: 기본 36.5도
+            // 이번 주 인증 1회당 +0.8도 상승
+            // 지난 주 인증 횟수 대비 이번 주 인증이 부족하면 그 차이만큼 패널티 (-0.5도)
+            const increase = thisWeekCount * 0.8;
+            const penalty = Math.max(0, lastWeekCount - thisWeekCount) * 0.5;
+            const rawTemp = 36.5 + increase - penalty;
+            const passionTemp = Math.max(36.5, Math.min(100, rawTemp)); 
 
-        {/* 킬러 피처 2: 멤버 현황 & 넛지 시스템 */}
-        <section className="bg-white p-5 sm:rounded-2xl shadow-sm border-y sm:border border-gray-100">
-          <div className="mb-5">
+            // 모임 특화 상태 매핑
+            const getStatus = (temp: number) => {
+              if (temp < 40) return { label: "🌱 작은 불씨 지피기", gradient: "from-gray-300 to-gray-400", bg: "bg-gray-50", text: "text-gray-600" };
+              if (temp < 50) return { label: "✨ 온기가 도는 우리 모임", gradient: "from-yellow-300 to-orange-400", bg: "bg-orange-50", text: "text-orange-600" };
+              if (temp < 65) return { label: "🤝 함께 뛰는 즐거움", gradient: "from-orange-400 to-red-400", bg: "bg-red-50", text: "text-red-500" };
+              if (temp < 80) return { label: "⚡ 뜨거운 시너지 폭발!", gradient: "from-red-400 to-rose-500", bg: "bg-rose-50", text: "text-rose-600" };
+              if (temp < 90) return { label: "🔥 멈추지 않는 열정 크루", gradient: "from-rose-500 to-purple-500", bg: "bg-purple-50", text: "text-purple-600" };
+              return { label: "🌋 완벽한 팀워크, 기적의 모임!", gradient: "from-purple-500 via-red-500 to-yellow-500", bg: "bg-gradient-to-r from-purple-50 to-red-50", text: "text-red-600" };
+            };
+
+            const statusInfo = getStatus(passionTemp);
+            
+            // 온도 바 표시는 0도 ~ 100도 구간을 0~100%로 매핑
+            const percent = passionTemp;
+
+            return (
+              <div className="flex flex-col gap-2 mt-4">
+                <div className="flex items-end justify-between px-1 mb-1">
+                  <div className={`text-sm font-bold px-3 py-1.5 rounded-full ${statusInfo.bg} ${statusInfo.text} shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-white/50`}>
+                    {statusInfo.label}
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-gray-500 mr-1.5 font-medium">이번 주 인증 {thisWeekCount}회</span>
+                    <span className="text-2xl font-black text-gray-900 tracking-tight">{passionTemp.toFixed(1)}°C</span>
+                  </div>
+                </div>
+                
+                {/* 온도바 (Progress Bar) */}
+                <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                  {/* 기본 체온 36.5도 마커 */}
+                  <div 
+                    className="absolute top-0 bottom-0 w-0.5 bg-gray-300 z-10 shadow-sm"
+                    style={{ left: `36.5%` }}
+                    title="기본 체온 (36.5°C)"
+                  />
+                  <div
+                    className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${statusInfo.gradient}`}
+                    style={{ width: `${Math.max(2, percent)}%` }} // 최소 2%는 보여서 둥근 모서리 유지
+                  />
+                </div>
+                
+                <div className="flex justify-between text-[10px] sm:text-xs text-gray-400 font-medium px-2 mt-0.5 relative">
+                  <span>0°C</span>
+                  <span className="absolute left-[36.5%] -translate-x-1/2 text-theme font-bold">36.5°C</span>
+                  <span>100°C</span>
+                </div>
+              </div>
+            );
+          })()}
+        </section>
+
+        {/* 멤버 현황 */}
+        <section className="bg-white p-6 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100">
+          <div className="mb-5 flex items-center justify-between">
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               📋 멤버 현황
             </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              최근 {moimDetail.pokeDays || 5}일 이상 인증 게시글이 없는 멤버를
-              찔러보세요!
-            </p>
+            <span className="text-xs font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">
+              총 {moimDetail.memberCount}{!moimDetail.isOfficial && ` / ${moimDetail.maxMember}`}명
+            </span>
           </div>
-
           <div className="space-y-3">
             {[...(moimDetail.members || [])]
               .sort(
@@ -346,9 +396,6 @@ export default function MoimDetailPage() {
                   (b.monthlyPosts || 0) - (a.monthlyPosts || 0),
               )
               .map((member: any, index: number) => {
-                const needsNudge =
-                  member.lastActiveDaysAgo >= (moimDetail.pokeDays || 5);
-                const isNudged = nudgedMembers.has(member.id);
                 const rank = index + 1;
 
                 return (
@@ -437,18 +484,18 @@ export default function MoimDetailPage() {
                           🔥 {member.weeklyStreak || 0}일
                         </span>
                       </div>
-
-                      {needsNudge && !member.isMe && (
+                      
+                      {isLeader && !member.isMe && (
                         <button
-                          onClick={() => handleNudge(member.id)}
-                          disabled={isNudged}
-                          className={`text-xs font-bold px-3 py-2 rounded-lg transition-colors flex items-center gap-1 shrink-0 ${
-                            isNudged
-                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                              : "bg-orange-50 text-orange-600 hover:bg-orange-100 border border-orange-200"
-                          }`}
+                          onClick={() => {
+                            if (window.confirm(`${member.name}님을 이 모임에서 내보내시겠습니까?`)) {
+                              kickMemberMutation.mutate(member.id);
+                            }
+                          }}
+                          disabled={kickMemberMutation.isPending}
+                          className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors flex items-center shrink-0 bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 ml-1"
                         >
-                          {isNudged ? "완료" : "찌르기"}
+                          내보내기
                         </button>
                       )}
                     </div>
@@ -459,7 +506,7 @@ export default function MoimDetailPage() {
         </section>
 
         {/* 하단: 모임 전용 피드 */}
-        <section className="bg-white p-5 sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 min-h-[300px]">
+        <section className="bg-white p-6 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100 min-h-[300px]">
           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             📸 이번 달 모임 인증 피드
           </h3>
@@ -501,27 +548,59 @@ export default function MoimDetailPage() {
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">
-                    월 공동 목표 개수
+                    모임 이름
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
-                    value={editTarget}
-                    onChange={(e) => setEditTarget(Number(e.target.value))}
-                    min={1}
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="모임 이름을 입력하세요"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">
-                    찌르기 기준 (미활동 일수)
+                    최대 인원 제한 (명)
                   </label>
                   <input
                     type="number"
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
-                    value={editPokeDays}
-                    onChange={(e) => setEditPokeDays(Number(e.target.value))}
-                    min={1}
+                    value={editMaxMember}
+                    onChange={(e) => setEditMaxMember(Number(e.target.value))}
+                    min={moimDetail.memberCount > 0 ? moimDetail.memberCount : 2}
                   />
+                  <p className="text-xs text-gray-400 mt-1">현재 모임 인원({moimDetail.memberCount}명)보다 작게 설정할 수 없습니다.</p>
+                </div>
+                
+                <div className="pt-2 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-3 mt-2">
+                    <label className="text-sm font-bold text-gray-700">
+                      비공개 모임 여부
+                    </label>
+                    <button
+                      type="button"
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${editIsPrivate ? 'bg-theme' : 'bg-gray-300'}`}
+                      onClick={() => setEditIsPrivate(!editIsPrivate)}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editIsPrivate ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                  </div>
+                  
+                  {editIsPrivate && (
+                    <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <label className="block text-sm font-bold text-gray-700 mb-1">
+                        초대 비밀번호 변경 (선택)
+                      </label>
+                      <input
+                        type="password"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
+                        value={editPassword}
+                        onChange={(e) => setEditPassword(e.target.value)}
+                        placeholder="새 비밀번호를 입력"
+                      />
+                      <p className="text-xs text-theme mt-1.5 font-medium">* 비워두면 기존 비밀번호가 유지됩니다.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -607,8 +686,10 @@ export default function MoimDetailPage() {
                   className="flex-1 py-3.5 bg-theme text-white font-bold rounded-xl shadow-md shadow-theme/30 disabled:opacity-50"
                   onClick={() =>
                     updateSettingsMutation.mutate({
-                      targetAmount: editTarget,
-                      pokeDays: editPokeDays,
+                      name: editName,
+                      maxMember: editMaxMember,
+                      isPrivate: editIsPrivate,
+                      ...(editPassword && { password: editPassword })
                     })
                   }
                   disabled={updateSettingsMutation.isPending}
