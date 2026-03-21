@@ -7,10 +7,18 @@ export async function DELETE(
 ) {
   const session = await auth();
   const token = session?.access_token;
+  const currentUserId = session?.user?.id;
   const { id, memberId } = await params;
 
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
+  }
+
+  if (currentUserId && memberId === currentUserId) {
+    return NextResponse.json(
+      { error: "본인은 내보낼 수 없습니다." },
+      { status: 400 },
+    );
   }
 
   try {
