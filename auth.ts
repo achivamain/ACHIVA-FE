@@ -75,8 +75,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           };
         } catch (error) {
           console.error("Error refreshing access_token", error);
-          token.error = "refresh_tokenError";
-          return token;
+          return {
+            ...token,
+            access_token: undefined,
+            refresh_token: undefined,
+            expires_at: 0,
+            error: "refresh_tokenError",
+          };
         }
       }
     },

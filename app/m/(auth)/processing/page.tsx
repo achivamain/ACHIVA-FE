@@ -3,30 +3,43 @@
 "use client";
 
 import Loading from "@/components/Loading";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function Page() {
+  const router = useRouter();
+
   useEffect(() => {
     async function CheckIsInit() {
-      const res = await fetch(`/api/auth/isinit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      try {
+        const res = await fetch(`/api/auth/isinit`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      // false - 신규 유저(회원가입) / true - 기존 유저(로그인)
-      const isInit = (await res.json()).data;
+        if (!res.ok) {
+          window.location.replace("/api/auth/logout");
+          return;
+        }
 
-      if (isInit) {
-        redirect("/");
-      } else {
-        redirect("/signup");
+        // false - 신규 유저(회원가입) / true - 기존 유저(로그인)
+        const isInit = (await res.json()).data;
+
+        if (isInit) {
+          router.replace("/");
+          return;
+        }
+
+        router.replace("/signup");
+      } catch {
+        window.location.replace("/api/auth/logout");
       }
     }
+
     CheckIsInit();
-  }, []);
+  }, [router]);
 
   return <Loading />;
 }

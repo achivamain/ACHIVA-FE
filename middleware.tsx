@@ -5,6 +5,7 @@ export default auth((req) => {
   const { device } = userAgent(req);
   const isMobile = device.type === "mobile" || device.type === "tablet";
   const { pathname } = req.nextUrl;
+  const authError = (req.auth as { error?: string } | null)?.error;
 
   if (
     pathname.startsWith("/api") ||
@@ -24,7 +25,7 @@ export default auth((req) => {
   ) {
     return NextResponse.next();
   }
-  const isLoggedIn = !!req.auth;
+  const isLoggedIn = !!req.auth && !authError;
 
   // -------------------------
   // 1. 로그인 안 된 유저는 "/"로 강제 리다이렉트
