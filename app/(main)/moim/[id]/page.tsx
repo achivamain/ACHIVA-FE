@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -40,6 +40,7 @@ export default function MoimDetailPage() {
   const [editMaxMember, setEditMaxMember] = useState("10");
   const [editIsPrivate, setEditIsPrivate] = useState(false);
   const [editPassword, setEditPassword] = useState("");
+  const [visibleMemberCount, setVisibleMemberCount] = useState(10);
 
   const { data: moimDetail, isLoading } = useQuery<Moim>({
     queryKey: ["moimDetail", id],
@@ -171,6 +172,10 @@ export default function MoimDetailPage() {
     },
   });
 
+  useEffect(() => {
+    setVisibleMemberCount(10);
+  }, [id]);
+
   if (isLoading) return <div className="p-10 text-center">불러오는 중...</div>;
   if (!moimDetail)
     return <div className="p-10 text-center">모임을 찾을 수 없습니다.</div>;
@@ -209,6 +214,14 @@ export default function MoimDetailPage() {
     updateSettingsMutation.isPending ||
     isMaxMemberInvalid ||
     isPrivatePasswordInvalid;
+  // 이번 주 streak -> 이번 달 post 수 순서로 정렬
+  const sortedMembers = [...(moimDetail.members || [])].sort(
+    (a: any, b: any) =>
+      (b.weeklyStreak || 0) - (a.weeklyStreak || 0) ||
+      (b.monthlyPosts || 0) - (a.monthlyPosts || 0),
+  );
+  const visibleMembers = sortedMembers.slice(0, visibleMemberCount);
+  const hasMoreMembers = sortedMembers.length > visibleMemberCount;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 pb-20 lg:pb-0">
@@ -468,125 +481,128 @@ export default function MoimDetailPage() {
             </span>
           </div>
           <div className="space-y-3">
-            {[...(moimDetail.members || [])]
-              .sort(
-                (a: any, b: any) =>
-                  (b.monthlyPosts || 0) - (a.monthlyPosts || 0),
-              )
-              .map((member: any, index: number) => {
-                const rank = index + 1;
-                const isCurrentUser =
-                  member.isMe || (currentUserId && member.id === currentUserId);
+            {visibleMembers.map((member: any, index: number) => {
+              const rank = index + 1;
+              const isCurrentUser =
+                member.isMe || (currentUserId && member.id === currentUserId);
 
-                return (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl relative overflow-hidden shadow-sm border border-gray-100 hover:border-theme/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      {/* 랭킹 뱃지 */}
-                      <div className="w-6 sm:w-8 flex justify-center shrink-0">
-                        {rank === 1 ? (
-                          <span className="text-xl sm:text-2xl" title="1위">
-                            🥇
-                          </span>
-                        ) : rank === 2 ? (
-                          <span className="text-xl sm:text-2xl" title="2위">
-                            🥈
-                          </span>
-                        ) : rank === 3 ? (
-                          <span className="text-xl sm:text-2xl" title="3위">
-                            🥉
-                          </span>
-                        ) : (
-                          <span className="text-sm sm:text-base font-black italic text-gray-400">
-                            {rank}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-lg z-10 shrink-0 overflow-hidden">
-                        {member.profileImageUrl ? (
-                          <img
-                            src={member.profileImageUrl}
-                            alt="profile"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : isCurrentUser ? (
-                          "😎"
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-5 h-5 text-gray-400"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                          {member.role === "LEADER" && (
-                            <span title="방장">👑</span>
-                          )}
-                          {member.name}
-                          {isCurrentUser && (
-                            <span className="bg-theme text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5">
-                              ME
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1 flex gap-1 flex-wrap items-center">
-                          이번 달{" "}
-                          <span className="text-gray-700 font-medium">
-                            {member.monthlyPosts}개
-                          </span>
-                          {member.lastActiveDaysAgo > 0 && (
-                            <span className="text-gray-400 ml-1 opacity-80">
-                              ({member.lastActiveDaysAgo}일 전)
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="text-xs flex flex-col items-end justify-center">
-                        <span className="text-gray-400 font-medium text-[10px] sm:text-xs">
-                          이번 주 스트릭
+              return (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl relative overflow-hidden shadow-sm border border-gray-100 hover:border-theme/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {/* 랭킹 뱃지 */}
+                    <div className="w-6 sm:w-8 flex justify-center shrink-0">
+                      {rank === 1 ? (
+                        <span className="text-xl sm:text-2xl" title="1위">
+                          🥇
                         </span>
-                        <span className="text-theme font-bold text-sm flex items-center mt-0.5">
-                          🔥 {member.weeklyStreak || 0}일
+                      ) : rank === 2 ? (
+                        <span className="text-xl sm:text-2xl" title="2위">
+                          🥈
                         </span>
-                      </div>
-
-                      {isLeader && !isCurrentUser && (
-                        <button
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `${member.name}님을 이 모임에서 내보내시겠습니까?`,
-                              )
-                            ) {
-                              kickMemberMutation.mutate(member.id);
-                            }
-                          }}
-                          disabled={kickMemberMutation.isPending}
-                          className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors flex items-center shrink-0 bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 ml-1"
-                        >
-                          내보내기
-                        </button>
+                      ) : rank === 3 ? (
+                        <span className="text-xl sm:text-2xl" title="3위">
+                          🥉
+                        </span>
+                      ) : (
+                        <span className="text-sm sm:text-base font-black italic text-gray-400">
+                          {rank}
+                        </span>
                       )}
                     </div>
+
+                    <div className="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-lg z-10 shrink-0 overflow-hidden">
+                      {member.profileImageUrl ? (
+                        <img
+                          src={member.profileImageUrl}
+                          alt="profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : isCurrentUser ? (
+                        "😎"
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-5 h-5 text-gray-400"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                        {member.role === "LEADER" && <span title="방장">👑</span>}
+                        {member.name}
+                        {isCurrentUser && (
+                          <span className="bg-theme text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5">
+                            ME
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1 flex gap-1 flex-wrap items-center">
+                        이번 달{" "}
+                        <span className="text-gray-700 font-medium">
+                          {member.monthlyPosts}개
+                        </span>
+                        {member.lastActiveDaysAgo > 0 && (
+                          <span className="text-gray-400 ml-1 opacity-80">
+                            ({member.lastActiveDaysAgo}일 전)
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                );
-              })}
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-xs flex flex-col items-end justify-center">
+                      <span className="text-gray-400 font-medium text-[10px] sm:text-xs">
+                        이번 주 스트릭
+                      </span>
+                      <span className="text-theme font-bold text-sm flex items-center mt-0.5">
+                        🔥 {member.weeklyStreak || 0}일
+                      </span>
+                    </div>
+
+                    {isLeader && !isCurrentUser && (
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `${member.name}님을 이 모임에서 내보내시겠습니까?`,
+                            )
+                          ) {
+                            kickMemberMutation.mutate(member.id);
+                          }
+                        }}
+                        disabled={kickMemberMutation.isPending}
+                        className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors flex items-center shrink-0 bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 ml-1"
+                      >
+                        내보내기
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
+          {hasMoreMembers && (
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={() => setVisibleMemberCount((prev) => prev + 10)}
+                className="text-sm font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                더 보기
+              </button>
+            </div>
+          )}
         </section>
 
         {/* 하단: 모임 전용 피드 */}

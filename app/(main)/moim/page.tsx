@@ -416,7 +416,7 @@ export default function MoimExplorePage() {
                         <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
                           👑 방장
                         </span>
-                        {moim.leaderName}
+                        {moim.isOfficial ? "나오운" : moim.leaderName}
                       </div>
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {moim.description}
