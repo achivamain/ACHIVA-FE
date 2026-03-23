@@ -367,12 +367,10 @@ export default function MoimDetailPage() {
                 }),
               ).length || 0;
 
-            // 온도 계산: 기본 36.5도
-            // 이번 주 인증 1회당 +0.8도 상승
-            // 지난 주 인증 횟수 대비 이번 주 인증이 부족하면 그 차이만큼 패널티 (-0.5도)
+            // 기본 36.5, 게시글당 +0.8, max 100, 패널티는 임시 비활성
             const increase = thisWeekCount * 0.8;
-            const penalty = Math.max(0, lastWeekCount - thisWeekCount) * 0.5;
-            const rawTemp = 36.5 + increase - penalty;
+            // const penalty = Math.max(0, lastWeekCount - thisWeekCount) * 0.5;
+            const rawTemp = 36.5 + increase;
             const passionTemp = Math.max(36.5, Math.min(100, rawTemp));
 
             // 모임 특화 상태 매핑
@@ -539,7 +537,9 @@ export default function MoimDetailPage() {
                     </div>
                     <div>
                       <div className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                        {member.role === "LEADER" && <span title="방장">👑</span>}
+                        {member.role === "LEADER" && (
+                          <span title="방장">👑</span>
+                        )}
                         {member.name}
                         {isCurrentUser && (
                           <span className="bg-theme text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5">
