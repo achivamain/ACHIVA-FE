@@ -30,10 +30,13 @@ export default async function HomePage({
   }
 
   try {
-    const { categoryCounts, weeklyCategoryCounts, categoryCharCounts } = await getHomeData(
-      user.id,
-      token,
-    );
+    const {
+      categoryCounts,
+      weeklyCategoryCounts,
+      categoryCharCounts,
+      totalArticleCount,
+      weeklyArticleCount,
+    } = await getHomeData(user.id, token);
 
     return (
       <div className="w-full flex-1 flex bg-[#FAFAFA]">
@@ -63,8 +66,8 @@ export default async function HomePage({
               />
               <div className="h-6"></div>
               <MyAchievementsSummary 
-                totalCount={categoryCounts.reduce((s, c) => s + c.count, 0)} 
-                thisWeekCount={weeklyCategoryCounts.reduce((s, c) => s + c.count, 0)}
+                totalCount={totalArticleCount}
+                thisWeekCount={weeklyArticleCount}
               />
               <div className="h-10"></div>
               {/* 나의 기록 보관소 */}

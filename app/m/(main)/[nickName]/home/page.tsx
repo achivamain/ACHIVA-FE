@@ -25,12 +25,14 @@ export default async function MobileHomePageRoute({
   }
 
   try {
-    const { categoryCounts, weeklyCategoryCounts, categoryCharCounts } = await getHomeData(
-      user.id,
-      token,
-    );
-    const totalCount = categoryCounts.reduce((sum, c) => sum + c.count, 0);
-    const thisWeekCount = weeklyCategoryCounts.reduce((sum, c) => sum + c.count, 0);
+    const {
+      categoryCounts,
+      weeklyCategoryCounts,
+      categoryCharCounts,
+      totalArticleCount,
+      weeklyArticleCount,
+    } = await getHomeData(user.id, token);
+
     return (
       <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
         <MyCategorys
@@ -46,7 +48,10 @@ export default async function MobileHomePageRoute({
           categoryCounts={categoryCounts}
         />
         <div className="h-6" />
-        <MyAchievementsSummary totalCount={totalCount} thisWeekCount={thisWeekCount} />
+        <MyAchievementsSummary
+          totalCount={totalArticleCount}
+          thisWeekCount={weeklyArticleCount}
+        />
         <div className="h-6" />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>
