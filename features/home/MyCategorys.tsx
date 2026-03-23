@@ -22,7 +22,6 @@ export function MyCategorys({
 }) {
   const resetPost = useDraftPostStore.use.resetPost();
   const setPost = useDraftPostStore.use.setPost();
-  const draft = useDraftPostStore.use.post();
   const categorysData = myCategories.map((cat) => {
     const countData = categoryCounts.find((i) => i.category == cat);
     const charCountData = categoryCharCounts.find((i) => i.category == cat);
@@ -30,9 +29,9 @@ export function MyCategorys({
 
     return {
       category: cat,
-      count: countData?.count ?? 0,
-      charCount: charCountData?.characterCount ?? 0,
-      weeklyCount: weeklyCountData?.count ?? 0,
+      count: Number(countData?.count ?? 0),
+      charCount: Number(charCountData?.characterCount ?? 0),
+      weeklyCount: Number(weeklyCountData?.count ?? 0),
     };
   }).sort((a, b) => {
     if (b.count !== a.count) return b.count - a.count;
@@ -69,16 +68,13 @@ export function MyCategorys({
           {/* 내 종목 카드들 */}
           {categorysData.map((cat) => {
             const imageSrc = categoryImages[cat.category as Category];
-            const isDrafting = draft.category === cat.category;
             const hasAnyPost = cat.count > 0;
             const isActiveThisWeek = cat.weeklyCount > 0;
-            const ringClass = isDrafting
-              ? "from-[#56341A] via-[#C76B22] to-[#F3BA6A]"
-              : hasAnyPost
+            const ringClass = hasAnyPost
                 ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
                 : "from-[#8A94A3] to-[#E2E8F0]";
-            const badgeLabel = hasAnyPost || isDrafting
-              ? `🔥 ${Math.max(cat.count, 1)}`
+            const badgeLabel = hasAnyPost
+              ? `🔥 ${cat.count}`
               : "New";
             return (
               <Link
@@ -92,7 +88,7 @@ export function MyCategorys({
                 >
                   <div
                     className={`absolute left-1/2 bottom-0 z-20 -translate-x-1/2 translate-y-[24%] whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-extrabold leading-none shadow-md ring-2 ring-white sm:px-3.5 sm:py-1.5 sm:text-[15px] ${
-                      isActiveThisWeek || isDrafting
+                      isActiveThisWeek
                         ? "bg-[#FFF2E8] text-[#C75B12]"
                         : "bg-[#F6F7F9] text-[#7C8696]"
                     }`}

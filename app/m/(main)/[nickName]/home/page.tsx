@@ -3,7 +3,6 @@ import { Category } from "@/types/Categories";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
-import LiveActivityTicker from "@/features/home/LiveActivityTicker";
 import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
