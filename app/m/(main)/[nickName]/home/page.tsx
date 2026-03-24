@@ -1,9 +1,7 @@
 import Logout from "@/components/Logout";
 import { Category } from "@/types/Categories";
 import { MyCategorys } from "@/features/home/MyCategorys";
-import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
-import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import AiReportWidget from "@/features/home/AiReportWidget";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
@@ -38,15 +36,9 @@ export default async function MobileHomePageRoute({
           categoryCharCounts={categoryCharCounts}
         />
         <div className="h-4" />
-        <HomeWeeklyPlanner
-          userId={user.id}
-          categories={user.categories as Category[]}
-          categoryCounts={categoryCounts}
-        />
         <div className="h-5" />
         <AiReportWidget userId={user.id} />
         <div className="h-6" />
-        <MyAchievementsSummary totalCount={totalCount} thisWeekCount={thisWeekCount} />
         <div className="h-6" />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>

@@ -130,7 +130,7 @@ export async function POST(req: Request) {
     }
 
     const aiData = await aiRes.json();
-    let content = aiData.choices[0].message.content.trim()
+    const content = aiData.choices[0].message.content.trim()
       .replace(/^```json\s*/i, "").replace(/^```/, "").replace(/```$/, "").trim();
 
     const parsed = JSON.parse(content);
