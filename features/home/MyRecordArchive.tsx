@@ -71,7 +71,7 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
       <div className="px-5">
         <div className="sm:w-[768px]">
           <h2 className="hidden sm:block text-[26px] font-semibold leading-[31px] text-black mb-4">
-            나의 기록 보관소
+            기록 보관소
           </h2>
           <p className="text-[#8E95A9] text-[15px]">
             아직 작성한 기록이 없습니다.
@@ -85,7 +85,7 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
     <div className="px-5">
       <div className="sm:w-[768px]">
         <h2 className="hidden sm:block text-[26px] font-semibold leading-[31px] text-black mb-4">
-          나의 기록 보관소
+          기록 보관소
         </h2>
         <div className="flex flex-col gap-6">
           {allPosts.map((post) => (

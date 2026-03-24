@@ -7,8 +7,8 @@ import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import AiReportWidget from "@/features/home/AiReportWidget";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
-import { notFound, redirect } from "next/navigation";
-import { getMe } from "@/lib/getUser";
+import { notFound } from "next/navigation";
+import { getUser } from "@/lib/getUser";
 
 export default async function MobileHomePageRoute({
   params,
@@ -20,10 +20,8 @@ export default async function MobileHomePageRoute({
 
   const { nickName } = await params;
 
-  const user = await getMe(token);
-  if (!(user.nickName === decodeURIComponent(nickName))) {
-    redirect(`/${nickName}`);
-  }
+  const user = await getUser(nickName, token).catch(() => null);
+  if (!user) notFound();
 
   try {
     const { categoryCounts, weeklyCategoryCounts, categoryCharCounts } = await getHomeData(
@@ -37,7 +35,6 @@ export default async function MobileHomePageRoute({
         <MyCategorys
           myCategories={user.categories}
           categoryCounts={categoryCounts}
-          weeklyCategoryCounts={weeklyCategoryCounts}
           categoryCharCounts={categoryCharCounts}
         />
         <div className="h-4" />

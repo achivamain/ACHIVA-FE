@@ -56,7 +56,7 @@ export default function AiReportWidget({ userId }: { userId: string }) {
           </div>
           <div className="text-left">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">AI 루틴 솔루션</p>
-            <h3 className="text-[17px] font-extrabold tracking-tight">나의 한달 운동 분석 리포트</h3>
+            <h3 className="text-[17px] font-extrabold tracking-tight">한달 운동 분석 리포트</h3>
           </div>
         </div>
         <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-white/10 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>

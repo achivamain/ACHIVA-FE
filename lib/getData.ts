@@ -156,37 +156,11 @@ export async function getHomeData(userId: string, token: string) {
     return categoryCounts as CategoryCount[];
   }
 
-  // 카테고리별 글자수 받아오기
-  async function getCategorysCharCount() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      console.error(
-        "Error in fetch character counts of categories: ",
-        errorData,
-      );
-      throw new Error(errorData.error || "서버 오류");
-    }
-    const { data } = await res.json();
-    if (!data) {
-      throw new Error("Invalid character counts of categories data");
-    }
-    const { categoryCharacterCounts } = data;
-    return categoryCharacterCounts as CategoryCharCount[];
-  }
+  const [categoryCounts] = await Promise.all([getPostCategory()]);
 
-  const [categoryCounts, mySummaryData, categoryCharCounts] = await Promise.all(
-    [getPostCategory(), getSummaryData(token), getCategorysCharCount()],
-  );
-
-  return { categoryCounts, mySummaryData, categoryCharCounts };
+  return {
+    categoryCounts,
+    weeklyCategoryCounts: [] as CategoryCount[],
+    categoryCharCounts: [] as CategoryCharCount[],
+  };
 }
