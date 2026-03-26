@@ -16,7 +16,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const res = await fetch(
       // 왜 path로 안 받고 쿼리로 받는거임??
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/friendships/{friendshipId}/accept?friendshipId=${friendshipId}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/friendships/${friendshipId}/accept}`,
       {
         method: "PATCH",
         headers: {
@@ -28,7 +28,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!res.ok) {
       const errorBody = await res.json().catch(() => null);
-      console.error(`Server Error: /api/friendships/{friendshipId}/accept?friendshipId=${friendshipId}: [${res.status}] ${errorBody}`);
+      console.error(`Server Error: /api/friendships/${friendshipId}/accept: [${res.status}] ${errorBody}`);
       return NextResponse.json(
         { error: "친구 신청 수락 요청 실패" },
         { status: res.status },
