@@ -91,7 +91,7 @@ export function TitlePage({ size, post }: Props) {
         className="aspect-square w-[390px] h-[390px] relative overflow-hidden"
       >
         {/* 배경 이미지 */}
-        <PostImg url={post.photoUrls?.[0] || null} filtered />
+        <PostImg url={post.photoUrls?.[0] || "/default-cover-bg.png"} filtered />
 
         {/* 그라디언트 오버레이: 상단 약하게, 하단 강하게 */}
         <div
@@ -217,30 +217,104 @@ export function ContentPage({
   size,
   page,
   backgroundColor,
+  photoUrl,
 }: {
   size: number;
   page: Question;
   backgroundColor: string;
+  photoUrl?: string | null;
 }) {
+  const resolvedPhoto = photoUrl || "/default-cover-bg.png";
+  const hasPhoto = true; // 기본 이미지로 항상 사진 배경 사용
+  const isLight = backgroundColor === "#f9f9f9";
+
   return (
     <div style={{ height: size, width: size }}>
       <div
         style={{
           transform: `scale(${size / 430})`,
           transformOrigin: "top left",
-          backgroundColor: backgroundColor,
+          backgroundColor: hasPhoto ? "transparent" : backgroundColor,
         }}
-        className={`aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${
-          backgroundColor === "#f9f9f9" ? "text-black" : "text-white"
-        }`}
+        className="aspect-square w-[430px] h-[430px] relative overflow-hidden"
       >
-        <div>
+        {/* 사진 배경 */}
+        <PostImg url={resolvedPhoto} filtered />
+
+        {/* 그라디언트 오버레이 (사진 있을 때만) */}
+        {hasPhoto && (
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.1) 25%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.82) 100%)",
+            }}
+          />
+        )}
+
+        {/* 콘텐츠 */}
+        <div
+          className={`absolute inset-0 flex flex-col px-[28px] pt-[26px] pb-[28px] ${
+            hasPhoto ? "" : "py-[95px] px-[20px]"
+          }`}
+          style={
+            !hasPhoto
+              ? { color: isLight ? "#000" : "#fff", padding: "95px 20px" }
+              : undefined
+          }
+        >
+          {/* 질문 라벨 — 상단, 크고 명확하게 */}
           {page.question && (
-            <h2 className="font-semibold text-[32px] mb-[24px] leading-[50px]">
-              {page.question}
-            </h2>
+            <div className="mb-[18px]">
+              <span
+                className="text-[15px] font-bold tracking-[0.04em] px-[14px] py-[6px] rounded-full inline-block"
+                style={
+                  hasPhoto
+                    ? {
+                        color: "rgba(255,255,255,1)",
+                        background: "rgba(255,255,255,0.22)",
+                        backdropFilter: "blur(8px)",
+                        border: "1px solid rgba(255,255,255,0.4)",
+                        boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+                      }
+                    : {
+                        color: isLight ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.6)",
+                        borderColor: isLight ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.2)",
+                        background: isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.08)",
+                      }
+                }
+              >
+                {page.question}
+              </span>
+            </div>
           )}
-          <div className="whitespace-pre-wrap">{page.content}</div>
+
+          {/* 얇은 구분선 (사진 있을 때) */}
+          {hasPhoto && (
+            <div
+              className="mb-[20px]"
+              style={{ height: "1px", background: "rgba(255,255,255,0.25)" }}
+            />
+          )}
+
+          {/* 본문 내용 */}
+          <p
+            className="whitespace-pre-wrap leading-[1.7] font-medium"
+            style={
+              hasPhoto
+                ? {
+                    fontSize: "20px",
+                    color: "rgba(255,255,255,0.95)",
+                    textShadow: "0 1px 8px rgba(0,0,0,0.5)",
+                  }
+                : {
+                    fontSize: "18px",
+                    color: isLight ? "#000" : "#fff",
+                  }
+            }
+          >
+            {page.content}
+          </p>
         </div>
       </div>
     </div>

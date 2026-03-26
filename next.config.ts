@@ -9,7 +9,10 @@ const nextConfig: NextConfig = {
         : false, //배포시 console.log 제거
   },
   images: {
-    domains: ["achivadata.s3.ap-northeast-2.amazonaws.com"],
+    domains: [
+      "achivadata.s3.ap-northeast-2.amazonaws.com",
+      "images.unsplash.com",
+    ],
   },
   async redirects() {
     return [

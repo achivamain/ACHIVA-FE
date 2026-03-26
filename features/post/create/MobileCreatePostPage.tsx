@@ -31,18 +31,18 @@ export default function MobileCreatePostPage() {
   let content: React.ReactNode;
   switch (currentStep) {
     case 0:
+      headerTitle = "사진 추가";
       content = (
-        <div>
-          <MobileWriting />
+        <div className="px-5">
+          <ImageUploader />
         </div>
       );
       break;
 
     case 1:
-      headerTitle = "사진 추가";
       content = (
-        <div className="px-5">
-          <ImageUploader />
+        <div>
+          <MobileWriting />
         </div>
       );
       break;
