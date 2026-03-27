@@ -57,7 +57,7 @@ export default function ImageUploader() {
   const openFilePicker = () => {
     if (window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(
-        JSON.stringify({ type: "REQUEST_CAMERA" }),
+        JSON.stringify({ type: "REQUEST_GALLERY" }),
       );
     } else {
       input.current?.click();
