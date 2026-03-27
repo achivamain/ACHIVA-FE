@@ -54,26 +54,13 @@ export default function ImageUploader() {
     }
   }, [images.length]);
 
-  const openCamera = () => {
+  const openFilePicker = () => {
     if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: "REQUEST_CAMERA" }));
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({ type: "REQUEST_CAMERA" }),
+      );
     } else {
-      if (input.current) {
-        input.current.removeAttribute("capture");
-        input.current.setAttribute("capture", "environment");
-        input.current.click();
-      }
-    }
-  };
-
-  const openGallery = () => {
-    if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: "REQUEST_GALLERY" }));
-    } else {
-      if (input.current) {
-        input.current.removeAttribute("capture");
-        input.current.click();
-      }
+      input.current?.click();
     }
   };
 
@@ -82,92 +69,60 @@ export default function ImageUploader() {
 
       {/* 빈 상태 — 업로드 유도 영역 */}
       {images.length === 0 && (
-        isMobile ? (
-          <div className="w-full flex gap-3 mt-4">
-            <button
-              onClick={openCamera}
-              className="flex-1 flex flex-col items-center justify-center gap-4 py-10 rounded-[20px]
-                bg-gradient-to-br from-[#fcfbf9] to-[#f4f1ee] border border-[#e5e5e5] shadow-sm
-                hover:shadow-md transition-all duration-200 active:scale-95"
-            >
-              <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center border border-[#ececec]">
-                <span className="text-[32px]">📸</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-bold text-[#412A2A] text-[16px] mb-1">바로 사진 찍기</span>
-                <span className="text-[12px] text-[#A0938C]">기본 카메라 실행</span>
-              </div>
-            </button>
-            
-            <button
-              onClick={openGallery}
-              className="flex-1 flex flex-col items-center justify-center gap-4 py-10 rounded-[20px]
-                bg-gradient-to-br from-[#fcfbf9] to-[#f4f1ee] border border-[#e5e5e5] shadow-sm
-                hover:shadow-md transition-all duration-200 active:scale-95"
-            >
-              <div className="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center border border-[#ececec]">
-                <span className="text-[32px]">🖼️</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-bold text-[#412A2A] text-[16px] mb-1">갤러리 앨범 열기</span>
-                <span className="text-[12px] text-[#A0938C]">앨범에서 여러 장 선택</span>
-              </div>
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={openGallery}
-            className="relative flex flex-col justify-center items-center
-              aspect-square w-full sm:w-120
-              rounded-2xl overflow-hidden
-              border-2 border-dashed border-[#C0A898]
-              bg-gradient-to-br from-[#fdf6f0] to-[#f0e8e0]
-              hover:from-[#f5ede4] hover:to-[#e8dbd0]
-              transition-all duration-300 group cursor-pointer"
+        <button
+          onClick={openFilePicker}
+          className="relative flex flex-col justify-center items-center
+            aspect-square w-full sm:w-120
+            rounded-2xl overflow-hidden
+            border-2 border-dashed border-[#C0A898]
+            bg-gradient-to-br from-[#fdf6f0] to-[#f0e8e0]
+            hover:from-[#f5ede4] hover:to-[#e8dbd0]
+            transition-all duration-300 group cursor-pointer"
+        >
+          {/* 배경 흐릿한 원 장식 */}
+          <div className="absolute w-48 h-48 rounded-full bg-[#e8c9b0]/30 blur-3xl top-8 left-8" />
+          <div className="absolute w-36 h-36 rounded-full bg-[#f0b090]/20 blur-2xl bottom-12 right-12" />
+
+          {/* 아이콘 */}
+          <div
+            className="relative z-10 flex flex-col items-center gap-5
+              transition-transform duration-300 group-hover:scale-105"
           >
-            <div className="absolute w-48 h-48 rounded-full bg-[#e8c9b0]/30 blur-3xl top-8 left-8" />
-            <div className="absolute w-36 h-36 rounded-full bg-[#f0b090]/20 blur-2xl bottom-12 right-12" />
-
             <div
-              className="relative z-10 flex flex-col items-center gap-5
-                transition-transform duration-300 group-hover:scale-105"
+              className="flex items-center justify-center
+                w-20 h-20 rounded-full
+                bg-white/70 backdrop-blur-sm
+                shadow-[0_8px_32px_rgba(100,60,30,0.12)]
+                border border-white/80"
             >
-              <div
-                className="flex items-center justify-center
-                  w-20 h-20 rounded-full
-                  bg-white/70 backdrop-blur-sm
-                  shadow-[0_8px_32px_rgba(100,60,30,0.12)]
-                  border border-white/80"
-              >
-                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                  <path
-                    d="M18 3v18M9 12l9-9 9 9"
-                    stroke="#7A5040"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M4 24v5a3 3 0 003 3h22a3 3 0 003-3v-5"
-                    stroke="#7A5040"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-
-              <div className="text-center">
-                <p className="text-[18px] font-bold text-[#412A2A] mb-1">
-                  사진을 업로드하세요
-                </p>
-                <p className="text-[13px] text-[#7A5040]/70 font-medium">
-                  최대 5장 · 정사각형으로 편집됩니다
-                </p>
-              </div>
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                <path
+                  d="M18 3v18M9 12l9-9 9 9"
+                  stroke="#7A5040"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M4 24v5a3 3 0 003 3h22a3 3 0 003-3v-5"
+                  stroke="#7A5040"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
-          </button>
-        )
+
+            <div className="text-center">
+              <p className="text-[18px] font-bold text-[#412A2A] mb-1">
+                {isMobile ? "갤러리에서 사진 선택" : "사진을 업로드하세요"}
+              </p>
+              <p className="text-[13px] text-[#7A5040]/70 font-medium">
+                최대 5장 · 정사각형으로 편집됩니다
+              </p>
+            </div>
+          </div>
+        </button>
       )}
 
       {/* 크롭 영역 */}
@@ -297,7 +252,7 @@ export default function ImageUploader() {
               bg-[#f0e8e0] hover:bg-[#e8dbd0]
               border border-[#C0A898]/50
               transition-all duration-200"
-            onClick={openGallery}
+            onClick={openFilePicker}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 3v10M3 8h10" stroke="#412A2A" strokeWidth="2" strokeLinecap="round" />
@@ -306,21 +261,19 @@ export default function ImageUploader() {
           </button>
         </div>
       ) : (
-        !isMobile && (
-          <div className="w-full">
-            <button
-              className="flex items-center justify-center
-                w-full h-11 rounded-xl
-                font-medium text-[15px] text-[#7A5040]/70
-                bg-transparent hover:bg-[#f0e8e0]
-                border border-[#C0A898]/40
-                transition-all duration-200"
-              onClick={handleNextStep}
-            >
-              사진 없이 계속하기
-            </button>
-          </div>
-        )
+        <div className="w-full">
+          <button
+            className="flex items-center justify-center
+              w-full h-11 rounded-xl
+              font-medium text-[15px] text-[#7A5040]/70
+              bg-transparent hover:bg-[#f0e8e0]
+              border border-[#C0A898]/40
+              transition-all duration-200"
+            onClick={handleNextStep}
+          >
+            사진 없이 계속하기
+          </button>
+        </div>
       )}
 
       <input

@@ -18,7 +18,6 @@ export default function MobileCreatePostPage() {
   const router = useRouter();
   const currentStep = useCreatePostStepStore.use.currentStep();
   const handlePrevStep = useCreatePostStepStore.use.handlePrevStep();
-  const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
@@ -61,16 +60,6 @@ export default function MobileCreatePostPage() {
       title = "에러";
       content = null;
   }
-
-  const step0RightElement = currentStep === 0 ? (
-    <button
-      onClick={handleNextStep}
-      className="text-[#999] font-medium text-[15px] px-2 py-1"
-    >
-      건너뛰기
-    </button>
-  ) : undefined;
-
   return (
     <div className="flex-1 flex flex-col h-full">
       {currentStep > 0 ? (
@@ -81,7 +70,7 @@ export default function MobileCreatePostPage() {
         </div>
       ) : (
         <div className="flex-shrink-0">
-          <MobileHeader onClick={router.back} rightElement={step0RightElement}>
+          <MobileHeader onClick={router.back}>
             {headerTitle ?? null}
           </MobileHeader>
         </div>
