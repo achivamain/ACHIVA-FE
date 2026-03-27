@@ -3,83 +3,17 @@
 import { PostRes } from "@/types/Post";
 import type { Question } from "@/types/Post";
 import PostImg from "@/components/PostImg";
-import { format, startOfWeek, endOfWeek, subWeeks, isWithinInterval } from "date-fns";
-import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
 type Props = {
   size: number;
   post: PostRes;
 };
 
-// 게시글 작성자의 게시글들 중 이번 주 포스트 수 및 연속 주 3회 달성 스트릭을 계산
-function useWorkoutStats(memberId: string, postDateString: string) {
-  const [weeklyCount, setWeeklyCount] = useState<number | null>(null);
-  const [streakWeeks, setStreakWeeks] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!memberId || !postDateString) return;
-
-    async function fetchStats() {
-      try {
-        const res = await fetch(
-          `/api/members/getPosts?id=${memberId}&pageParam=0&size=200&sort=DESC`,
-          { method: "GET", headers: { "Content-Type": "application/json" } }
-        );
-        if (!res.ok) return;
-        const json = await res.json();
-        const posts: { createdAt: string }[] = json.data?.content ?? [];
-
-        const referenceDate = new Date(postDateString);
-
-        const thisWeekStart = startOfWeek(referenceDate, { weekStartsOn: 1 });
-        const thisWeekEnd = endOfWeek(referenceDate, { weekStartsOn: 1 });
-        const thisWeekPosts = posts.filter((p) => {
-          const pDate = new Date(p.createdAt);
-          return isWithinInterval(pDate, {
-            start: thisWeekStart,
-            end: thisWeekEnd,
-          }) && pDate.getTime() <= referenceDate.getTime();
-        });
-        setWeeklyCount(thisWeekPosts.length);
-
-        let streak = 0;
-        if (thisWeekPosts.length >= 3) {
-          streak = 1;
-          let weekIdx = 1;
-          while (true) {
-            const weekStart = startOfWeek(subWeeks(referenceDate, weekIdx), { weekStartsOn: 1 });
-            const weekEnd = endOfWeek(subWeeks(referenceDate, weekIdx), { weekStartsOn: 1 });
-            const count = posts.filter((p) =>
-              isWithinInterval(new Date(p.createdAt), { start: weekStart, end: weekEnd })
-            ).length;
-            if (count >= 3) { streak++; weekIdx++; } else break;
-          }
-        } else {
-          let weekIdx = 1;
-          while (true) {
-            const weekStart = startOfWeek(subWeeks(referenceDate, weekIdx), { weekStartsOn: 1 });
-            const weekEnd = endOfWeek(subWeeks(referenceDate, weekIdx), { weekStartsOn: 1 });
-            const count = posts.filter((p) =>
-              isWithinInterval(new Date(p.createdAt), { start: weekStart, end: weekEnd })
-            ).length;
-            if (count >= 3) { streak++; weekIdx++; } else break;
-          }
-        }
-        setStreakWeeks(streak);
-      } catch {
-        // silently ignore
-      }
-    }
-
-    fetchStats();
-  }, [memberId, postDateString]);
-
-  return { weeklyCount, streakWeeks };
-}
-
 export function TitlePage({ size, post }: Props) {
   const date = new Date(post.createdAt);
-  const { weeklyCount, streakWeeks } = useWorkoutStats(post.memberId, post.createdAt);
+  const weeklyCount = post.weeklyWorkoutCount ?? null;
+  const streakWeeks = post.continuousGoalWeeks ?? null;
 
   return (
     <div style={{ height: size, width: size }}>
@@ -90,19 +24,18 @@ export function TitlePage({ size, post }: Props) {
         }}
         className="aspect-square w-[390px] h-[390px] relative overflow-hidden"
       >
-        {/* 배경 (사진 or 불꽃 그라디언트) */}
         {post.photoUrls?.[0] ? (
-          <PostImg url={post.photoUrls[0]} filtered filterOpacity={35} />
+          <PostImg url={post.photoUrls[0]} filtered />
         ) : (
-          <PostImg url="/default-cover-bg.png" filtered filterOpacity={35} />
+          <PostImg url="/default-cover-bg.png" filtered />
         )}
 
-        {/* 그라디언트 오버레이: 텍스트 가독성 확보 (가볍게) */}
+        {/* 그라디언트 오버레이 */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.6) 100%)",
+              "linear-gradient(to bottom, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.45) 100%)",
           }}
         />
 
@@ -127,18 +60,17 @@ export function TitlePage({ size, post }: Props) {
           </span>
         </div>
 
-        {/* 얇은 구분선 */}
+        {/* 상단 구분선 */}
         <div
           className="absolute left-[22px] right-[22px]"
           style={{ top: "56px", height: "1px", background: "rgba(255,255,255,0.18)" }}
         />
 
-        {/* 하단 콘텐츠 영역 */}
+        {/* 하단 콘텐츠 */}
         <div className="absolute bottom-[22px] left-[22px] right-[22px]">
-          {/* 배지 영역 */}
-          {weeklyCount !== null && (
+          {/* 통계 배지 */}
+          {weeklyCount !== null && weeklyCount > 0 && (
             <div className="flex items-center gap-[8px] mb-[14px] flex-wrap">
-              {/* 이번 주 운동 횟수 */}
               <div
                 className="flex items-center gap-[6px] px-[11px] py-[5px] rounded-full"
                 style={{
@@ -148,11 +80,9 @@ export function TitlePage({ size, post }: Props) {
                 }}
               >
                 <span className="text-[13px] leading-none">
-                  {weeklyCount === 0
-                    ? "🌱"
-                    : Array.from({ length: Math.min(weeklyCount, 7) }, (_, i) => (
-                        <span key={i}>🔥</span>
-                      ))}
+                  {Array.from({ length: Math.min(weeklyCount, 7) }, (_, i) => (
+                    <span key={i}>🔥</span>
+                  ))}
                 </span>
                 <span
                   className="text-[12px] font-semibold tracking-[0.03em]"
@@ -162,7 +92,6 @@ export function TitlePage({ size, post }: Props) {
                 </span>
               </div>
 
-              {/* 스트릭 배지 */}
               {streakWeeks !== null && streakWeeks >= 2 && (
                 <div
                   className="flex items-center gap-[5px] px-[11px] py-[5px] rounded-full"
@@ -191,7 +120,7 @@ export function TitlePage({ size, post }: Props) {
             style={{ height: "1px", background: "rgba(255,255,255,0.2)" }}
           />
 
-          {/* 타이틀 */}
+          {/* 제목 */}
           <h1
             className="font-bold leading-[1.15] mb-[10px]"
             style={{
@@ -204,7 +133,7 @@ export function TitlePage({ size, post }: Props) {
             {post.title}
           </h1>
 
-          {/* 서브텍스트: N번째 이야기 */}
+          {/* 서브텍스트 */}
           <p
             className="text-[14px] font-medium tracking-[0.06em]"
             style={{ color: "rgba(255,255,255,0.55)" }}
@@ -221,107 +150,30 @@ export function ContentPage({
   size,
   page,
   backgroundColor,
-  photoUrl,
 }: {
   size: number;
   page: Question;
   backgroundColor: string;
-  photoUrl?: string | null;
 }) {
-  const hasPhoto = true; // 불꽃 그라디언트도 사진처럼 취급하여 흰색 글씨+그림자(프리미엄 UI) 적용
-  const isLight = backgroundColor === "#f9f9f9";
-
   return (
     <div style={{ height: size, width: size }}>
       <div
         style={{
           transform: `scale(${size / 430})`,
           transformOrigin: "top left",
-          backgroundColor: hasPhoto ? "transparent" : backgroundColor,
+          backgroundColor: backgroundColor,
         }}
-        className="aspect-square w-[430px] h-[430px] relative overflow-hidden"
+        className={`aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${
+          backgroundColor === "#f9f9f9" ? "text-black" : "text-white"
+        }`}
       >
-        {/* 배경 (사진 or 불꽃 그라디언트) */}
-        {photoUrl ? (
-          <PostImg url={photoUrl} filtered filterOpacity={35} />
-        ) : (
-          <PostImg url="/default-cover-bg.png" filtered filterOpacity={35} />
-        )}
-
-        {/* 그라디언트 오버레이 (가볍게) */}
-        {hasPhoto && (
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0.25) 65%, rgba(0,0,0,0.55) 100%)",
-            }}
-          />
-        )}
-
-        {/* 콘텐츠 */}
-        <div
-          className={`absolute inset-0 flex flex-col px-[28px] pt-[26px] pb-[28px] ${
-            hasPhoto ? "" : "py-[95px] px-[20px]"
-          }`}
-          style={
-            !hasPhoto
-              ? { color: isLight ? "#000" : "#fff", padding: "95px 20px" }
-              : undefined
-          }
-        >
-          {/* 질문 라벨 — 상단, 크고 명확하게 */}
+        <div>
           {page.question && (
-            <div className="mb-[18px]">
-              <span
-                className="text-[15px] font-bold tracking-[0.04em] px-[14px] py-[6px] rounded-full inline-block"
-                style={
-                  hasPhoto
-                    ? {
-                        color: "rgba(255,255,255,1)",
-                        background: "rgba(255,255,255,0.22)",
-                        backdropFilter: "blur(8px)",
-                        border: "1px solid rgba(255,255,255,0.4)",
-                        boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
-                      }
-                    : {
-                        color: isLight ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.6)",
-                        borderColor: isLight ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.2)",
-                        background: isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.08)",
-                      }
-                }
-              >
-                {page.question}
-              </span>
-            </div>
+            <h2 className="font-semibold text-[32px] mb-[24px] leading-[50px]">
+              {page.question}
+            </h2>
           )}
-
-          {/* 얇은 구분선 (사진 있을 때) */}
-          {hasPhoto && (
-            <div
-              className="mb-[20px]"
-              style={{ height: "1px", background: "rgba(255,255,255,0.25)" }}
-            />
-          )}
-
-          {/* 본문 내용 */}
-          <p
-            className="whitespace-pre-wrap leading-[1.7] font-medium"
-            style={
-              hasPhoto
-                ? {
-                    fontSize: "20px",
-                    color: "rgba(255,255,255,0.95)",
-                    textShadow: "0 1px 8px rgba(0,0,0,0.5)",
-                  }
-                : {
-                    fontSize: "18px",
-                    color: isLight ? "#000" : "#fff",
-                  }
-            }
-          >
-            {page.content}
-          </p>
+          <div className="whitespace-pre-wrap">{page.content}</div>
         </div>
       </div>
     </div>

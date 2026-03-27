@@ -133,14 +133,15 @@ export async function getSummeryData(token: string) {
 export async function getHomeData(userId: string, token: string) {
   // 카테고리별 게시물 수 받아오기
   async function getPostCategory() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${userId}`,
-      {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/count-by-category?memberId=${userId}`;
+    console.log("[DEBUG] Fetching PostCategory:", url);
+    const res = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        cache: "no-store",
       },
     );
     if (!res.ok) {
@@ -151,6 +152,31 @@ export async function getHomeData(userId: string, token: string) {
     const { data } = await res.json();
     if (!data) {
       throw new Error("Invalid post counts of categories data");
+    }
+    const { categoryCounts } = data;
+    return categoryCounts as CategoryCount[];
+  }
+
+  async function getWeeklyPostCategory() {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/weekly-count-by-category?memberId=${userId}`;
+    console.log("[DEBUG] Fetching WeeklyPostCategory:", url);
+    const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Error in fetch weekly post counts of categories: ", errorData);
+      throw new Error(errorData.error || "서버 오류");
+    }
+    const { data } = await res.json();
+    if (!data) {
+      throw new Error("Invalid weekly post counts of categories data");
     }
     const { categoryCounts } = data;
     return categoryCounts as CategoryCount[];
@@ -184,9 +210,9 @@ export async function getHomeData(userId: string, token: string) {
     return categoryCharacterCounts as CategoryCharCount[];
   }
 
-  const [categoryCounts, mySummaryData, categoryCharCounts] = await Promise.all(
-    [getPostCategory(), getSummaryData(token), getCategorysCharCount()],
+  const [categoryCounts, weeklyCategoryCounts, mySummaryData, categoryCharCounts] = await Promise.all(
+    [getPostCategory(), getWeeklyPostCategory(), getSummaryData(token), getCategorysCharCount()],
   );
 
-  return { categoryCounts, mySummaryData, categoryCharCounts };
+  return { categoryCounts, weeklyCategoryCounts, mySummaryData, categoryCharCounts };
 }
