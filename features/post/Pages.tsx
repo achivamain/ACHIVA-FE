@@ -90,15 +90,19 @@ export function TitlePage({ size, post }: Props) {
         }}
         className="aspect-square w-[390px] h-[390px] relative overflow-hidden"
       >
-        {/* 배경 이미지 */}
-        <PostImg url={post.photoUrls?.[0] || "/default-cover-bg.png"} filtered />
+        {/* 배경 (사진 or 불꽃 그라디언트) */}
+        {post.photoUrls?.[0] ? (
+          <PostImg url={post.photoUrls[0]} filtered />
+        ) : (
+          <PostImg url="/default-cover-bg.png" filtered />
+        )}
 
-        {/* 그라디언트 오버레이: 상단 약하게, 하단 강하게 */}
+        {/* 그라디언트 오버레이: 텍스트 가독성을 위한 고급스러운 블랙 타오버레이 */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.78) 100%)",
+              "linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.85) 100%)",
           }}
         />
 
@@ -224,8 +228,7 @@ export function ContentPage({
   backgroundColor: string;
   photoUrl?: string | null;
 }) {
-  const resolvedPhoto = photoUrl || "/default-cover-bg.png";
-  const hasPhoto = true; // 기본 이미지로 항상 사진 배경 사용
+  const hasPhoto = true; // 불꽃 그라디언트도 사진처럼 취급하여 흰색 글씨+그림자(프리미엄 UI) 적용
   const isLight = backgroundColor === "#f9f9f9";
 
   return (
@@ -238,16 +241,20 @@ export function ContentPage({
         }}
         className="aspect-square w-[430px] h-[430px] relative overflow-hidden"
       >
-        {/* 사진 배경 */}
-        <PostImg url={resolvedPhoto} filtered />
+        {/* 배경 (사진 or 불꽃 그라디언트) */}
+        {photoUrl ? (
+          <PostImg url={photoUrl} filtered />
+        ) : (
+          <PostImg url="/default-cover-bg.png" filtered />
+        )}
 
-        {/* 그라디언트 오버레이 (사진 있을 때만) */}
+        {/* 그라디언트 오버레이 (사진/배경) */}
         {hasPhoto && (
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.1) 25%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.82) 100%)",
+                "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.1) 25%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.8) 100%)",
             }}
           />
         )}
