@@ -92,17 +92,17 @@ export function TitlePage({ size, post }: Props) {
       >
         {/* 배경 (사진 or 불꽃 그라디언트) */}
         {post.photoUrls?.[0] ? (
-          <PostImg url={post.photoUrls[0]} filtered />
+          <PostImg url={post.photoUrls[0]} filtered filterOpacity={35} />
         ) : (
-          <PostImg url="/default-cover-bg.png" filtered />
+          <PostImg url="/default-cover-bg.png" filtered filterOpacity={35} />
         )}
 
-        {/* 그라디언트 오버레이: 텍스트 가독성을 위한 고급스러운 블랙 타오버레이 */}
+        {/* 그라디언트 오버레이: 텍스트 가독성 확보 (가볍게) */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.85) 100%)",
+              "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.6) 100%)",
           }}
         />
 
@@ -243,18 +243,18 @@ export function ContentPage({
       >
         {/* 배경 (사진 or 불꽃 그라디언트) */}
         {photoUrl ? (
-          <PostImg url={photoUrl} filtered />
+          <PostImg url={photoUrl} filtered filterOpacity={35} />
         ) : (
-          <PostImg url="/default-cover-bg.png" filtered />
+          <PostImg url="/default-cover-bg.png" filtered filterOpacity={35} />
         )}
 
-        {/* 그라디언트 오버레이 (사진/배경) */}
+        {/* 그라디언트 오버레이 (가볍게) */}
         {hasPhoto && (
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.1) 25%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.8) 100%)",
+                "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0.25) 65%, rgba(0,0,0,0.55) 100%)",
             }}
           />
         )}
