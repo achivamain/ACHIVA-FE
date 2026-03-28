@@ -2,7 +2,7 @@ import PostImg from "@/components/PostImg";
 import { useDraftPostStore } from "@/store/CreatePostStore";
 import { NextStepButton } from "./Buttons";
 import { format } from "date-fns";
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { User } from "@/types/User";
 import { useQuery } from "@tanstack/react-query";
 import { DraftPost } from "@/types/Post";
@@ -27,19 +27,6 @@ export default function TitleEditor() {
     },
   });
 
-  const { data: userStats } = useQuery({
-    queryKey: ["userStats"],
-    queryFn: async () => {
-      const res = await fetch(`/api/members/me/stats`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) {
-        throw new Error("network error");
-      }
-      return (await res.json()).data;
-    },
-  });
   const setPost = useDraftPostStore.use.setPost();
   const [isLoading, setIsLoading] = useState(false);
   const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 480;
@@ -50,22 +37,19 @@ export default function TitleEditor() {
     }
   }, []);
 
-  useEffect(() => {
-    if (userStats) {
-      setPost({
-        weeklyWorkoutCount: userStats.weeklyWorkoutCount,
-        continuousGoalWeeks: userStats.continuousGoalWeeks,
-      });
-    }
-  }, [userStats, setPost]);
-
   const createNewPost = async (draft: DraftPost) => {
     setIsLoading(true);
     try {
+      const {
+        weeklyWorkoutCount: _weeklyWorkoutCount,
+        continuousGoalWeeks: _continuousGoalWeeks,
+        ...postPayload
+      } = draft;
+
       const res = await fetch("/api/posts", {
         method: "POST",
         body: JSON.stringify({
-          post: draft,
+          post: postPayload,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -130,7 +114,11 @@ export default function TitleEditor() {
           {/* 상단 구분선 */}
           <div
             className="absolute left-[22px] right-[22px]"
-            style={{ top: "56px", height: "1px", background: "rgba(255,255,255,0.18)" }}
+            style={{
+              top: "56px",
+              height: "1px",
+              background: "rgba(255,255,255,0.18)",
+            }}
           />
 
           {/* 하단 콘텐츠 */}

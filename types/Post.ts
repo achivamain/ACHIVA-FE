@@ -14,8 +14,7 @@ export type Post = {
 export type DraftPost = Partial<Post> & {
   id?: string;
   categoryCount?: number;
-  //book?: Book;
-}; // 글쓰기 중 타입
+};
 
 export type PostPage = {
   id: string;

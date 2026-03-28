@@ -1,10 +1,7 @@
 // pc용 - use client를 위한...
 "use client";
 
-import {
-  useCreatePostStepStore,
-  useDraftPostStore,
-} from "@/store/CreatePostStore";
+import { useCreatePostStepStore } from "@/store/CreatePostStore";
 import { useEffect, useState } from "react";
 import { MobileWriting } from "./Writing";
 import ImageUploader from "./ImageUploader";
@@ -13,6 +10,7 @@ import TitleEditor from "./TitleEditor";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useRouter } from "next/navigation";
 import MobileHeader from "@/components/MobileHeader";
+import { usePrepareDraftPostStats } from "./usePrepareDraftPostStats";
 
 export default function MobileCreatePostPage() {
   const router = useRouter();
@@ -20,6 +18,8 @@ export default function MobileCreatePostPage() {
   const handlePrevStep = useCreatePostStepStore.use.handlePrevStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+
+  usePrepareDraftPostStats();
 
   // 글쓰기 버튼 클릭 시 작성상태 리셋
   useEffect(() => {
