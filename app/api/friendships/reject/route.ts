@@ -12,11 +12,16 @@ export async function PATCH(req: NextRequest) {
   if (!token) {
     return NextResponse.json({ error: "미인증 유저" }, { status: 401 });
   }
+  if (!friendshipId) {
+    return NextResponse.json(
+      { error: "friendshipId가 필요합니다." },
+      { status: 400 },
+    );
+  }
 
   try {
     const res = await fetch(
-      // 왜 path로 안 받고 쿼리로 받는거임?? << 진짜 모름... 다른 API도 이런거 좀 있음
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/friendships/${friendshipId}/reject?`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/friendships/${friendshipId}/reject`,
       {
         method: "PATCH",
         headers: {
