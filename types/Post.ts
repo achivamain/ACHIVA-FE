@@ -7,6 +7,8 @@ export type Post = {
   category: Category;
   backgroundColor: BackgroundColor;
   pages: PostPage[];
+  weeklyWorkoutCount?: number;
+  continuousGoalWeeks?: number;
 };
 
 export type DraftPost = Partial<Post> & {

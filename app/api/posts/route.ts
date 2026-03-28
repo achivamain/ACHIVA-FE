@@ -38,6 +38,8 @@ export async function POST(req: NextRequest) {
             content,
           })),
           backgroundColor: draft.backgroundColor,
+          weeklyWorkoutCount: draft.weeklyWorkoutCount ?? null,
+          continuousGoalWeeks: draft.continuousGoalWeeks ?? null,
         }),
       },
     );

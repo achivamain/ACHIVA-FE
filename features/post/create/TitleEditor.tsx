@@ -2,11 +2,9 @@ import PostImg from "@/components/PostImg";
 import { useDraftPostStore } from "@/store/CreatePostStore";
 import { NextStepButton } from "./Buttons";
 import { format } from "date-fns";
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { User } from "@/types/User";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "motion/react";
-import { AnimatePresence } from "motion/react";
 import { DraftPost } from "@/types/Post";
 
 export default function TitleEditor() {
@@ -28,9 +26,22 @@ export default function TitleEditor() {
       return (await res.json()).data as User;
     },
   });
+
+  const { data: userStats } = useQuery({
+    queryKey: ["userStats"],
+    queryFn: async () => {
+      const res = await fetch(`/api/members/me/stats`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) {
+        throw new Error("network error");
+      }
+      return (await res.json()).data;
+    },
+  });
   const setPost = useDraftPostStore.use.setPost();
   const [isLoading, setIsLoading] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 480;
 
   useLayoutEffect(() => {
@@ -39,8 +50,16 @@ export default function TitleEditor() {
     }
   }, []);
 
+  useEffect(() => {
+    if (userStats) {
+      setPost({
+        weeklyWorkoutCount: userStats.weeklyWorkoutCount,
+        continuousGoalWeeks: userStats.continuousGoalWeeks,
+      });
+    }
+  }, [userStats, setPost]);
+
   const createNewPost = async (draft: DraftPost) => {
-    //게시글 생성
     setIsLoading(true);
     try {
       const res = await fetch("/api/posts", {
@@ -74,70 +93,137 @@ export default function TitleEditor() {
             transform: `scale(${size / 390})`,
             transformOrigin: "top left",
           }}
-          className="aspect-square w-[390px] h-[390px] relative z-[60]"
+          className="aspect-square w-[390px] h-[390px] relative overflow-hidden"
         >
           <PostImg url={draft.photoUrls?.[0] || null} filtered />
-          <div className="absolute top-[90px] left-[23px]">
-            <div className="font-light text-[16px] text-white/70">
-              {format(new Date(), "yyyy.MM.dd")}
-            </div>
+
+          {/* 그라디언트 오버레이 */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to bottom, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.45) 100%)",
+            }}
+          />
+
+          {/* 상단: 날짜 + 카테고리 태그 */}
+          <div className="absolute top-[22px] left-[22px] right-[22px] flex items-center justify-between">
+            <span
+              className="text-[13px] font-medium tracking-[0.12em] uppercase"
+              style={{ color: "rgba(255,255,255,0.75)" }}
+            >
+              {format(new Date(), "yyyy · MM · dd")}
+            </span>
+            <span
+              className="text-[11px] font-semibold tracking-[0.08em] px-[10px] py-[4px] rounded-full border"
+              style={{
+                color: "rgba(255,255,255,0.85)",
+                borderColor: "rgba(255,255,255,0.3)",
+                background: "rgba(255,255,255,0.12)",
+                backdropFilter: "blur(6px)",
+              }}
+            >
+              {draft.category}
+            </span>
+          </div>
+
+          {/* 상단 구분선 */}
+          <div
+            className="absolute left-[22px] right-[22px]"
+            style={{ top: "56px", height: "1px", background: "rgba(255,255,255,0.18)" }}
+          />
+
+          {/* 하단 콘텐츠 */}
+          <div className="absolute bottom-[22px] left-[22px] right-[22px]">
+            {/* 통계 배지 */}
+            {draft.weeklyWorkoutCount !== undefined &&
+              draft.weeklyWorkoutCount > 0 && (
+                <div className="flex items-center gap-[8px] mb-[14px] flex-wrap">
+                  <div
+                    className="flex items-center gap-[6px] px-[11px] py-[5px] rounded-full"
+                    style={{
+                      background: "rgba(255,255,255,0.15)",
+                      backdropFilter: "blur(10px)",
+                      border: "1px solid rgba(255,255,255,0.25)",
+                    }}
+                  >
+                    <span className="text-[13px] leading-none">
+                      {Array.from(
+                        { length: Math.min(draft.weeklyWorkoutCount, 7) },
+                        (_, i) => (
+                          <span key={i}>🔥</span>
+                        ),
+                      )}
+                    </span>
+                    <span
+                      className="text-[12px] font-semibold tracking-[0.03em]"
+                      style={{ color: "rgba(255,255,255,0.95)" }}
+                    >
+                      이번 주 {draft.weeklyWorkoutCount}회
+                    </span>
+                  </div>
+
+                  {draft.continuousGoalWeeks !== undefined &&
+                    draft.continuousGoalWeeks >= 2 && (
+                      <div
+                        className="flex items-center gap-[5px] px-[11px] py-[5px] rounded-full"
+                        style={{
+                          background:
+                            "linear-gradient(135deg, rgba(251,146,60,0.85) 0%, rgba(239,68,68,0.75) 100%)",
+                          backdropFilter: "blur(10px)",
+                          border: "1px solid rgba(255,200,100,0.35)",
+                        }}
+                      >
+                        <span className="text-[13px] leading-none">⚡</span>
+                        <span
+                          className="text-[12px] font-bold tracking-[0.02em]"
+                          style={{ color: "rgba(255,255,255,1)" }}
+                        >
+                          {draft.continuousGoalWeeks}주 연속 달성
+                        </span>
+                      </div>
+                    )}
+                </div>
+              )}
+
+            {/* 구분선 */}
+            <div
+              className="mb-[12px]"
+              style={{ height: "1px", background: "rgba(255,255,255,0.2)" }}
+            />
+
+            {/* 제목 */}
             <input
               maxLength={18}
-              className={`w-full relative mb-[24px] z-[62]
-                font-semibold text-[45px]  leading-[50px] 
-                outline-none 
-                placeholder:text-white/80 
-                ${isEditing ? "text-white" : "text-white/80"} `}
+              className="w-full font-bold leading-[1.15] outline-none bg-transparent mb-[10px]"
+              style={{
+                fontSize: "38px",
+                color: "rgba(255,255,255,0.95)",
+                textShadow: "0 2px 12px rgba(0,0,0,0.4)",
+                letterSpacing: "-0.01em",
+              }}
               type="text"
               placeholder="오늘의 운동"
               autoFocus
               value={draft.title ?? ""}
               onChange={(e) => {
-                setIsEditing(true);
                 setPost({ title: e.target.value });
               }}
-              onBlur={() => {
-                setIsEditing(false);
-              }}
             />
-            <div className={`text-[32px] font-light text-white leading-[40px]`}>
-              <div>
-                <span className="font-bold">{draft.category}</span> 기록
-              </div>
-              <div>
-                <span className="font-bold">
-                  {(draft.categoryCount ?? 0) + 1}번째
-                </span>{" "}
-                이야기
-              </div>
-            </div>
+
+            {/* 서브텍스트 */}
+            <p
+              className="text-[14px] font-medium tracking-[0.06em]"
+              style={{ color: "rgba(255,255,255,0.55)" }}
+            >
+              {draft.category} · {(draft.categoryCount ?? 0) + 1}번째 이야기
+            </p>
           </div>
-          <AnimatePresence>
-            {isEditing && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 bg-black/40"
-              />
-            )}
-          </AnimatePresence>
         </div>
-        <AnimatePresence>
-          {isEditing && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/40"
-            />
-          )}
-        </AnimatePresence>
       </div>
       <div className="w-full mt-5">
         <NextStepButton
           isLoading={isLoading}
-          // disabled={!draft.title}
           onClick={async () => {
             createNewPost(draft);
           }}
