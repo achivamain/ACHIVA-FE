@@ -161,7 +161,6 @@ export default function Post({
                   size={containerWidth ?? 0}
                   page={page}
                   backgroundColor={post.backgroundColor}
-                  photoUrl={post.photoUrls?.[0] || null}
                 />
               </SwiperSlide>
             );
