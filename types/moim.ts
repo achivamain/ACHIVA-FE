@@ -19,6 +19,7 @@ export type Moim = {
   id: number;
   name: string;
   description: string;
+  score: number;
   categories: Category[];
   leaderName: string;
   memberCount: number;
