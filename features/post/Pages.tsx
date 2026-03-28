@@ -22,11 +22,7 @@ export function TitlePage({ size, post }: Props) {
         }}
         className="aspect-square w-[390px] h-[390px] relative overflow-hidden"
       >
-        {post.photoUrls?.[0] ? (
-          <PostImg url={post.photoUrls[0]} filtered />
-        ) : (
-          <PostImg url="/default-cover-bg.png" filtered />
-        )}
+        <PostImg url={post.photoUrls?.[0] || null} filtered />
 
         {/* 그라디언트 오버레이 */}
         <div
