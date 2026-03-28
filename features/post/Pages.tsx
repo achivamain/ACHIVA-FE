@@ -1,5 +1,3 @@
-"use client";
-
 import { PostRes } from "@/types/Post";
 import type { Question } from "@/types/Post";
 import PostImg from "@/components/PostImg";

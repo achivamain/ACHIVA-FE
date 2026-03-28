@@ -49,10 +49,13 @@ export type PostRes = {
   memberId: string;
   memberNickName: string;
   memberProfileUrl: string;
+  memberArticleCount?: number;
   backgroundColor: BackgroundColor;
   authorCategorySeq: number;
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
+  weeklyWorkoutCount: number;
+  continuousGoalWeeks: number;
   cheerings?: Cheering[];
   bookArticle?: {
     bookId: string;

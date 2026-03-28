@@ -20,7 +20,7 @@ export function Profile({ user, currentUserId, currentUserFriends }: Props) {
       <div className="relative shrink-0">
         <ProfileImg url={user.profileImageUrl!} size={160} />
         <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 scale-125 origin-bottom">
-          <PostCountBadge userId={user.id} />
+          <PostCountBadge articleCount={user.articleCount} />
         </div>
       </div>
       <div className="flex-1 flex flex-col items-start justify-center gap-3">
@@ -94,7 +94,7 @@ export default function MobileProfile({
         <div className="relative shrink-0">
           <ProfileImg url={user.profileImageUrl!} size={125} />
           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-10 scale-110 origin-bottom">
-            <PostCountBadge userId={user.id} />
+            <PostCountBadge articleCount={user.articleCount} />
           </div>
         </div>
         <div className="flex flex-col justify-center">
