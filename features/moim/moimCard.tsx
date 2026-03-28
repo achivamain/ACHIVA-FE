@@ -6,7 +6,17 @@ type MoimCardProps = {
   onClick: () => void;
 };
 
+/** groupGoalCurrent(이번 주 인증 횟수) 기반 온도 계산 - 상세 페이지와 동일한 공식 */
+function calcTemp(moim: Moim): number {
+  const thisWeekCount = moim.groupGoalCurrent ?? 0;
+  const increase = thisWeekCount * 0.8;
+  const rawTemp = 36.5 + increase;
+  return Math.max(36.5, Math.min(100, rawTemp));
+}
+
 export function OfficialChallengeCard({ moim, onClick }: MoimCardProps) {
+  const temp = calcTemp(moim);
+
   return (
     <div
       onClick={onClick}
@@ -37,9 +47,15 @@ export function OfficialChallengeCard({ moim, onClick }: MoimCardProps) {
           {moim.description}
         </p>
 
-        <div className="mt-auto flex items-center text-white text-xs font-medium">
-          <MemberCountIndicatorIcon />
-          {moim.memberCount.toLocaleString()}명 참여 중
+        <div className="mt-auto flex items-center justify-between text-white text-xs font-medium">
+          <span className="flex items-center">
+            <MemberCountIndicatorIcon />
+            {moim.memberCount.toLocaleString()}명 참여 중
+          </span>
+          {/* 온도: 하단 우측, 기존 스타일과 동일한 반투명 pill */}
+          <span className="bg-black/30 text-white/90 text-[11px] font-bold px-2 py-1 rounded-full border border-white/20 backdrop-blur-sm">
+            🔥 {temp.toFixed(1)}°C
+          </span>
         </div>
       </div>
     </div>
@@ -47,6 +63,8 @@ export function OfficialChallengeCard({ moim, onClick }: MoimCardProps) {
 }
 
 export function MyCrewCard({ moim, onClick }: MoimCardProps) {
+  const temp = calcTemp(moim);
+
   return (
     <div
       onClick={onClick}
@@ -75,11 +93,10 @@ export function MyCrewCard({ moim, onClick }: MoimCardProps) {
             <MemberCountIndicatorIcon />
             {moim.memberCount} / {moim.maxMember}
           </span>
-          {!moim.isOfficial && (
-            <span className="bg-orange-700/40 px-2 py-1 -my-1 rounded-full border border-white/20 drop-shadow-sm">
-              👑 {moim.leaderName || "방장없음"}
-            </span>
-          )}
+          {/* 온도: 기존 방장 pill 스타일과 동일하게 */}
+          <span className="bg-orange-700/40 px-2 py-1 -my-1 rounded-full border border-white/20 drop-shadow-sm">
+            🔥 {temp.toFixed(1)}°C
+          </span>
         </div>
       </div>
     </div>

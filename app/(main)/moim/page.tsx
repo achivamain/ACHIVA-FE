@@ -395,7 +395,10 @@ export default function MoimExplorePage() {
                     직접 첫 번째 모임을 만들어보세요!
                   </div>
                 ) : (
-                  filteredMoims.map((moim) => (
+                  filteredMoims.map((moim) => {
+                    const current = moim.groupGoalCurrent ?? 0;
+                    const temp = Math.min(100, Math.max(36.5, 36.5 + current * 0.8));
+                    return (
                     <div
                       key={moim.id}
                       onClick={() => router.push(`/moim/${moim.id}`)}
@@ -408,9 +411,14 @@ export default function MoimExplorePage() {
                           )}
                           {moim.name}
                         </h3>
-                        <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
-                          👤 {moim.memberCount} / {moim.maxMember}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+                            🔥 {temp.toFixed(1)}°C
+                          </span>
+                          <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                            👤 {moim.memberCount} / {moim.maxMember}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-1 mb-3 text-xs text-gray-500 font-medium">
                         <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
@@ -432,7 +440,8 @@ export default function MoimExplorePage() {
                         ))}
                       </div>
                     </div>
-                  ))
+                  );
+                  })
                 )}
               </div>
             )}
