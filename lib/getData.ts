@@ -238,7 +238,6 @@ export async function getHomeData(userId: string, token: string) {
   // 카테고리별 게시물 수 받아오기
   async function getPostCategory() {
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/count-by-category?memberId=${userId}`;
-    console.log("[DEBUG] Fetching PostCategory:", url);
     const res = await fetch(url, {
         method: "GET",
         headers: {
@@ -263,7 +262,7 @@ export async function getHomeData(userId: string, token: string) {
 
   async function getWeeklyPostCategory() {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/weekly-count-by-category?memberId=${userId}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/weekly-count-by-category?memberId=${userId}`,
       {
         method: "GET",
         headers: {
