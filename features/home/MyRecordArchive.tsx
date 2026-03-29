@@ -121,56 +121,61 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
           <div className="flex flex-col gap-6">
             {filteredPosts.map((post) => (
               <Link key={post.id} href={`/post/${post.id}`}>
-                <div
-                  className="w-full rounded-[24px] bg-white border border-[#F0EBE3]
-                shadow-[0_4px_20px_rgba(0,0,0,0.04)]
-                pt-[20px] pb-[20px] px-[20px]
-                hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1
-                transition-all duration-300 cursor-pointer ring-1 ring-[#F0EBE3]/50"
-                >
-                  {/* 카테고리, 날짜 */}
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="inline-flex items-center justify-center
-                    h-[26px] px-3 bg-[#1A1A1A] rounded-full
-                    font-bold text-[12px] text-white"
-                    >
-                      {post.category}
-                    </span>
-                    <span
-                      className={`font-semibold text-[13px] text-[#9CA3AF] ${inter.className}`}
-                    >
-                      {formatDateDisplay(post.createdAt)}
-                    </span>
-                  </div>
+                {(() => {
+                  const primaryQuestion = post.question?.[0];
+                  const questionLabel =
+                    primaryQuestion?.question?.trim() || "오늘의 운동 일지";
 
-                  {/* 본문 */}
-                  <h3 className="mt-4 font-bold text-[19px] leading-tight text-[#1A1A1A]">
-                    {post.title}
-                  </h3>
-
-                  {post.question?.slice(0, 1).map((q, idx) => (
+                  return (
                     <div
-                      key={idx}
-                      className="mt-4"
+                      className="w-full rounded-[24px] bg-white border border-[#F0EBE3]
+                    shadow-[0_4px_20px_rgba(0,0,0,0.04)]
+                    pt-[20px] pb-[20px] px-[20px]
+                    hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1
+                    transition-all duration-300 cursor-pointer ring-1 ring-[#F0EBE3]/50"
                     >
-                      <span
-                        className="inline-flex items-center justify-center
-                      h-[22px] px-2.5 bg-[#F5F3F0] rounded-[6px]
-                      font-bold text-[11px] text-[#9CA3AF]"
-                      >
-                        {q.question}
-                      </span>
-                      {q.content && (
-                        <p
-                          className={`mt-2 font-medium text-[14px] leading-relaxed text-[#4B5563] line-clamp-2 ${inter.className}`}
+                      {/* 카테고리, 날짜 */}
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="inline-flex items-center justify-center
+                        h-[26px] px-3 bg-[#F5F3F0] rounded-full
+                        font-bold text-[12px] text-[#1A1A1A]"
                         >
-                          {q.content}
-                        </p>
+                          {post.category}
+                        </span>
+                        <span
+                          className={`font-semibold text-[13px] text-[#9CA3AF] ${inter.className}`}
+                        >
+                          {formatDateDisplay(post.createdAt)}
+                        </span>
+                      </div>
+
+                      {/* 본문 */}
+                      <h3 className="mt-2 font-bold text-[19px] leading-tight text-[#1A1A1A]">
+                        {post.title}
+                      </h3>
+
+                      {primaryQuestion && (
+                        <div className="mt-2">
+                          <span
+                            className="inline-flex items-center justify-center
+                          h-[22px] px-2.5 bg-[#F5F3F0] rounded-[6px]
+                          font-bold text-[11px] text-[#9CA3AF]"
+                          >
+                            {questionLabel}
+                          </span>
+                          {primaryQuestion.content && (
+                            <p
+                              className={`mt-2 font-medium text-[14px] leading-relaxed text-[#4B5563] line-clamp-2 ${inter.className}`}
+                            >
+                              {primaryQuestion.content}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </Link>
             ))}
           </div>

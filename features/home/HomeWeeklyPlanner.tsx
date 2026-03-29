@@ -26,6 +26,7 @@ import {
   localPlannerPlanRepository,
   type PlannerPlanMap,
 } from "@/features/home/plannerPlanRepository";
+import { useDraftPostStore } from "@/store/CreatePostStore";
 import type { Category } from "@/types/Categories";
 import type { CategoryCount } from "@/types/Post";
 import type { PostsData } from "@/types/responses";
@@ -159,11 +160,11 @@ function PlannerDayButton({
           className,
           "flex h-[76px] w-full flex-col items-center justify-center gap-1.5 rounded-[18px] px-1 py-3 transition-all duration-200 active:scale-95",
           isSelected
-            ? "bg-[#1A1A1A] shadow-lg shadow-black/15"
+            ? "bg-[#6B625A] shadow-lg shadow-black/15"
             : hasCompletedPlanned
               ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
             : isToday(date)
-              ? "bg-[#FFF4EC] ring-1.5 ring-[#D96B2B]/35"
+              ? "bg-[#FFF4EC] ring-1 ring-[#D96B2B]/35"
               : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
         )}
       >
@@ -178,7 +179,7 @@ function PlannerDayButton({
                   ? "text-[#EF4444]"
                 : dayIndex === 5
                     ? "text-[#3B82F6]"
-                    : "text-[#1A1A1A]",
+                    : "text-[#4A433D]",
             shouldDimPast && "opacity-55",
           )}
         >
@@ -201,7 +202,7 @@ function PlannerDayButton({
         className,
         "flex h-[58px] w-full flex-col items-center justify-center gap-1 rounded-[14px] px-1 py-2 transition-all duration-200 active:scale-95",
         isSelected
-          ? "bg-[#1A1A1A] shadow-md shadow-black/15"
+          ? "bg-[#6B625A] shadow-md shadow-black/15"
           : hasCompletedPlanned
             ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
           : isToday(date)
@@ -221,7 +222,7 @@ function PlannerDayButton({
                 ? "text-[#EF4444]"
                 : dayIndex === 5
                   ? "text-[#3B82F6]"
-                  : "text-[#1A1A1A]",
+                  : "text-[#4A433D]",
           isWeekend && !isSelected && "font-extrabold",
           shouldDimPast && !modifiers.outside && "opacity-55",
         )}
@@ -260,10 +261,10 @@ export default function HomeWeeklyPlanner({
   categories,
   categoryCounts,
 }: HomeWeeklyPlannerProps) {
-  void categoryCounts;
-
   const router = useRouter();
   const pathname = usePathname();
+  const resetPost = useDraftPostStore.use.resetPost();
+  const setPost = useDraftPostStore.use.setPost();
   const today = useMemo(() => new Date(), []);
   const currentWeekStart = useMemo(
     () => startOfWeek(today, { weekStartsOn: WEEK_STARTS_ON }),
@@ -294,6 +295,13 @@ export default function HomeWeeklyPlanner({
     ? (completedCategoriesByDate[selectedDateKey] ?? [])
     : [];
   const selectedDayStatus = selectedDate ? getDayStatus(selectedDate) : null;
+  const categoryCountMap = useMemo(
+    () =>
+      new Map(
+        categoryCounts.map((item) => [item.category, item.count] as const),
+      ),
+    [categoryCounts],
+  );
   const plannedDates = useMemo(
     () =>
       new Set(
@@ -511,6 +519,16 @@ export default function HomeWeeklyPlanner({
     router.push(`${pathname}?date=${dateText}#record-archive`);
   };
 
+  const handleWriteCategory = (category: Category) => {
+    resetPost();
+    setPost({
+      category,
+      categoryCount: categoryCountMap.get(category) ?? 0,
+    });
+
+    router.push(pathname.startsWith("/m/") ? "/m/post/create" : "/post/create");
+  };
+
   return (
     <>
       <section className="mx-5 overflow-hidden rounded-[24px] bg-white shadow-[0_2px_20px_rgba(0,0,0,0.07)] ring-1 ring-[#F0EBE3] sm:mx-auto sm:w-full sm:max-w-[640px]">
@@ -519,7 +537,7 @@ export default function HomeWeeklyPlanner({
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">
               {viewMode === "weekly" ? "Weekly Plan" : "Monthly Plan"}
             </p>
-            <h3 className="mt-0.5 text-[18px] font-bold tracking-tight text-[#1A1A1A]">
+            <h3 className="mt-0.5 text-[18px] font-bold tracking-tight text-[#4A433D]">
               {headerLabel}
             </h3>
           </div>
@@ -531,7 +549,7 @@ export default function HomeWeeklyPlanner({
               className={cn(
                 "rounded-full px-3 py-1 text-[11px] font-bold transition-all duration-200",
                 viewMode === "weekly"
-                  ? "bg-white text-[#1A1A1A] shadow-sm"
+                  ? "bg-white text-[#4A433D] shadow-sm"
                   : "text-[#9CA3AF] hover:text-[#6B7280]",
               )}
             >
@@ -543,7 +561,7 @@ export default function HomeWeeklyPlanner({
               className={cn(
                 "rounded-full px-3 py-1 text-[11px] font-bold transition-all duration-200",
                 viewMode === "monthly"
-                  ? "bg-white text-[#1A1A1A] shadow-sm"
+                  ? "bg-white text-[#4A433D] shadow-sm"
                   : "text-[#9CA3AF] hover:text-[#6B7280]",
               )}
             >
@@ -559,7 +577,7 @@ export default function HomeWeeklyPlanner({
               onClick={() =>
                 setMonthlyDisplayDate((current) => addMonths(current, -1))
               }
-              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#1A1A1A] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
+              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
             >
               이전 달
             </button>
@@ -568,7 +586,7 @@ export default function HomeWeeklyPlanner({
               onClick={() =>
                 setMonthlyDisplayDate((current) => addMonths(current, 1))
               }
-              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#1A1A1A] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
+              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
             >
               다음 달
             </button>
@@ -643,7 +661,7 @@ export default function HomeWeeklyPlanner({
         <div className="flex justify-end px-5 pb-4">
           <div className="flex items-center gap-1.5 rounded-full bg-[#FFF8D9] px-3 py-1.5 text-[12px] font-semibold text-[#8A5A14]">
             <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동 계획</span>
-            <span className="font-bold text-[#1A1A1A]">
+            <span className="font-bold text-[#4A433D]">
               {visibleCompletedPlannedCount}
             </span>
             <span>개</span>
@@ -659,6 +677,7 @@ export default function HomeWeeklyPlanner({
         allCategories={categories}
         onClose={() => setSelectedDate(null)}
         onToggleCategory={handleToggleCategory}
+        onWriteCategory={handleWriteCategory}
         onMoveToArchive={moveToArchive}
       />
     </>

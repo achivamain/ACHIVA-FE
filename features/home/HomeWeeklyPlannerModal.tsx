@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Category } from "@/types/Categories";
@@ -62,6 +63,7 @@ type HomeWeeklyPlannerModalProps = {
   allCategories: Category[];
   onClose: () => void;
   onToggleCategory: (category: Category) => void;
+  onWriteCategory: (category: Category) => void;
   onMoveToArchive: () => void;
 };
 
@@ -73,9 +75,12 @@ export default function HomeWeeklyPlannerModal({
   allCategories,
   onClose,
   onToggleCategory,
+  onWriteCategory,
   onMoveToArchive,
 }: HomeWeeklyPlannerModalProps) {
   const isOpen = selectedDate !== null;
+  const activeWriteCategory =
+    dayStatus === "today" ? plannedCategories[plannedCategories.length - 1] : null;
 
   return (
     <>
@@ -105,7 +110,7 @@ export default function HomeWeeklyPlannerModal({
                 <p className="text-[12px] font-bold text-[#D96B2B]">
                   {DAY_LABELS[getDayIndex(selectedDate)]}요일
                 </p>
-                <h4 className="text-[20px] font-extrabold text-[#1A1A1A]">
+                <h4 className="text-[20px] font-extrabold text-[#4A433D]">
                   {format(selectedDate, "M월 d일", { locale: ko })}
                 </h4>
               </>
@@ -157,7 +162,7 @@ export default function HomeWeeklyPlannerModal({
             <button
               type="button"
               onClick={onMoveToArchive}
-              className="flex w-full items-center justify-between rounded-[16px] bg-[#1A1A1A] px-4 py-3.5 text-left transition-all active:scale-[0.98]"
+              className="flex w-full items-center justify-between rounded-[16px] bg-[#4A433D] px-4 py-3.5 text-left transition-all active:scale-[0.98]"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
@@ -186,7 +191,7 @@ export default function HomeWeeklyPlannerModal({
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-[#1A1A1A]">
+              <div className="flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-[#4A433D]">
                 보러가기
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +227,7 @@ export default function HomeWeeklyPlannerModal({
                       className={cn(
                         "flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold transition-all active:scale-95",
                         isPlanned
-                          ? "bg-[#1A1A1A] text-white"
+                          ? "bg-[#4A433D] text-white"
                           : "border border-dashed border-[#D1C9BE] bg-white text-[#9CA3AF] hover:border-[#D96B2B] hover:text-[#D96B2B]",
                       )}
                     >
@@ -241,48 +246,59 @@ export default function HomeWeeklyPlannerModal({
                   ? "오늘 할 운동"
                   : "오늘 운동을 계획해보세요"
                 : plannedCategories.length > 0
-                  ? "예정된 운동"
+                ? "예정된 운동"
                   : "운동을 계획해보세요"}
             </p>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {allCategories.map((category) => {
                 const isPlanned = plannedCategories.includes(category);
 
                 return (
-                  <button
+                  <div
                     key={category}
-                    type="button"
-                    onClick={() => onToggleCategory(category)}
-                    className={cn(
-                      "flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold transition-all active:scale-95",
-                      isPlanned
-                        ? "bg-[#1A1A1A] text-white"
-                        : "border border-dashed border-[#D1C9BE] bg-white text-[#9CA3AF] hover:border-[#D96B2B] hover:text-[#D96B2B]",
-                    )}
+                    className="flex items-center gap-2"
                   >
-                    <span>{category}</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => onToggleCategory(category)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold transition-all active:scale-95",
+                        isPlanned
+                          ? "bg-[#4A433D] text-white"
+                          : "border border-dashed border-[#D1C9BE] bg-white text-[#9CA3AF] hover:border-[#D96B2B] hover:text-[#D96B2B]",
+                      )}
+                    >
+                      <span>{category}</span>
+                    </button>
+                  </div>
                 );
               })}
             </div>
 
-            {plannedCategories.length > 0 && (
-              <div className="mt-4 rounded-[18px] bg-[#FCFCFA] px-4 py-3 ring-1 ring-[#F0EBE3]">
-                <p className="text-[12px] font-semibold text-[#9CA3AF]">
-                  선택된 계획
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {plannedCategories.map((category) => (
-                    <span
-                      key={category}
-                      className="rounded-full bg-[#FFF4EC] px-3 py-1.5 text-[13px] font-semibold text-[#D96B2B] ring-1 ring-[#D96B2B]/20"
-                    >
-                      {category}
-                    </span>
-                  ))}
+            {dayStatus === "today" && plannedCategories.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="mt-4 flex items-center justify-between rounded-[18px] bg-[#4A433D] px-4 py-3 text-white shadow-lg shadow-black/10"
+              >
+                <div>
+                  <p className="text-[11px] text-white/45">
+                    오늘 계획한 운동
+                  </p>
+                  <p className="mt-0.5 text-[15px] font-bold">
+                    {activeWriteCategory} 기록하러 가기
+                  </p>
                 </div>
-              </div>
+                <button
+                  type="button"
+                  onClick={() => activeWriteCategory && onWriteCategory(activeWriteCategory)}
+                  className="rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-[#4A433D]"
+                >
+                  글 쓰기
+                </button>
+              </motion.div>
             )}
           </div>
         ) : null}
