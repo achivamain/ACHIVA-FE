@@ -5,6 +5,7 @@ import { categories, categoryImages } from "@/types/Categories";
 import { CategoryCharCount, CategoryCount } from "@/types/Post";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Category } from "@/types/Categories";
 
 import LiveActivityTicker from "@/features/home/LiveActivityTicker";
@@ -20,8 +21,12 @@ export function MyCategorys({
   weeklyCategoryCounts: CategoryCount[];
   categoryCharCounts?: CategoryCharCount[];
 }) {
+  const pathname = usePathname();
   const resetPost = useDraftPostStore.use.resetPost();
   const setPost = useDraftPostStore.use.setPost();
+  const createPostPath = pathname.startsWith("/m/")
+    ? "/m/post/create"
+    : "/post/create";
   const categorysData = myCategories.map((cat) => {
     const countData = categoryCounts.find((i) => i.category == cat);
     const charCountData = categoryCharCounts.find((i) => i.category == cat);
@@ -79,7 +84,7 @@ export function MyCategorys({
             return (
               <Link
                 key={cat.category}
-                href="/post/create"
+                href={createPostPath}
                 onClick={() => handleCategoryClick(cat)}
                 className="flex flex-col items-center gap-2.5 group cursor-pointer w-[76px] sm:w-[92px]"
               >

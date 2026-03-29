@@ -36,6 +36,7 @@ export default async function HomePage({
       categoryCharCounts,
       totalArticleCount,
       weeklyArticleCount,
+      streakWeeks,
     } = await getHomeData(user.id, token);
 
     return (
@@ -67,6 +68,7 @@ export default async function HomePage({
               <div className="h-6"></div>
               <MyAchievementsSummary 
                 totalCount={totalArticleCount}
+                streakWeeks={streakWeeks}
                 thisWeekCount={weeklyArticleCount}
               />
               <div className="h-10"></div>

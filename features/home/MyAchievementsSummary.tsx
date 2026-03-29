@@ -14,15 +14,8 @@ export default function MyAchievementsSummary({
 }) {
   // 열정 온도 계산 로직 (기본 36.5도 보장, 상승폭 유지, 난이도 조절)
   const passionTemp = useMemo(() => {
-    let calculated = 36.5 + (totalCount * 0.2) + (streakWeeks * 0.8);
-    
-    // 냉각 패널티: 주 3회 미만일 때 차감 (하지만 최소 36.5도는 유지하여 긍정적인 피드백 지속)
-    if (thisWeekCount < 3) {
-      const penalty = (3 - thisWeekCount) * 1.5;
-      calculated -= penalty;
-    }
-    
-    return Math.max(36.5, Math.min(99.9, Number(calculated.toFixed(1))));
+    let calculated = 36.5 + (totalCount * 0.2) + (streakWeeks * 0.8)
+    return Math.max(36.5, Math.min(100, Number(calculated.toFixed(1))));
   }, [totalCount, streakWeeks, thisWeekCount]);
 
   // 구간을 6단계로 세밀하게 나누고 긍정적인 문구 반영
