@@ -2,7 +2,20 @@
 // 에러명을 잘 짓고 싶다...
 
 import { notFound } from "next/navigation";
+import { endOfWeek, format, parseISO, startOfWeek, subWeeks } from "date-fns";
 import { CategoryCharCount, CategoryCount, PostRes } from "@/types/Post";
+import type { PostsData } from "@/types/responses";
+
+const PROJECT_START_DATE = "2025-01-01T00:00:00";
+const MEMBER_POSTS_PAGE_SIZE = 100;
+
+function toDateTimeParam(date: Date) {
+  return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+}
+
+function toWeekKey(date: Date) {
+  return format(startOfWeek(date, { weekStartsOn: 1 }), "yyyy-MM-dd");
+}
 
 export async function getPostData(postId: string, token: string) {
   async function getPost() {
@@ -131,10 +144,100 @@ export async function getSummeryData(token: string) {
 
 // /[nickName]/home
 export async function getHomeData(userId: string, token: string) {
+  async function getArticleCount(startDate: string, endDate: string) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/${userId}/count?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Error in fetch article count: ", errorData);
+      throw new Error(errorData.error || "서버 오류");
+    }
+
+    const { data } = await res.json();
+    if (!data || typeof data.articleCount !== "number") {
+      throw new Error("Invalid article count data");
+    }
+
+    return data.articleCount as number;
+  }
+
+  async function getStreakWeeks() {
+    const projectStart = parseISO(PROJECT_START_DATE);
+    const activeWeekKeys = new Set<string>();
+    let page = 0;
+
+    while (true) {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/member/${userId}/articles?page=${page}&size=${MEMBER_POSTS_PAGE_SIZE}&sort=createdAt,DESC`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Error in fetch posts for streak weeks: ", errorData);
+        throw new Error(errorData.error || "서버 오류");
+      }
+
+      const json = await res.json();
+      const data = json.data as PostsData;
+      const posts = data?.content ?? [];
+
+      if (posts.length === 0) {
+        break;
+      }
+
+      let reachedProjectStart = false;
+
+      for (const post of posts) {
+        const createdAt = parseISO(post.createdAt);
+
+        if (createdAt < projectStart) {
+          reachedProjectStart = true;
+          break;
+        }
+
+        activeWeekKeys.add(toWeekKey(createdAt));
+      }
+
+      if (reachedProjectStart || data.last) {
+        break;
+      }
+
+      page += 1;
+    }
+
+    let streakWeeks = 0;
+    let cursorWeekStart = subWeeks(
+      startOfWeek(new Date(), { weekStartsOn: 1 }),
+      1,
+    );
+
+    while (activeWeekKeys.has(format(cursorWeekStart, "yyyy-MM-dd"))) {
+      streakWeeks += 1;
+      cursorWeekStart = subWeeks(cursorWeekStart, 1);
+    }
+
+    return streakWeeks;
+  }
+
   // 카테고리별 게시물 수 받아오기
   async function getPostCategory() {
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/count-by-category?memberId=${userId}`;
-    console.log("[DEBUG] Fetching PostCategory:", url);
     const res = await fetch(url, {
         method: "GET",
         headers: {
@@ -158,15 +261,14 @@ export async function getHomeData(userId: string, token: string) {
   }
 
   async function getWeeklyPostCategory() {
-    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/weekly-count-by-category?memberId=${userId}`;
-    console.log("[DEBUG] Fetching WeeklyPostCategory:", url);
-    const res = await fetch(url, {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/weekly-count-by-category?memberId=${userId}`,
+      {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        cache: "no-store",
       },
     );
     if (!res.ok) {
@@ -210,9 +312,37 @@ export async function getHomeData(userId: string, token: string) {
     return categoryCharacterCounts as CategoryCharCount[];
   }
 
-  const [categoryCounts, weeklyCategoryCounts, mySummaryData, categoryCharCounts] = await Promise.all(
-    [getPostCategory(), getWeeklyPostCategory(), getSummaryData(token), getCategorysCharCount()],
+  const now = new Date();
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+
+  const [
+    categoryCounts,
+    weeklyCategoryCounts,
+    mySummaryData,
+    categoryCharCounts,
+    totalArticleCount,
+    weeklyArticleCount,
+    streakWeeks,
+  ] = await Promise.all(
+    [
+      getPostCategory(),
+      getWeeklyPostCategory(),
+      getSummaryData(token),
+      getCategorysCharCount(),
+      getArticleCount(PROJECT_START_DATE, toDateTimeParam(now)),
+      getArticleCount(toDateTimeParam(weekStart), toDateTimeParam(weekEnd)),
+      getStreakWeeks(),
+    ],
   );
 
-  return { categoryCounts, weeklyCategoryCounts, mySummaryData, categoryCharCounts };
+  return {
+    categoryCounts,
+    weeklyCategoryCounts,
+    mySummaryData,
+    categoryCharCounts,
+    totalArticleCount,
+    weeklyArticleCount,
+    streakWeeks,
+  };
 }
