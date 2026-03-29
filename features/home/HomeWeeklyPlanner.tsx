@@ -61,6 +61,38 @@ function getDayStatus(date: Date): DayStatus {
   return isBefore(startOfDay(date), startOfDay(new Date())) ? "past" : "future";
 }
 
+function getCompletedPlannedCount(
+  dates: string[],
+  plans: PlannerPlanMap,
+  completedCategoriesByDate: Record<string, string[]>,
+) {
+  return dates.reduce((count, dateKey) => {
+    const plannedCategories = plans[dateKey]?.categories ?? [];
+    const completedCategories = new Set(completedCategoriesByDate[dateKey] ?? []);
+
+    return (
+      count +
+      plannedCategories.filter((category) => completedCategories.has(category))
+        .length
+    );
+  }, 0);
+}
+
+function getCompletedPlannedDates(
+  dates: string[],
+  plans: PlannerPlanMap,
+  completedCategoriesByDate: Record<string, string[]>,
+) {
+  return new Set(
+    dates.filter((dateKey) => {
+      const plannedCategories = plans[dateKey]?.categories ?? [];
+      const completedCategories = new Set(completedCategoriesByDate[dateKey] ?? []);
+
+      return plannedCategories.some((category) => completedCategories.has(category));
+    }),
+  );
+}
+
 function DayDots({
   hasPlanned,
   hasCompleted,
@@ -71,7 +103,7 @@ function DayDots({
   bright?: boolean;
 }) {
   return (
-    <div className="flex min-h-[8px] items-center justify-center gap-1">
+    <div className="mt-1 flex min-h-[8px] translate-y-1 items-center justify-center gap-1">
       {hasPlanned && (
         <span
           className={cn(
@@ -98,12 +130,14 @@ function PlannerDayButton({
   variant,
   plannedDates,
   completedDates,
+  completedPlannedDates,
   className,
   ...buttonProps
 }: DayButtonProps & {
   variant: ViewMode;
   plannedDates: Set<string>;
   completedDates: Set<string>;
+  completedPlannedDates: Set<string>;
 }) {
   const date = day.date;
   const dateKey = getDateKey(date);
@@ -113,6 +147,8 @@ function PlannerDayButton({
   const isWeekend = dayIndex >= 5;
   const hasPlanned = plannedDates.has(dateKey);
   const hasCompleted = completedDates.has(dateKey);
+  const hasCompletedPlanned = completedPlannedDates.has(dateKey);
+  const shouldDimPast = isPast && !isSelected;
 
   if (variant === "weekly") {
     return (
@@ -124,10 +160,11 @@ function PlannerDayButton({
           "flex h-[76px] w-full flex-col items-center justify-center gap-1.5 rounded-[18px] px-1 py-3 transition-all duration-200 active:scale-95",
           isSelected
             ? "bg-[#1A1A1A] shadow-lg shadow-black/15"
+            : hasCompletedPlanned
+              ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
             : isToday(date)
               ? "bg-[#FFF4EC] ring-1.5 ring-[#D96B2B]/35"
               : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
-          isPast && !isSelected && "opacity-55",
         )}
       >
         <span
@@ -139,9 +176,10 @@ function PlannerDayButton({
                 ? "text-[#D96B2B]"
                 : dayIndex === 6
                   ? "text-[#EF4444]"
-                  : dayIndex === 5
+                : dayIndex === 5
                     ? "text-[#3B82F6]"
                     : "text-[#1A1A1A]",
+            shouldDimPast && "opacity-55",
           )}
         >
           {format(date, "d")}
@@ -164,11 +202,12 @@ function PlannerDayButton({
         "flex h-[58px] w-full flex-col items-center justify-center gap-1 rounded-[14px] px-1 py-2 transition-all duration-200 active:scale-95",
         isSelected
           ? "bg-[#1A1A1A] shadow-md shadow-black/15"
+          : hasCompletedPlanned
+            ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
           : isToday(date)
             ? "bg-[#FFF4EC] ring-1 ring-[#D96B2B]/35"
             : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
         modifiers.outside && "opacity-35",
-        isPast && !isSelected && !modifiers.outside && "opacity-55",
       )}
     >
       <span
@@ -184,6 +223,7 @@ function PlannerDayButton({
                   ? "text-[#3B82F6]"
                   : "text-[#1A1A1A]",
           isWeekend && !isSelected && "font-extrabold",
+          shouldDimPast && !modifiers.outside && "opacity-55",
         )}
       >
         {format(date, "d")}
@@ -262,6 +302,40 @@ export default function HomeWeeklyPlanner({
           .map((entry) => entry.date),
       ),
     [plans],
+  );
+  const weeklyDateKeys = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, index) =>
+        getDateKey(addDays(weekStart, index)),
+      ),
+    [weekStart],
+  );
+  const monthlyDateKeys = useMemo(() => {
+    const keys: string[] = [];
+
+    for (
+      let cursor = currentMonth;
+      !isBefore(monthEnd, cursor);
+      cursor = addDays(cursor, 1)
+    ) {
+      keys.push(getDateKey(cursor));
+    }
+
+    return keys;
+  }, [currentMonth, monthEnd]);
+  const completedPlannedDates = useMemo(
+    () =>
+      viewMode === "weekly"
+        ? getCompletedPlannedDates(weeklyDateKeys, plans, completedCategoriesByDate)
+        : getCompletedPlannedDates(monthlyDateKeys, plans, completedCategoriesByDate),
+    [completedCategoriesByDate, monthlyDateKeys, plans, viewMode, weeklyDateKeys],
+  );
+  const visibleCompletedPlannedCount = useMemo(
+    () =>
+      viewMode === "weekly"
+        ? getCompletedPlannedCount(weeklyDateKeys, plans, completedCategoriesByDate)
+        : getCompletedPlannedCount(monthlyDateKeys, plans, completedCategoriesByDate),
+    [completedCategoriesByDate, monthlyDateKeys, plans, viewMode, weeklyDateKeys],
   );
 
   const headerLabel =
@@ -552,6 +626,7 @@ export default function HomeWeeklyPlanner({
                   variant={viewMode}
                   plannedDates={plannedDates}
                   completedDates={completedDates}
+                  completedPlannedDates={completedPlannedDates}
                 />
               ),
               ...(viewMode === "weekly"
@@ -563,6 +638,16 @@ export default function HomeWeeklyPlanner({
                 : {}),
             }}
           />
+        </div>
+
+        <div className="flex justify-end px-5 pb-4">
+          <div className="flex items-center gap-1.5 rounded-full bg-[#FFF8D9] px-3 py-1.5 text-[12px] font-semibold text-[#8A5A14]">
+            <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동 계획</span>
+            <span className="font-bold text-[#1A1A1A]">
+              {visibleCompletedPlannedCount}
+            </span>
+            <span>개</span>
+          </div>
         </div>
       </section>
 
