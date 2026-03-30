@@ -7,8 +7,8 @@ import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import AiReportWidget from "@/features/home/AiReportWidget";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
-import { notFound } from "next/navigation";
-import { getUser } from "@/lib/getUser";
+import { notFound, redirect } from "next/navigation";
+import { getMe } from "@/lib/getUser";
 
 export default async function MobileHomePageRoute({
   params,
@@ -19,8 +19,11 @@ export default async function MobileHomePageRoute({
   if (error) return <Logout />;
 
   const { nickName } = await params;
-  const user = await getUser(nickName, token).catch(() => null);
+  const user = await getMe(token).catch(() => null);
   if (!user) notFound();
+  if (user.nickName !== decodeURIComponent(nickName)) {
+    redirect(`/${nickName}`);
+  }
 
   try {
     const {

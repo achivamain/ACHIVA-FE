@@ -308,6 +308,9 @@ export default function HomeWeeklyPlanner({
     ? (completedCategoriesByDate[selectedDateKey] ?? [])
     : [];
   const selectedDayStatus = selectedDate ? getDayStatus(selectedDate) : null;
+  const isPastSelectedDate = selectedDate
+    ? startOfDay(selectedDate) < startOfDay(today) && !isToday(selectedDate)
+    : false;
   const categoryCountMap = useMemo(
     () =>
       new Map(
@@ -491,7 +494,7 @@ export default function HomeWeeklyPlanner({
   };
 
   const handleToggleCategory = async (category: Category) => {
-    if (!selectedDateKey) return;
+    if (!selectedDateKey || isPastSelectedDate) return;
 
     const nextCategories = selectedCategories.includes(category)
       ? selectedCategories.filter((item) => item !== category)

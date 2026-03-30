@@ -209,34 +209,6 @@ export default function HomeWeeklyPlannerModal({
                 </svg>
               </div>
             </button>
-
-            <div className="mt-6">
-              <p className="mb-3 text-[12px] font-semibold text-[#9CA3AF]">
-                테스트용 계획 수정
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {allCategories.map((category) => {
-                  const isPlanned = plannedCategories.includes(category);
-
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => onToggleCategory(category)}
-                      className={cn(
-                        "flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold transition-all active:scale-95",
-                        isPlanned
-                          ? "bg-[#4A433D] text-white"
-                          : "border border-dashed border-[#D1C9BE] bg-white text-[#9CA3AF] hover:border-[#D96B2B] hover:text-[#D96B2B]",
-                      )}
-                    >
-                      <span>{category}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         ) : selectedDate && dayStatus ? (
           <div className="px-5 pt-4 pb-6">

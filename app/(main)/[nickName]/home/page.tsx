@@ -1,6 +1,6 @@
 import Banner from "@/features/event/Banner";
 import { Category } from "@/types/Categories";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
 import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
@@ -9,7 +9,7 @@ import LiveActivityTicker from "@/features/home/LiveActivityTicker";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
 import { getAuthSession } from "@/lib/getAuthSession";
-import { getUser } from "@/lib/getUser";
+import { getMe, isOwner } from "@/lib/getUser";
 import AiReportWidget from "@/features/home/AiReportWidget";
 
 export default async function HomePage({
@@ -21,8 +21,12 @@ export default async function HomePage({
   if (error) return <Logout />;
 
   const { nickName } = await params;
-  const user = await getUser(nickName, token).catch(() => null);
+  const user = await getMe(token).catch(() => null);
   if (!user) notFound();
+
+  if (!(await isOwner(nickName, token))) {
+    redirect(`/${nickName}`);
+  }
 
   try {
     const {
