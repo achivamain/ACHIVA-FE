@@ -65,7 +65,6 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
 
   const allPosts: PostRes[] = data?.pages.flatMap((page) => page.content) ?? [];
 
-  // 날짜 필터링 로직
   const filteredPosts = selectedDate
     ? allPosts.filter((post) => {
         const postDate = format(new Date(post.createdAt), "yyyy-MM-dd");
@@ -107,8 +106,8 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
         {filteredPosts.length === 0 ? (
           <div className="py-10 text-center">
             <p className="text-[#8E95A9] text-[15px]">
-              {isFiltered 
-                ? "해당 날짜에 작성된 기록이 이 목록에 없습니다." 
+              {isFiltered
+                ? "해당 날짜에 작성된 기록이 이 목록에 없습니다."
                 : "아직 작성한 기록이 없습니다."}
             </p>
             {isFiltered && (
@@ -182,7 +181,6 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
             </div>
         )}
 
-        {/* 무한 스크롤 트리거 */}
         <div ref={observerRef} className="h-10" />
         {isFetchingNextPage && (
           <div className="flex justify-center py-4">

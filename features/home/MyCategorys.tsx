@@ -8,8 +8,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Category } from "@/types/Categories";
 
-import LiveActivityTicker from "@/features/home/LiveActivityTicker";
-
 export function MyCategorys({
   myCategories,
   categoryCounts,
@@ -27,22 +25,25 @@ export function MyCategorys({
   const createPostPath = pathname.startsWith("/m/")
     ? "/m/post/create"
     : "/post/create";
-  const categorysData = myCategories.map((cat) => {
-    const countData = categoryCounts.find((i) => i.category == cat);
-    const charCountData = categoryCharCounts.find((i) => i.category == cat);
-    const weeklyCountData = weeklyCategoryCounts.find((i) => i.category == cat);
 
-    return {
-      category: cat,
-      count: Number(countData?.count ?? 0),
-      charCount: Number(charCountData?.characterCount ?? 0),
-      weeklyCount: Number(weeklyCountData?.count ?? 0),
-    };
-  }).sort((a, b) => {
-    if (b.count !== a.count) return b.count - a.count;
-    if (b.charCount !== a.charCount) return b.charCount - a.charCount;
-    return a.category.localeCompare(b.category, "ko");
-  });
+  const categorysData = myCategories
+    .map((cat) => {
+      const countData = categoryCounts.find((i) => i.category == cat);
+      const charCountData = categoryCharCounts.find((i) => i.category == cat);
+      const weeklyCountData = weeklyCategoryCounts.find((i) => i.category == cat);
+
+      return {
+        category: cat,
+        count: Number(countData?.count ?? 0),
+        charCount: Number(charCountData?.characterCount ?? 0),
+        weeklyCount: Number(weeklyCountData?.count ?? 0),
+      };
+    })
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      if (b.charCount !== a.charCount) return b.charCount - a.charCount;
+      return a.category.localeCompare(b.category, "ko");
+    });
 
   const handleCategoryClick = (cat: { category: string; count: number }) => {
     resetPost();
@@ -54,7 +55,6 @@ export function MyCategorys({
 
   return (
     <div className="flex flex-col w-full pb-0 overflow-hidden">
-      {/* 상단 타이틀 구역 */}
       <div className="flex items-center justify-between px-5 sm:px-9 mt-8 sm:mt-12 mb-6">
         <h1 className="text-[20px] sm:text-[24px] font-bold leading-[31px] text-black tracking-tight">
           오늘의 운동 기록
@@ -67,20 +67,17 @@ export function MyCategorys({
         </Link>
       </div>
 
-      {/* 종목 빠른 기록 영역 */}
       <div className="w-full overflow-x-auto pl-5 pr-0 pb-4 sm:px-9 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex min-w-max items-start gap-4 pr-5 sm:gap-5 sm:pr-0">
-          {/* 내 종목 카드들 */}
           {categorysData.map((cat) => {
             const imageSrc = categoryImages[cat.category as Category];
             const hasAnyPost = cat.count > 0;
             const isActiveThisWeek = cat.weeklyCount > 0;
             const ringClass = hasAnyPost
-                ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
-                : "from-[#8A94A3] to-[#E2E8F0]";
-            const badgeLabel = hasAnyPost
-              ? `🔥 ${cat.count}`
-              : "New";
+              ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
+              : "from-[#8A94A3] to-[#E2E8F0]";
+            const badgeLabel = hasAnyPost ? `🔥 ${cat.count}` : "New";
+
             return (
               <Link
                 key={cat.category}
@@ -123,10 +120,6 @@ export function MyCategorys({
             );
           })}
         </div>
-      </div>
-      {/* 전광판: 카테고리 라벨 바로 아래 */}
-      <div className="mt-2">
-        <LiveActivityTicker />
       </div>
     </div>
   );

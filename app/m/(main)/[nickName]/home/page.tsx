@@ -4,6 +4,7 @@ import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
 import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
+import AiReportWidget from "@/features/home/AiReportWidget";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
 import { notFound } from "next/navigation";
@@ -51,6 +52,8 @@ export default async function MobileHomePageRoute({
           streakWeeks={streakWeeks}
           thisWeekCount={weeklyArticleCount}
         />
+        <div className="h-6" />
+        <AiReportWidget userId={user.id} />
         <div className="h-6" />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>
