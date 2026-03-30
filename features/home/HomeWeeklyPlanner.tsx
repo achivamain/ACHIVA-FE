@@ -79,6 +79,16 @@ function getCompletedPlannedCount(
   }, 0);
 }
 
+function getCompletedCount(
+  dates: string[],
+  completedPostCountByDate: Record<string, number>,
+) {
+  return dates.reduce(
+    (count, dateKey) => count + (completedPostCountByDate[dateKey] ?? 0),
+    0,
+  );
+}
+
 function getCompletedPlannedDates(
   dates: string[],
   plans: PlannerPlanMap,
@@ -275,6 +285,9 @@ export default function HomeWeeklyPlanner({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [plans, setPlans] = useState<PlannerPlanMap>({});
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
+  const [completedPostCountByDate, setCompletedPostCountByDate] = useState<
+    Record<string, number>
+  >({});
   const [completedCategoriesByDate, setCompletedCategoriesByDate] = useState<
     Record<string, string[]>
   >({});
@@ -345,6 +358,13 @@ export default function HomeWeeklyPlanner({
         : getCompletedPlannedCount(monthlyDateKeys, plans, completedCategoriesByDate),
     [completedCategoriesByDate, monthlyDateKeys, plans, viewMode, weeklyDateKeys],
   );
+  const visibleCompletedCount = useMemo(
+    () =>
+      viewMode === "weekly"
+        ? getCompletedCount(weeklyDateKeys, completedPostCountByDate)
+        : getCompletedCount(monthlyDateKeys, completedPostCountByDate),
+    [completedPostCountByDate, monthlyDateKeys, viewMode, weeklyDateKeys],
+  );
 
   const headerLabel =
     viewMode === "monthly"
@@ -383,6 +403,7 @@ export default function HomeWeeklyPlanner({
     async function fetchCompletedStatus() {
       try {
         const nextCompletedDates = new Set<string>();
+        const nextCompletedPostCountByDate = new Map<string, number>();
         const nextCompletedCategoriesByDate = new Map<string, Set<string>>();
         const fetchFloor = isBefore(weekStart, currentMonth) ? weekStart : currentMonth;
         let page = 0;
@@ -423,6 +444,10 @@ export default function HomeWeeklyPlanner({
             ) {
               const dateKey = getDateKey(postDate);
               nextCompletedDates.add(dateKey);
+              nextCompletedPostCountByDate.set(
+                dateKey,
+                (nextCompletedPostCountByDate.get(dateKey) ?? 0) + 1,
+              );
 
               const categoriesForDate =
                 nextCompletedCategoriesByDate.get(dateKey) ?? new Set<string>();
@@ -436,6 +461,9 @@ export default function HomeWeeklyPlanner({
         }
 
         setCompletedDates(nextCompletedDates);
+        setCompletedPostCountByDate(
+          Object.fromEntries(nextCompletedPostCountByDate.entries()),
+        );
         setCompletedCategoriesByDate(
           Object.fromEntries(
             Array.from(nextCompletedCategoriesByDate.entries()).map(
@@ -659,12 +687,21 @@ export default function HomeWeeklyPlanner({
         </div>
 
         <div className="flex justify-end px-5 pb-4">
-          <div className="flex items-center gap-1.5 rounded-full bg-[#FFF8D9] px-3 py-1.5 text-[12px] font-semibold text-[#8A5A14]">
-            <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동 계획</span>
-            <span className="font-bold text-[#4A433D]">
-              {visibleCompletedPlannedCount}
-            </span>
-            <span>개</span>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-1.5 rounded-full bg-[#FFF4EC] px-3 py-1.5 text-[12px] font-semibold text-[#D96B2B]">
+              <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동</span>
+              <span className="font-bold text-[#4A433D]">
+                {visibleCompletedCount}
+              </span>
+              <span>개</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full bg-[#FFF8D9] px-3 py-1.5 text-[12px] font-semibold text-[#8A5A14]">
+              <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동 계획</span>
+              <span className="font-bold text-[#4A433D]">
+                {visibleCompletedPlannedCount}
+              </span>
+              <span>개</span>
+            </div>
           </div>
         </div>
       </section>

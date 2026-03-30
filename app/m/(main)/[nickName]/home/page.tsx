@@ -26,7 +26,6 @@ export default async function MobileHomePageRoute({
       categoryCounts,
       weeklyCategoryCounts,
       categoryCharCounts,
-      totalArticleCount,
       weeklyArticleCount,
       streakWeeks,
     } = await getHomeData(user.id, token);
@@ -47,7 +46,8 @@ export default async function MobileHomePageRoute({
         />
         <div className="h-6" />
         <MyAchievementsSummary
-          totalCount={totalArticleCount}
+          userId={user.id}
+          totalCount={user.articleCount}
           streakWeeks={streakWeeks}
           thisWeekCount={weeklyArticleCount}
         />

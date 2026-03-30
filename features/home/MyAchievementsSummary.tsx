@@ -1,22 +1,164 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { format, parseISO } from "date-fns";
 import { inter } from "@/lib/fonts";
+import {
+  localPlannerPlanRepository,
+  type PlannerPlanMap,
+} from "@/features/home/plannerPlanRepository";
+import type { PostsData } from "@/types/responses";
 
 export default function MyAchievementsSummary({
+  userId,
   totalCount = 0,
   streakWeeks = 0,
   thisWeekCount = 0,
 }: {
+  userId: string;
   totalCount?: number;
   streakWeeks?: number;
   thisWeekCount?: number;
 }) {
-  // 열정 온도 계산 로직 (기본 36.5도 보장, 상승폭 유지, 난이도 조절)
+  const [completedGoalCount, setCompletedGoalCount] = useState(0);
+  const activityScore = totalCount + completedGoalCount + streakWeeks;
+
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    async function fetchCompletedGoalCount(plans: PlannerPlanMap) {
+      const plannedEntries = Object.values(plans).filter(
+        (entry) => entry.categories.length > 0,
+      );
+
+      if (plannedEntries.length === 0) {
+        if (isMounted) {
+          setCompletedGoalCount(0);
+        }
+        return;
+      }
+
+      const plannedDateKeys = new Set(plannedEntries.map((entry) => entry.date));
+      const earliestPlannedDate = plannedEntries.reduce(
+        (earliest, entry) => (entry.date < earliest ? entry.date : earliest),
+        plannedEntries[0].date,
+      );
+      const completedCategoriesByDate = new Map<string, Set<string>>();
+      let page = 0;
+
+      while (true) {
+        const response = await fetch(
+          `/api/members/getPosts?pageParam=${page}&size=30&id=${userId}&sort=DESC`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            cache: "no-store",
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch posts");
+        }
+
+        const json = await response.json();
+        const data = json.data as PostsData;
+        const posts = data?.content ?? [];
+
+        if (posts.length === 0) {
+          break;
+        }
+
+        let reachedBeforePlannedRange = false;
+
+        for (const post of posts) {
+          const postDateKey = format(parseISO(post.createdAt), "yyyy-MM-dd");
+
+          if (postDateKey < earliestPlannedDate) {
+            reachedBeforePlannedRange = true;
+            break;
+          }
+
+          if (!plannedDateKeys.has(postDateKey)) {
+            continue;
+          }
+
+          const categoriesForDate =
+            completedCategoriesByDate.get(postDateKey) ?? new Set<string>();
+          categoriesForDate.add(post.category);
+          completedCategoriesByDate.set(postDateKey, categoriesForDate);
+        }
+
+        if (reachedBeforePlannedRange || data.last) {
+          break;
+        }
+
+        page += 1;
+      }
+
+      const nextCompletedGoalCount = plannedEntries.reduce((count, entry) => {
+        const completedCategories =
+          completedCategoriesByDate.get(entry.date) ?? new Set<string>();
+
+        return (
+          count +
+          entry.categories.filter((category) => completedCategories.has(category))
+            .length
+        );
+      }, 0);
+
+      if (isMounted) {
+        setCompletedGoalCount(nextCompletedGoalCount);
+      }
+    }
+
+    async function loadCompletedGoalCount() {
+      try {
+        const plans = await localPlannerPlanRepository.listPlans(userId);
+        await fetchCompletedGoalCount(plans);
+      } catch (error) {
+        if ((error as Error).name === "AbortError") {
+          return;
+        }
+        console.error("Failed to load completed goal count", error);
+        if (isMounted) {
+          setCompletedGoalCount(0);
+        }
+      }
+    }
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== `home-planner-plans:${userId}`) return;
+      loadCompletedGoalCount();
+    };
+
+    const handlePlansUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<{ userId?: string }>;
+      if (customEvent.detail?.userId !== userId) return;
+      loadCompletedGoalCount();
+    };
+
+    loadCompletedGoalCount();
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("home-planner-plans-updated", handlePlansUpdated);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener(
+        "home-planner-plans-updated",
+        handlePlansUpdated,
+      );
+    };
+  }, [userId]);
+
+  // 열정 온도 계산 로직, 현재 게시글당 0.4, 계획 세우고 하면 추가로 0.1, 주 3회 완성하면 1.5
   const passionTemp = useMemo(() => {
-    let calculated = 36.5 + (totalCount * 0.2) + (streakWeeks * 0.8)
+    const calculated = 36.5 + 0.4 * totalCount + 0.1 * completedGoalCount + 1.5 * streakWeeks;
     return Math.max(36.5, Math.min(100, Number(calculated.toFixed(1))));
-  }, [totalCount, streakWeeks, thisWeekCount]);
+  }, [completedGoalCount, streakWeeks, totalCount]);
 
   // 구간을 6단계로 세밀하게 나누고 긍정적인 문구 반영
   const tempStatus = useMemo(() => {
@@ -56,7 +198,7 @@ export default function MyAchievementsSummary({
       barColor: "bg-[#F6C89A]"
     };
     // 36.5도 ~ 40도 미만 (기록 1회 이상)
-    if (totalCount > 0) return { 
+    if (activityScore > 0) return { 
       color: "text-[#D96B2B]", 
       bg: "bg-[#FFF4EC]", 
       label: "운동 세포 깨우기", 
@@ -71,7 +213,7 @@ export default function MyAchievementsSummary({
       icon: "🌱", 
       barColor: "bg-[#FDE2C3]"
     };
-  }, [passionTemp, totalCount]);
+  }, [activityScore, passionTemp]);
 
   const isCoolingDown = thisWeekCount < 3;
 

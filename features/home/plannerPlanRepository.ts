@@ -45,6 +45,9 @@ function readPlans(userId: string): PlannerPlanMap {
 function writePlans(userId: string, plans: PlannerPlanMap) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(getStorageKey(userId), JSON.stringify(plans));
+  window.dispatchEvent(
+    new CustomEvent("home-planner-plans-updated", { detail: { userId } }),
+  );
 }
 
 export const localPlannerPlanRepository: PlannerPlanRepository = {
