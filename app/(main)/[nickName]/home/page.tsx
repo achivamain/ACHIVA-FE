@@ -10,6 +10,7 @@ import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getUser } from "@/lib/getUser";
+import AiReportWidget from "@/features/home/AiReportWidget";
 
 export default async function HomePage({
   params,
@@ -59,14 +60,15 @@ export default async function HomePage({
                 categoryCounts={categoryCounts}
               />
               <div className="h-6"></div>
-              <MyAchievementsSummary 
+              <MyAchievementsSummary
                 userId={user.id}
                 totalCount={user.articleCount}
                 streakWeeks={streakWeeks}
                 thisWeekCount={weeklyArticleCount}
               />
+              <div className="h-6"></div>
+              <AiReportWidget userId={user.id} />
               <div className="h-10"></div>
-              {/* 나의 기록 보관소 */}
               <MyRecordArchive userId={user.id} />
               <div className="h-10"></div>
             </div>

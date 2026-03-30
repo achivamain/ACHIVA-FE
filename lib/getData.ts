@@ -67,10 +67,8 @@ export async function getPostData(postId: string, token: string) {
 // 홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
 async function getSummaryData(token: string) {
   try {
-    // 검색 기간을 올해로 지정
     const startDate = `${new Date().getFullYear()}-01-01T00:00:00`;
 
-    // 총 글자수
     const charRes = fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count?startDate=${startDate}`,
       {
@@ -82,7 +80,6 @@ async function getSummaryData(token: string) {
       },
     );
 
-    // 보낸 응원 포인트
     const cheerRes = fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score?startDate=${startDate}`,
       {
@@ -94,7 +91,6 @@ async function getSummaryData(token: string) {
       },
     );
 
-    // 목표 포인트
     const goalRes = fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count?startDate=${startDate}`,
       {
@@ -127,14 +123,12 @@ async function getSummaryData(token: string) {
   }
 }
 
-// /[nickName]
 export async function getSummeryData(token: string) {
   const [mySummaryData] = await Promise.all([getSummaryData(token)]);
 
   return { mySummaryData };
 }
 
-// /[nickName]/home
 export async function getHomeData(userId: string, token: string) {
   async function getCurrentStats() {
     const res = await fetch(
@@ -162,18 +156,16 @@ export async function getHomeData(userId: string, token: string) {
     return data as MemberStats;
   }
 
-  // 카테고리별 게시물 수 받아오기
   async function getPostCategory() {
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/count-by-category?memberId=${userId}`;
     const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        cache: "no-store",
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-    );
+      cache: "no-store",
+    });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       console.error("Error in fetch post counts of categories: ", errorData);
@@ -211,7 +203,6 @@ export async function getHomeData(userId: string, token: string) {
     return categoryCounts as CategoryCount[];
   }
 
-  // 카테고리별 글자수 받아오기
   async function getCategorysCharCount() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
@@ -245,15 +236,13 @@ export async function getHomeData(userId: string, token: string) {
     mySummaryData,
     categoryCharCounts,
     currentStats,
-  ] = await Promise.all(
-    [
-      getPostCategory(),
-      getWeeklyPostCategory(),
-      getSummaryData(token),
-      getCategorysCharCount(),
-      getCurrentStats(),
-    ],
-  );
+  ] = await Promise.all([
+    getPostCategory(),
+    getWeeklyPostCategory(),
+    getSummaryData(token),
+    getCategorysCharCount(),
+    getCurrentStats(),
+  ]);
 
   return {
     categoryCounts,
