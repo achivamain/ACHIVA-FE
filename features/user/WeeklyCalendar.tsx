@@ -1,74 +1,36 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import {
-  format,
-  startOfWeek,
-  addDays,
-  isSameDay,
-  parseISO,
-  isBefore,
-} from "date-fns";
+import { format, addDays, isSameDay } from "date-fns";
 import { LoadingIcon } from "@/components/Icons";
-import type { PostsData } from "@/types/responses";
+import { fetchWeeklyActiveDateKeys, getCurrentWeekRange, toDateKey } from "@/lib/weeklyStreak";
 
 type WeeklyCalendarProps = {
   userId: string;
 };
 
-const PAGE_SIZE = 20;
-
 export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
-  const [activeDates, setActiveDates] = useState<Date[]>([]);
+  const [activeDateKeys, setActiveDateKeys] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const referenceDate = useMemo(() => new Date(), []);
 
   const { weekStart, weekDays } = useMemo(() => {
-    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const { weekStart } = getCurrentWeekRange(referenceDate);
     const weekDays = Array.from({ length: 7 }).map((_, i) =>
       addDays(weekStart, i),
     );
     return { weekStart, weekDays };
-  }, []);
+  }, [referenceDate]);
 
   useEffect(() => {
     async function fetchWeeklyPosts() {
       try {
         setIsLoading(true);
-        const collectedDates: Date[] = [];
-        let page = 0;
-
-        while (true) {
-          const response = await fetch(
-            `/api/members/getPosts?pageParam=${page}&size=${PAGE_SIZE}&id=${userId}&sort=DESC`,
-            { method: "GET", headers: { "Content-Type": "application/json" } },
-          );
-
-          if (!response.ok) throw new Error("Failed to fetch posts");
-
-          const json = await response.json();
-          const data = json.data as PostsData;
-
-          // 게시글 or 컨텐츠가 없는 경우
-          if (!data?.content?.length) break;
-
-          let reachedBeforeWeek = false;
-          for (const post of data.content) {
-            const postDate = parseISO(post.createdAt);
-            // 이번 주 시작 이전 게시글 찾으면 종료
-            if (isBefore(postDate, weekStart)) {
-              reachedBeforeWeek = true;
-              break;
-            }
-            collectedDates.push(postDate);
-          }
-
-          // 이번 주 이전 게시글 발견 또는 마지막 페이지면 종료
-          if (reachedBeforeWeek || data.last) break;
-
-          page++;
-        }
-
-        setActiveDates(collectedDates);
+        const nextActiveDateKeys = await fetchWeeklyActiveDateKeys(
+          userId,
+          referenceDate,
+        );
+        setActiveDateKeys(nextActiveDateKeys);
       } catch (error) {
         console.error("Error fetching streak data:", error);
       } finally {
@@ -79,7 +41,7 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
     if (userId) {
       fetchWeeklyPosts();
     }
-  }, [userId, weekStart]);
+  }, [referenceDate, userId, weekStart]);
 
   return (
     <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 transition-all hover:shadow-md">
@@ -104,9 +66,7 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
         ) : (
           weekDays.map((day, idx) => {
             const isToday = isSameDay(day, new Date());
-            const hasWorkout = activeDates.some((active) =>
-              isSameDay(active, day),
-            );
+            const hasWorkout = activeDateKeys.has(toDateKey(day));
 
             return (
               <div
@@ -147,10 +107,7 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
                     className="absolute top-[34px] sm:top-[42px] left-[50%] w-full h-[3px] bg-gray-100 -z-10 rounded-full"
                     style={{ width: "calc(100% + 10px)" }}
                   >
-                    {hasWorkout &&
-                      activeDates.some((a) =>
-                        isSameDay(a, addDays(day, 1)),
-                      ) && (
+                    {hasWorkout && activeDateKeys.has(toDateKey(addDays(day, 1))) && (
                         <div className="h-full rounded-full bg-gradient-to-r from-orange-300 to-amber-300 shadow-[0_0_8px_rgba(251,146,60,0.5)]"></div>
                       )}
                   </div>

@@ -1,0 +1,184 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { isBefore, parseISO } from "date-fns";
+import {
+  fetchWeeklyActiveDateKeys,
+  getCurrentWeekRange,
+  isDateInWeekRange,
+} from "@/lib/weeklyStreak";
+import type { PostsData } from "@/types/responses";
+
+type TickerActivity = {
+  id: string;
+  memberNickName: string;
+  weeklyCount: number;
+};
+
+const MAX_TICKER_USERS = 10;
+
+type FeedAuthor = {
+  id: string;
+  memberNickName: string;
+};
+
+async function fetchRecentWeeklyAuthors(baseDate = new Date()) {
+  const { weekStart, weekEnd } = getCurrentWeekRange(baseDate);
+  const authors = new Map<string, FeedAuthor>();
+  let page = 0;
+
+  while (authors.size < MAX_TICKER_USERS) {
+    const response = await fetch(`/api/feed?pageParam=${page}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch feed");
+    }
+
+    const json = await response.json();
+    const data = (json.data ?? json) as PostsData;
+    const posts = data?.content ?? [];
+
+    if (posts.length === 0) {
+      break;
+    }
+
+    let reachedBeforeWeek = false;
+
+    for (const post of posts) {
+      const postDate = parseISO(post.createdAt);
+
+      if (isBefore(postDate, weekStart)) {
+        reachedBeforeWeek = true;
+        break;
+      }
+
+      if (!isDateInWeekRange(postDate, weekStart, weekEnd)) {
+        continue;
+      }
+
+      if (!authors.has(post.memberId)) {
+        authors.set(post.memberId, {
+          id: post.memberId,
+          memberNickName: post.memberNickName,
+        });
+      }
+
+      if (authors.size === MAX_TICKER_USERS) {
+        break;
+      }
+    }
+
+    if (reachedBeforeWeek || data.last) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return Array.from(authors.values());
+}
+
+export default function LiveActivityTicker() {
+  const [activities, setActivities] = useState<TickerActivity[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadFeed() {
+      try {
+        const referenceDate = new Date();
+        const authors = await fetchRecentWeeklyAuthors(referenceDate);
+        const results = await Promise.allSettled(
+          authors.map(async (author) => {
+            const activeDateKeys = await fetchWeeklyActiveDateKeys(
+              author.id,
+              referenceDate,
+            );
+            return {
+              ...author,
+              weeklyCount: activeDateKeys.size,
+            };
+          }),
+        );
+
+        if (!isActive) {
+          return;
+        }
+
+        const nextActivities = results.flatMap((result) =>
+          result.status === "fulfilled" && result.value.weeklyCount > 0
+            ? [result.value]
+            : [],
+        );
+
+        setActivities(nextActivities);
+        setCurrentIndex(0);
+      } catch (error) {
+        console.error("Failed to load live activity", error);
+      }
+    }
+
+    loadFeed();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activities.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % activities.length);
+    }, 3500); // 3.5초마다 위로 롤링
+    return () => clearInterval(interval);
+  }, [activities.length]);
+
+  // 이번 주 게시글이 없을 때는 티커 표시 X
+  if (activities.length === 0) return null;
+
+  return (
+    <div className="mx-5 mb-2 overflow-hidden rounded-[16px] bg-white px-4 py-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-[#F0EBE3] flex items-center gap-2.5">
+      <span className="text-[15px] animate-pulse">🔥</span>
+      <div className="flex-1 relative h-[20px] overflow-hidden">
+        {activities.map((act, index) => {
+          // 상태 및 위치 계산
+          const offsetIndex = index - currentIndex;
+          // 배열의 끝에서 처음으로 자연스럽게 넘어가게 하기 위한 약간의 트릭
+          let transformY = offsetIndex * 100;
+          const opacity = index === currentIndex ? 1 : 0;
+
+          if (offsetIndex < 0) {
+            transformY = (activities.length + offsetIndex) * 100;
+          }
+
+          return (
+            <div
+              key={act.id}
+              className="absolute left-0 w-full flex items-center gap-1.5 transition-all duration-500 ease-in-out"
+              style={{
+                transform: `translateY(${transformY}%)`,
+                opacity: opacity,
+              }}
+            >
+              <span className="truncate text-[13px] font-medium text-[#4B5563]">
+                <strong className="font-bold text-[#D96B2B]">
+                  {act.memberNickName}
+                </strong>
+                님이{" "}
+                <strong className="font-bold text-[#1A1A1A]">
+                  주 {act.weeklyCount}회 운동
+                </strong>
+                을 달성했어요! 🎉
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

@@ -4,6 +4,11 @@
 import { notFound } from "next/navigation";
 import { CategoryCharCount, CategoryCount, PostRes } from "@/types/Post";
 
+type MemberStats = {
+  weeklyWorkoutCount?: number;
+  continuousGoalWeeks?: number;
+};
+
 export async function getPostData(postId: string, token: string) {
   async function getPost() {
     const postRes = await fetch(
@@ -62,10 +67,8 @@ export async function getPostData(postId: string, token: string) {
 // 홈 하단 데이터(총 글자수, 보낸 응원 포인트, 목표 포인트)
 async function getSummaryData(token: string) {
   try {
-    // 검색 기간을 올해로 지정
     const startDate = `${new Date().getFullYear()}-01-01T00:00:00`;
 
-    // 총 글자수
     const charRes = fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-total-character-count?startDate=${startDate}`,
       {
@@ -77,7 +80,6 @@ async function getSummaryData(token: string) {
       },
     );
 
-    // 보낸 응원 포인트
     const cheerRes = fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/cheerings/total-sending-score?startDate=${startDate}`,
       {
@@ -89,7 +91,6 @@ async function getSummaryData(token: string) {
       },
     );
 
-    // 목표 포인트
     const goalRes = fetch(
       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/goals/my-total-click-count?startDate=${startDate}`,
       {
@@ -122,19 +123,16 @@ async function getSummaryData(token: string) {
   }
 }
 
-// /[nickName]
 export async function getSummeryData(token: string) {
   const [mySummaryData] = await Promise.all([getSummaryData(token)]);
 
   return { mySummaryData };
 }
 
-// /[nickName]/home
 export async function getHomeData(userId: string, token: string) {
-  // 카테고리별 게시물 수 받아오기
-  async function getPostCategory() {
+  async function getCurrentStats() {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/{memberId}/count-by-category?memberId=${userId}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me/stats`,
       {
         method: "GET",
         headers: {
@@ -143,6 +141,31 @@ export async function getHomeData(userId: string, token: string) {
         },
       },
     );
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Error in fetch member stats: ", errorData);
+      throw new Error(errorData.error || "서버 오류");
+    }
+
+    const { data } = await res.json();
+    if (!data) {
+      throw new Error("Invalid member stats data");
+    }
+
+    return data as MemberStats;
+  }
+
+  async function getPostCategory() {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/count-by-category?memberId=${userId}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       console.error("Error in fetch post counts of categories: ", errorData);
@@ -156,11 +179,77 @@ export async function getHomeData(userId: string, token: string) {
     return categoryCounts as CategoryCount[];
   }
 
-  const [categoryCounts] = await Promise.all([getPostCategory()]);
+  async function getWeeklyPostCategory() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/${userId}/weekly-count-by-category?memberId=${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Error in fetch weekly post counts of categories: ", errorData);
+      throw new Error(errorData.error || "서버 오류");
+    }
+    const { data } = await res.json();
+    if (!data) {
+      throw new Error("Invalid weekly post counts of categories data");
+    }
+    const { categoryCounts } = data;
+    return categoryCounts as CategoryCount[];
+  }
+
+  async function getCategorysCharCount() {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/articles/my-character-count-by-category`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      console.error(
+        "Error in fetch character counts of categories: ",
+        errorData,
+      );
+      throw new Error(errorData.error || "서버 오류");
+    }
+    const { data } = await res.json();
+    if (!data) {
+      throw new Error("Invalid character counts of categories data");
+    }
+    const { categoryCharacterCounts } = data;
+    return categoryCharacterCounts as CategoryCharCount[];
+  }
+
+  const [
+    categoryCounts,
+    weeklyCategoryCounts,
+    mySummaryData,
+    categoryCharCounts,
+    currentStats,
+  ] = await Promise.all([
+    getPostCategory(),
+    getWeeklyPostCategory(),
+    getSummaryData(token),
+    getCategorysCharCount(),
+    getCurrentStats(),
+  ]);
 
   return {
     categoryCounts,
-    weeklyCategoryCounts: [] as CategoryCount[],
-    categoryCharCounts: [] as CategoryCharCount[],
+    weeklyCategoryCounts,
+    mySummaryData,
+    categoryCharCounts,
+    weeklyArticleCount: currentStats.weeklyWorkoutCount ?? 0,
+    streakWeeks: currentStats.continuousGoalWeeks ?? 0,
   };
 }
