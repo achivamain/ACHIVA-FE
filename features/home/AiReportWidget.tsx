@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type AiReportData = {
   calories: string;
@@ -24,6 +24,8 @@ const SECTIONS = [
 
 export default function AiReportWidget({ userId }: { userId: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, error, refetch } = useQuery<AiReportData>({
     queryKey: ["ai-report-v2", userId],
@@ -42,6 +44,29 @@ export default function AiReportWidget({ userId }: { userId: string }) {
     staleTime: 1000 * 60 * 60,
     retry: false,
   });
+
+  useEffect(() => {
+    const element = contentRef.current;
+    if (!element) return;
+
+    const updateHeight = () => {
+      setContentHeight(element.scrollHeight);
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      updateHeight();
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [data, isLoading, error]);
 
   return (
     <section className="mx-5 sm:mx-auto sm:max-w-[640px] sm:w-full overflow-hidden rounded-[24px] bg-gradient-to-br from-[#1A1A1A] to-[#2A2218] shadow-[0_4px_24px_rgba(0,0,0,0.18)] ring-1 ring-[#3A3A3A] text-white">
@@ -67,8 +92,11 @@ export default function AiReportWidget({ userId }: { userId: string }) {
       </button>
 
       {/* 콘텐츠 */}
-      <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
-        <div className="px-5 pb-6 pt-0">
+      <div
+        className={`overflow-hidden transition-[max-height,opacity] duration-500 ease-in-out ${isOpen ? "opacity-100" : "opacity-0"}`}
+        style={{ maxHeight: isOpen ? `${contentHeight}px` : "0px" }}
+      >
+        <div ref={contentRef} className="px-5 pb-6 pt-0">
           {/* 구분선 */}
           <div className="h-px bg-white/10 mb-5" />
 

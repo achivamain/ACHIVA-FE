@@ -84,18 +84,52 @@ export async function POST(req: Request) {
 
     const topWeek = Object.entries(weekCounts).sort((a, b) => b[1] - a[1]);
     const topMonth = Object.entries(monthCounts).sort((a, b) => b[1] - a[1]);
+    const activeDaysInMonth = new Set(
+      monthPosts.map((p: any) => {
+        try {
+          return format(parseISO(p.createdAt), "yyyy-MM-dd");
+        } catch {
+          return null;
+        }
+      }).filter(Boolean)
+    ).size;
+    const activeDaysInWeek = new Set(
+      weekPosts.map((p: any) => {
+        try {
+          return format(parseISO(p.createdAt), "yyyy-MM-dd");
+        } catch {
+          return null;
+        }
+      }).filter(Boolean)
+    ).size;
+    const monthCategoryDiversity = Object.keys(monthCounts).length;
+    const weekCategoryDiversity = Object.keys(weekCounts).length;
 
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(buildLocalReport(weekPosts, monthPosts, topWeek, topMonth, weekCalories, monthCalories, isLatestRecent ? latestPost : null, latestCalories));
     }
 
-    const logsText = monthPosts.slice(0, 50).map((p: any) =>
+    const logsText = monthPosts.map((p: any) =>
       `- ${format(parseISO(p.createdAt), "M/d")}: ${p.category}${p.content ? ` (${String(p.content).substring(0, 30)})` : ""}`
     ).join("\n") || "기록 없음";
 
     const statsText = `이번 주: ${weekPosts.length}회, 약 ${weekCalories.toLocaleString()} kcal
 이번 달: ${monthPosts.length}회, 약 ${monthCalories.toLocaleString()} kcal
 이번 주 주력: ${topWeek.slice(0,3).map(([k,v])=>`${k}(${v}회)`).join(', ') || '없음'}`;
+    const calorieGuideText = Object.entries(CALORIE_MAP)
+      .map(([category, kcal]) => `- ${category}: ${kcal}kcal/hr (서비스 내부 추정 기준)`)
+      .join("\n");
+    const weekCategoryBreakdown = Object.entries(weekCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, count]) => `${category} ${count}회 / 약 ${estimateCalories(category, count as number).toLocaleString()}kcal`)
+      .join(", ") || "없음";
+    const monthCategoryBreakdown = Object.entries(monthCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, count]) => `${category} ${count}회 / 약 ${estimateCalories(category, count as number).toLocaleString()}kcal`)
+      .join(", ") || "없음";
+    const recentPatternText = monthPosts.slice(0, 10).map((p: any) =>
+      `- ${format(parseISO(p.createdAt), "M/d")}: ${p.category}${p.content ? ` / ${String(p.content).substring(0, 40)}` : ""}`
+    ).join("\n") || "최근 패턴 없음";
 
     const latestSection = isLatestRecent
       ? `\n방금 기록한 운동: ${latestPost.category}, 내용: "${String(latestPost.content ?? "").substring(0, 80)}", 추정 칼로리: ${latestCalories}kcal\n`
@@ -105,7 +139,53 @@ export async function POST(req: Request) {
       ? `,\n  "latestFeedback": "방금 기록한 ${latestPost?.category}에 대한 즉각 피드백 + ${latestCalories}kcal 소모 언급 + 응원 (2~3문장)"`
       : "";
 
-    const prompt = `사용자 운동 데이터:\n${statsText}\n${latestSection}\n최근 일지:\n${logsText}\n\nJSON만 반환:\n{\n  "calories": "이번 주 칼로리 요약 + 이번 달 비교 (숫자 포함)",\n  "weeklyScore": "이번 주 0~100점 + 한줄 평가",\n  "bodyChange": "1개월 후 예상 신체 변화 (구체적)",\n  "weakness": "부족한 운동 유형 + 이유",\n  "nextWeekPlan": "다음 주 추천 루틴 (총 횟수 + 종목 조합)",\n  "funFact": "이번 달 소모량 재미있는 비교"${latestFieldSpec}\n}`;
+    const prompt = `너는 운동 기록을 해석해 주는 한국어 피트니스 코치다.
+아래 "서비스 계산값"은 이미 서버에서 계산된 공식 수치이므로 그대로 신뢰하고, 임의로 다시 계산하거나 수정하지 마라.
+운동별 칼로리 기준표는 해석 참고용이며, 설명의 근거를 풍부하게 만들기 위한 컨텍스트다.
+답변은 과장 없이 구체적으로, 사용자의 실제 기록 패턴을 근거로 작성해라.
+각 항목은 2~4문장 이내로 작성하고, 같은 표현을 반복하지 마라.
+
+[서비스 계산 기준]
+- 운동 1회 기본 길이: 45분
+- 칼로리 계산은 서버에서 이미 반영됨
+
+[운동별 칼로리 참고표]
+${calorieGuideText}
+
+[서비스 계산값]
+${statsText}
+- 이번 주 활동일 수: ${activeDaysInWeek}일
+- 이번 달 활동일 수: ${activeDaysInMonth}일
+- 이번 주 운동 다양성: ${weekCategoryDiversity}종목
+- 이번 달 운동 다양성: ${monthCategoryDiversity}종목
+- 이번 주 종목별 요약: ${weekCategoryBreakdown}
+- 이번 달 종목별 요약: ${monthCategoryBreakdown}
+${latestSection}
+[최근 10개 패턴]
+${recentPatternText}
+
+[최근 30일 로그 최대 100개]
+${logsText}
+
+[작성 지침]
+- calories: 이번 주와 이번 달 칼로리 흐름을 숫자와 함께 설명하고, 활동 빈도 또는 운동 구성과 연결해 해석해라.
+- weeklyScore: 출석 빈도, 활동일 수, 운동 다양성을 함께 보고 0~100점으로 평가해라.
+- bodyChange: 최근 30일 패턴을 근거로 한 달 후 기대 가능한 변화를 현실적으로 설명해라.
+- weakness: 부족하거나 편중된 부분을 구체적으로 짚고, 왜 보완이 필요한지 말해라.
+- nextWeekPlan: 사용자의 최근 패턴을 반영한 실행 가능한 다음 주 루틴을 제안해라. 총 횟수와 종목 조합이 드러나야 한다.
+- funFact: 이번 달 운동량을 일상적인 비유로 재미있게 설명하라.
+- latestFeedback: 최신 운동이 24시간 이내일 때만 작성하며, 방금 한 운동에 대한 즉각 피드백과 응원을 포함해라.
+- 기록이 적으면 추측을 줄이고, 무리한 확정 표현 대신 가능성, 동기부여 유도 중심으로 써라.
+
+JSON만 반환:
+{
+  "calories": "이번 주 칼로리 요약 + 이번 달 비교 (숫자 포함)",
+  "weeklyScore": "이번 주 0~100점 + 한줄 평가",
+  "bodyChange": "1개월 후 예상 신체 변화 (구체적)",
+  "weakness": "부족한 운동 유형 + 이유",
+  "nextWeekPlan": "다음 주 추천 루틴 (총 횟수 + 종목 조합)",
+  "funFact": "이번 달 소모량 재미있는 비교"${latestFieldSpec}
+}`;
 
     const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -114,7 +194,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4.1-nano",
+        model: "gpt-5.4-nano",
         messages: [
           { role: "system", content: "너는 한국어로 답하는 친절하고 동기부여 넘치는 피트니스 코치야. 반드시 JSON만 반환해." },
           { role: "user", content: prompt }
