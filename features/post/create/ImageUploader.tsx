@@ -54,17 +54,6 @@ export default function ImageUploader() {
     }
   }, [images.length]);
 
-  // 사진 선택 시 자동 업로드 및 다음 단계 진행
-  useEffect(() => {
-    if (
-      images.length > 0 &&
-      !isUploading &&
-      images.every((img) => img.croppedAreaPixels)
-    ) {
-      onUpload();
-    }
-  }, [images, isUploading, onUpload]);
-
   const openFilePicker = () => {
     if (window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(
@@ -250,13 +239,28 @@ export default function ImageUploader() {
         </div>
       )}
 
-      {/* 하단 버튼 (자동 업로드이므로 로딩 상태만 표시) */}
+      {/* 하단 버튼 */}
       {images.length > 0 ? (
-        <div className="w-full flex flex-col items-center justify-center h-[90px]">
-          <div className="animate-spin w-8 h-8 rounded-full border-4 border-[#C0A898]/40 border-t-[#7A5040]" />
-          <p className="mt-3 text-[14px] font-semibold text-[#7A5040]">
-            사진 처리 중... 곧 다음 단계로 이동합니다
-          </p>
+        <div className="w-full flex flex-col gap-2">
+          <NextStepButton isLoading={isUploading} onClick={onUpload}>
+            다음
+          </NextStepButton>
+          <button
+            className="flex items-center justify-center gap-2
+              w-full h-11 rounded-xl
+              font-semibold text-[15px] text-[#412A2A]/45
+              bg-[#f0e8e0]
+              border border-[#C0A898]/50
+              transition-all duration-200
+              cursor-not-allowed"
+            onClick={openFilePicker}
+            disabled
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 3v10M3 8h10" stroke="#412A2A" strokeOpacity="0.45" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            사진 더 추가하기
+          </button>
         </div>
       ) : (
         <div className="w-full">
