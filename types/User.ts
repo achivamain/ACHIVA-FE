@@ -20,4 +20,5 @@ export type User = {
   role?: string;
   description: string;
   createdAt: string;
+  articleCount: number;
 };

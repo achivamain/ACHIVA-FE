@@ -5,7 +5,11 @@ import type { DraftPost } from "@/types/Post";
 
 export async function POST(req: NextRequest) {
   const { post } = await req.json();
-  const draft = post as DraftPost;
+  const {
+    weeklyWorkoutCount: _weeklyWorkoutCount,
+    continuousGoalWeeks: _continuousGoalWeeks,
+    ...draft
+  } = post as DraftPost;
   const session = await auth();
   const token = session?.access_token;
   if (!token) {
