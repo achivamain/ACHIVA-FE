@@ -8,7 +8,6 @@ import { CloseIcon } from "@/components/Icons";
 import type { Moim } from "@/types/moim";
 import { categories as ALL_CATEGORIES, type Category } from "@/types/Categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { parseISO, isSameWeek, subWeeks } from "date-fns";
 import FeedPost from "@/features/feed/FeedPost";
 import type { PostRes } from "@/types/Post";
 
@@ -374,25 +373,10 @@ export default function MoimDetailPage() {
             🔥 우리 모임 열정 온도
           </h3>
           {(() => {
-            const now = new Date();
-            const thisWeekCount =
-              feedData?.content?.filter((post: PostRes) =>
-                isSameWeek(parseISO(post.createdAt), now, { weekStartsOn: 1 }),
-              ).length || 0;
-            const lastWeekCount =
-              feedData?.content?.filter((post: PostRes) =>
-                isSameWeek(parseISO(post.createdAt), subWeeks(now, 1), {
-                  weekStartsOn: 1,
-                }),
-              ).length || 0;
-
-            // 온도 계산: 기본 36.5도
-            // 이번 주 인증 1회당 +0.8도 상승
-            // 지난 주 인증 횟수 대비 이번 주 인증이 부족하면 그 차이만큼 패널티 (-0.5도)
-            const increase = thisWeekCount * 0.8;
-            const penalty = Math.max(0, lastWeekCount - thisWeekCount) * 0.5;
-            const rawTemp = 36.5 + increase - penalty;
-            const passionTemp = Math.max(36.5, Math.min(100, rawTemp));
+            const passionTemp = Math.max(
+              36.5,
+              Math.min(100, 36.5 + 0.8 * moimDetail.score),
+            );
 
             // 모임 특화 상태 매핑
             const getStatus = (temp: number) => {
@@ -454,7 +438,7 @@ export default function MoimDetailPage() {
                   </div>
                   <div className="text-right">
                     <span className="text-xs text-gray-500 mr-1.5 font-medium">
-                      이번 주 인증 {thisWeekCount}회
+                      누적 인증 {moimDetail.score ?? 0}회
                     </span>
                     <span className="text-2xl font-black text-gray-900 tracking-tight">
                       {passionTemp.toFixed(1)}°C
@@ -551,7 +535,9 @@ export default function MoimDetailPage() {
                     </div>
                     <div>
                       <div className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                        {member.role === "LEADER" && <span title="방장">👑</span>}
+                        {member.role === "LEADER" && (
+                          <span title="방장">👑</span>
+                        )}
                         {member.name}
                         {isCurrentUser && (
                           <span className="bg-theme text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5">

@@ -2,6 +2,8 @@
 import { useState } from "react";
 import Image from "next/image";
 
+const DEFAULT_BG = "/default-post-bg.png";
+
 export default function PostImg({
   url,
   filtered = false,
@@ -10,6 +12,7 @@ export default function PostImg({
   filtered?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
+  const src = url || DEFAULT_BG;
   return (
     <div className="relative aspect-square w-full h-full">
       {!loaded && (
@@ -17,15 +20,13 @@ export default function PostImg({
           <div className="bg-loading absolute inset-0 animate-pulse"></div>
         </div>
       )}
-      {url && (
-        <Image
-          className={`${loaded ? "" : "opacity-0"}`}
-          src={url}
-          alt="profile image"
-          fill
-          onLoad={() => setLoaded(true)}
-        />
-      )}
+      <Image
+        className={`${loaded ? "" : "opacity-0"}`}
+        src={src}
+        alt="post background"
+        fill
+        onLoad={() => setLoaded(true)}
+      />
       {filtered && (
         <div className="absolute inset-0 w-full h-full bg-black/70" />
       )}

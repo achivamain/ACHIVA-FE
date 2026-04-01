@@ -56,7 +56,7 @@ export default function FeedPost({ post }: { post: PostRes }) {
             <div className="relative flex-shrink-0">
               <ProfileImg size={38} url={post.memberProfileUrl} />
               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 z-10 scale-[0.85] origin-bottom">
-                <PostCountBadge userId={post.memberId} />
+                <PostCountBadge articleCount={post.memberArticleCount} />
               </div>
             </div>
             <p className="font-medium">{post.memberNickName}</p>

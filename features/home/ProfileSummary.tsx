@@ -1,4 +1,5 @@
 // 프로필 요약 정보 컴포넌트
+// Deprecated?
 
 type SummaryCardProps = {
   icon: string;

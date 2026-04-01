@@ -1,11 +1,16 @@
 import Banner from "@/features/event/Banner";
+import { Category } from "@/types/Categories";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
+import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
+import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
+import LiveActivityTicker from "@/features/home/LiveActivityTicker";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getMe, isOwner } from "@/lib/getUser";
+import AiReportWidget from "@/features/home/AiReportWidget";
 
 export default async function HomePage({
   params,
@@ -16,20 +21,21 @@ export default async function HomePage({
   if (error) return <Logout />;
 
   const { nickName } = await params;
-
   const user = await getMe(token).catch(() => null);
   if (!user) notFound();
 
-  // 본인만 접근 가능
   if (!(await isOwner(nickName, token))) {
     redirect(`/${nickName}`);
   }
 
   try {
-    const { categoryCounts, categoryCharCounts } = await getHomeData(
-      user.id,
-      token,
-    );
+    const {
+      categoryCounts,
+      weeklyCategoryCounts,
+      categoryCharCounts,
+      weeklyArticleCount,
+      streakWeeks,
+    } = await getHomeData(user.id, token);
 
     return (
       <div className="w-full flex-1 flex bg-[#FAFAFA]">
@@ -44,13 +50,29 @@ export default async function HomePage({
                   오늘도 열심히 운동하는 당신을 응원합니다!
                 </p>
               </div>
+              <LiveActivityTicker />
               <MyCategorys
                 myCategories={user.categories}
                 categoryCounts={categoryCounts}
+                weeklyCategoryCounts={weeklyCategoryCounts}
                 categoryCharCounts={categoryCharCounts}
               />
+              <div className="h-8"></div>
+              <HomeWeeklyPlanner
+                userId={user.id}
+                categories={user.categories as Category[]}
+                categoryCounts={categoryCounts}
+              />
+              <div className="h-6"></div>
+              <MyAchievementsSummary
+                userId={user.id}
+                totalCount={user.articleCount}
+                streakWeeks={streakWeeks}
+                thisWeekCount={weeklyArticleCount}
+              />
+              <div className="h-6"></div>
+              <AiReportWidget userId={user.id} />
               <div className="h-10"></div>
-              {/* 나의 기록 보관소 */}
               <MyRecordArchive userId={user.id} />
               <div className="h-10"></div>
             </div>

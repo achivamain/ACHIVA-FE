@@ -7,13 +7,14 @@ export type Post = {
   category: Category;
   backgroundColor: BackgroundColor;
   pages: PostPage[];
+  weeklyWorkoutCount?: number;
+  continuousGoalWeeks?: number;
 };
 
 export type DraftPost = Partial<Post> & {
   id?: string;
   categoryCount?: number;
-  //book?: Book;
-}; // 글쓰기 중 타입
+};
 
 export type PostPage = {
   id: string;
@@ -49,10 +50,13 @@ export type PostRes = {
   memberId: string;
   memberNickName: string;
   memberProfileUrl: string;
+  memberArticleCount?: number;
   backgroundColor: BackgroundColor;
   authorCategorySeq: number;
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
+  weeklyWorkoutCount: number;
+  continuousGoalWeeks: number;
   cheerings?: Cheering[];
   bookArticle?: {
     bookId: string;
