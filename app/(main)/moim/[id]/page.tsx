@@ -6,6 +6,10 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { CloseIcon } from "@/components/Icons";
 import type { Moim } from "@/types/moim";
+import {
+  categories as ALL_CATEGORIES,
+  type Category,
+} from "@/types/Categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FeedPost from "@/features/feed/FeedPost";
 import type { PostRes } from "@/types/Post";
@@ -35,7 +39,10 @@ export default function MoimDetailPage() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
+  const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
   const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editCategories, setEditCategories] = useState<Category[]>([]);
   const [editMaxMember, setEditMaxMember] = useState("10");
   const [editIsPrivate, setEditIsPrivate] = useState(false);
   const [editPassword, setEditPassword] = useState("");
@@ -62,6 +69,8 @@ export default function MoimDetailPage() {
   const updateSettingsMutation = useMutation({
     mutationFn: async (payload: {
       name: string;
+      description: string;
+      categories: string[];
       maxMember: number;
       isPrivate: boolean;
       password?: string;
@@ -194,16 +203,12 @@ export default function MoimDetailPage() {
   );
   const isSoloLeader = isLeader && moimDetail.memberCount === 1;
 
-  // 이거 하드코딩된 거 같은데 나중에 체크 필요
-  const achieverCount: number =
-    moimDetail.members?.filter((m: any) => m.weeklyStreak >= 3).length || 0;
-  const progressPercentage = Math.min(
-    100,
-    moimDetail.memberCount > 0
-      ? (achieverCount / moimDetail.memberCount) * 100
-      : 0,
-  );
+  const trimmedEditName = editName.trim();
+  const trimmedEditDescription = editDescription.trim();
   const parsedEditMaxMember = Number(editMaxMember);
+  const isNameInvalid = !trimmedEditName;
+  const isDescriptionInvalid = !trimmedEditDescription;
+  const isCategoriesInvalid = editCategories.length === 0;
   const isMaxMemberInvalid =
     !editMaxMember.trim() ||
     !Number.isInteger(parsedEditMaxMember) ||
@@ -211,6 +216,9 @@ export default function MoimDetailPage() {
   const isPrivatePasswordInvalid = editIsPrivate && !editPassword.trim();
   const isUpdateDisabled =
     updateSettingsMutation.isPending ||
+    isNameInvalid ||
+    isDescriptionInvalid ||
+    isCategoriesInvalid ||
     isMaxMemberInvalid ||
     isPrivatePasswordInvalid;
   // 이번 주 streak -> 이번 달 post 수 순서로 정렬
@@ -218,6 +226,9 @@ export default function MoimDetailPage() {
     (a: any, b: any) =>
       (b.weeklyStreak || 0) - (a.weeklyStreak || 0) ||
       (b.monthlyPosts || 0) - (a.monthlyPosts || 0),
+  );
+  const manageableMembers = sortedMembers.filter(
+    (m: any) => !(m.isMe || (currentUserId && m.id === currentUserId)),
   );
   const visibleMembers = sortedMembers.slice(0, visibleMemberCount);
   const hasMoreMembers = sortedMembers.length > visibleMemberCount;
@@ -240,14 +251,26 @@ export default function MoimDetailPage() {
         <div className="flex items-center gap-2">
           {/* 공유/초대 버튼 */}
           <button
-            onClick={() => {
-              if (navigator.clipboard) {
-                navigator.clipboard.writeText(window.location.href);
-                alert("크루 초대 링크가 복사되었습니다! 🎉");
+            onClick={async () => {
+              const shareUrl = window.location.href;
+              const shareData = {
+                title: `[나오완] ${moimDetail?.name || "크루"} 모임에 합류하세요!`,
+                text: `${moimDetail?.description || "같이 운동해요!"} 🔥\n앱이 없다면 먼저 다운로드하세요:\n• iOS: https://apps.apple.com/kr/app/%EB%82%98%EB%8A%94%EC%98%A4%EB%8A%98%EC%9A%B4%EB%8F%99%ED%95%9C%EB%8B%A4/id6759653594\n• Android: https://play.google.com/store/apps/details?id=com.iworkouttoday.app`,
+                url: shareUrl,
+              };
+              if (navigator.share) {
+                try {
+                  await navigator.share(shareData);
+                } catch (e) {
+                  // 사용자가 취소한 경우 등 무시
+                }
+              } else {
+                navigator.clipboard?.writeText(shareUrl);
+                alert("초대 링크가 복사되었습니다! 🎉");
               }
             }}
             className="p-1.5 text-gray-400 hover:text-theme hover:bg-theme/5 rounded-full transition-colors"
-            title="초대 링크 복사"
+            title="초대 링크 공유"
           >
             <svg
               fill="none"
@@ -290,9 +313,14 @@ export default function MoimDetailPage() {
               onClick={() => {
                 if (isLeader) {
                   setEditName(moimDetail.name || "");
+                  setEditDescription(moimDetail.description || "");
+                  setEditCategories(
+                    (moimDetail.categories || []) as Category[],
+                  );
                   setEditMaxMember(String(moimDetail.maxMember || 10));
                   setEditIsPrivate(moimDetail.isPrivate || false);
                   setEditPassword(""); // 비밀번호는 초기화해 둠
+                  setIsMemberManagementOpen(false);
                 }
                 setIsSettingModalOpen(true);
               }}
@@ -364,9 +392,9 @@ export default function MoimDetailPage() {
               if (temp < 40)
                 return {
                   label: "🌱 작은 불씨 지피기",
-                  gradient: "from-gray-300 to-gray-400",
-                  bg: "bg-gray-50",
-                  text: "text-gray-600",
+                  gradient: "from-amber-200 to-amber-300",
+                  bg: "bg-amber-50",
+                  text: "text-amber-600",
                 };
               if (temp < 50)
                 return {
@@ -503,22 +531,19 @@ export default function MoimDetailPage() {
                           src={member.profileImageUrl}
                           alt="profile"
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                            (
+                              e.target as HTMLImageElement
+                            ).parentElement!.innerHTML =
+                              `<span class="text-sm font-bold text-gray-500">${(member.name || "?")[0].toUpperCase()}</span>`;
+                          }}
                         />
-                      ) : isCurrentUser ? (
-                        "😎"
                       ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="w-5 h-5 text-gray-400"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                        <span className="text-sm font-bold text-gray-500">
+                          {(member.name || "?")[0].toUpperCase()}
+                        </span>
                       )}
                     </div>
                     <div>
@@ -556,24 +581,6 @@ export default function MoimDetailPage() {
                         🔥 {member.weeklyStreak || 0}일
                       </span>
                     </div>
-
-                    {isLeader && !isCurrentUser && (
-                      <button
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              `${member.name}님을 이 모임에서 내보내시겠습니까?`,
-                            )
-                          ) {
-                            kickMemberMutation.mutate(member.id);
-                          }
-                        }}
-                        disabled={kickMemberMutation.isPending}
-                        className="text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors flex items-center shrink-0 bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 ml-1"
-                      >
-                        내보내기
-                      </button>
-                    )}
                   </div>
                 </div>
               );
@@ -638,11 +645,75 @@ export default function MoimDetailPage() {
                   </label>
                   <input
                     type="text"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
+                    className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900 ${
+                      isNameInvalid ? "border-red-300" : "border-gray-200"
+                    }`}
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     placeholder="모임 이름을 입력하세요"
                   />
+                  {isNameInvalid && (
+                    <p className="text-xs text-red-500 mt-1.5">
+                      모임 이름을 입력해주세요.
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">
+                    모임 소개글
+                  </label>
+                  <textarea
+                    rows={3}
+                    className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900 resize-none ${
+                      isDescriptionInvalid
+                        ? "border-red-300"
+                        : "border-gray-200"
+                    }`}
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="모임 소개글을 입력하세요"
+                  />
+                  {isDescriptionInvalid && (
+                    <p className="text-xs text-red-500 mt-1.5">
+                      모임 소개글을 입력해주세요.
+                    </p>
+                  )}
+                </div>
+                {/* 카테고리 선택 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    운동 종목
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1">
+                    {ALL_CATEGORIES.map((cat) => {
+                      const selected = editCategories.includes(cat);
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() =>
+                            setEditCategories((prev) =>
+                              selected
+                                ? prev.filter((c) => c !== cat)
+                                : [...prev, cat],
+                            )
+                          }
+                          className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
+                            selected
+                              ? "bg-theme text-white border-theme"
+                              : "bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {isCategoriesInvalid && (
+                    <p className="text-xs text-red-500 mt-1.5">
+                      운동 종목을 1개 이상 선택해주세요.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">
@@ -704,6 +775,79 @@ export default function MoimDetailPage() {
                 위험 구역
               </h3>
               <div className="space-y-2">
+                {isLeader && manageableMembers.length > 0 && (
+                  <div className="rounded-xl bg-red-50 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setIsMemberManagementOpen((prev) => !prev)
+                      }
+                      className="w-full flex items-center px-4 py-3 text-left text-red-600 font-bold hover:bg-red-100 transition-colors text-sm rounded-xl"
+                    >
+                      <span>👥 모임 인원 관리</span>
+                      <div className="ml-auto flex items-center gap-2">
+                        <span className="flex w-4 justify-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className={`w-4 h-4 transition-transform ${
+                              isMemberManagementOpen ? "rotate-90" : ""
+                            }`}
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    </button>
+
+                    {isMemberManagementOpen && (
+                      <div className="bg-white/70 px-3 pb-3 space-y-2 max-h-56 overflow-y-auto">
+                        {manageableMembers.map((m: any) => (
+                          <div
+                            key={m.id}
+                            className="flex items-center justify-between p-3 bg-white rounded-xl border border-red-100"
+                          >
+                            <div className="flex items-center gap-2">
+                              {m.profileImageUrl ? (
+                                <img
+                                  src={m.profileImageUrl}
+                                  className="w-8 h-8 rounded-full object-cover"
+                                  alt=""
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
+                                  {(m.name || "?")[0].toUpperCase()}
+                                </div>
+                              )}
+                              <span className="text-sm font-medium text-gray-800">
+                                {m.name}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `${m.name}님을 이 모임에서 내보내시겠습니까?`,
+                                  )
+                                )
+                                  kickMemberMutation.mutate(m.id);
+                              }}
+                              disabled={kickMemberMutation.isPending}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 border border-red-100 transition-colors"
+                            >
+                              내보내기
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 {!isSoloLeader && (
                   <button
                     onClick={() => {
@@ -714,22 +858,24 @@ export default function MoimDetailPage() {
                         leaveMoimMutation.mutate();
                       }
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm"
+                    className="w-full flex items-center px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm"
                     disabled={leaveMoimMutation.isPending}
                   >
                     <span>🚪 모임 탈퇴{isLeader ? " (방장 위임)" : ""}</span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <span className="ml-auto flex w-4 justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </span>
                   </button>
                 )}
                 {isLeader && !moimDetail.isOfficial && (
@@ -743,24 +889,26 @@ export default function MoimDetailPage() {
                         deleteMoimMutation.mutate();
                       }
                     }}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm"
+                    className="w-full flex items-center px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm"
                     disabled={deleteMoimMutation.isPending}
                   >
                     <span className="flex items-center gap-1.5">
                       <span>❌ 모임 삭제</span>
                     </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <span className="ml-auto flex w-4 justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </span>
                   </button>
                 )}
               </div>
@@ -778,7 +926,9 @@ export default function MoimDetailPage() {
                   className="flex-1 py-3.5 bg-theme text-white font-bold rounded-xl shadow-md shadow-theme/30 disabled:opacity-50"
                   onClick={() =>
                     updateSettingsMutation.mutate({
-                      name: editName,
+                      name: trimmedEditName,
+                      description: trimmedEditDescription,
+                      categories: editCategories,
                       maxMember: parsedEditMaxMember,
                       isPrivate: editIsPrivate,
                       ...(editPassword && { password: editPassword }),
