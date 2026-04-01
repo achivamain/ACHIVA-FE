@@ -6,12 +6,9 @@ type MoimCardProps = {
   onClick: () => void;
 };
 
-/** groupGoalCurrent(이번 주 인증 횟수) 기반 온도 계산 - 상세 페이지와 동일한 공식 */
+/** score(누적 인증 횟수) 기반 온도 계산 - 상세 페이지와 동일한 공식 */
 function calcTemp(moim: Moim): number {
-  const thisWeekCount = moim.groupGoalCurrent ?? 0;
-  const increase = thisWeekCount * 0.8;
-  const rawTemp = 36.5 + increase;
-  return Math.max(36.5, Math.min(100, rawTemp));
+  return Math.max(36.5, Math.min(100, 36.5 + 0.8 * (moim.score ?? 0)));
 }
 
 export function OfficialChallengeCard({ moim, onClick }: MoimCardProps) {

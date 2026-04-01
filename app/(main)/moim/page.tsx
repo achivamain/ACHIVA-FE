@@ -396,8 +396,10 @@ export default function MoimExplorePage() {
                   </div>
                 ) : (
                   filteredMoims.map((moim) => {
-                    const current = moim.groupGoalCurrent ?? 0;
-                    const temp = Math.min(100, Math.max(36.5, 36.5 + current * 0.8));
+                    const temp = Math.min(
+                      100,
+                      Math.max(36.5, 36.5 + 0.8 * (moim.score ?? 0)),
+                    );
                     return (
                     <div
                       key={moim.id}
