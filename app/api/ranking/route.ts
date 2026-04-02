@@ -41,6 +41,20 @@ const BY_CATEGORY: Record<string, UserRankData[]> = {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
+  const type = searchParams.get("type");
+
+  if (type === "crew") {
+    const CREWS: UserRankData[] = [
+      { memberId: 101, nickName: "올라올라 클라이밍", profileImageUrl: null, postCount: 220, weeklyCount: 45, streakWeeks: 12, title: "👑 열정 크루" },
+      { memberId: 102, nickName: "강남 러너스", profileImageUrl: null, postCount: 198, weeklyCount: 38, streakWeeks: 8, title: "🔥 핫 크루" },
+      { memberId: 103, nickName: "아침 요가 수련원", profileImageUrl: null, postCount: 154, weeklyCount: 29, streakWeeks: 5, title: "🔥 핫 크루" },
+      { memberId: 104, nickName: "주말 축구단", profileImageUrl: null, postCount: 120, weeklyCount: 20, streakWeeks: 4 },
+      { memberId: 105, nickName: "분당 라이더모임", profileImageUrl: null, postCount: 95, weeklyCount: 15, streakWeeks: 2 },
+    ];
+    return NextResponse.json({
+      data: CREWS.map((u, i) => ({ rank: i + 1, ...u })),
+    });
+  }
 
   if (category) {
     const list = BY_CATEGORY[category] ?? [];

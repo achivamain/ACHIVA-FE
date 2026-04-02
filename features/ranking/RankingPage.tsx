@@ -8,7 +8,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 
 // ── 타입 ──────────────────────────────────────────────
-type RankTab = "전체" | "관심운동";
+type RankTab = "전체" | "관심운동" | "크루";
 
 type RankUser = {
   rank: number;
@@ -25,275 +25,58 @@ function calcTemp(postCount: number): number {
   return 36.5 + 0.8 * postCount;
 }
 
-// ── 온도 → 색상 (sunset 팔레트) ───────────────────────────
-// 슬레이트 → 앰버 → 오렌지 → 코랄 → 와인레드
-function getTempColor(temp: number): {
-  primary: string;    // 대표색 hex
-  soft: string;       // 연한 변형 (ring, badge bg)
-  glow: string;       // box-shadow
-  gradient: string;   // tailwind gradient classes
-  intensity: number;  // 0~1
-} {
-  const norm = Math.max(0, Math.min(1, (temp - 36.5) / (90 - 36.5)));
+// ── 열정 티어 (50 / 75 / 100도 기준) ───────────────────────────────────────
+type PassionTier = {
+  name: string;     // 티어명
+  emoji: string;    // 이모지
+  color: string;    // 텍스트·수치 색상
+  bg: string;       // 뱃지 배경
+  border: string;   // 뱃지 테두리
+};
 
-  if (norm < 0.18) return {
-    primary: "#94A3B8",  // slate — 방전한 몸의 온도
-    soft: "#F1F5F9",
-    glow: "none",
-    gradient: "from-slate-200 to-slate-300",
-    intensity: norm,
+function getPassionTier(temp: number): PassionTier {
+  if (temp >= 100) return {
+    name: "열정레전드", emoji: "🔥🔥🔥",
+    color: "#EA580C", bg: "#FFF7ED", border: "#FDBA74",  // origin: orange-700 -> orange-600
   };
-  if (norm < 0.38) return {
-    primary: "#D97706",  // amber-600 — 초양 촛빛
-    soft: "#FEF3C7",
-    glow: `0 0 10px rgba(217,119,6,${0.15 + norm * 0.3})`,
-    gradient: "from-yellow-300 to-amber-400",
-    intensity: norm,
+  if (temp >= 75) return {
+    name: "열정왕", emoji: "🔥🔥",
+    color: "#F97316", bg: "#FFF7ED", border: "#FDBA74",  // origin: orange-600 -> orange-500
   };
-  if (norm < 0.56) return {
-    primary: "#EA580C",  // orange-600 — 따뜻한 빛
-    soft: "#FFEDD5",
-    glow: `0 0 12px rgba(234,88,12,${0.15 + norm * 0.35})`,
-    gradient: "from-amber-400 to-orange-500",
-    intensity: norm,
+  if (temp >= 50) return {
+    name: "열정러", emoji: "🔥",
+    color: "#D97706", bg: "#FFFBEB", border: "#FDE68A",  // amber-600
   };
-  if (norm < 0.76) return {
-    primary: "#C2410C",  // orange-700 — 단단한 빛
-    soft: "#FED7AA",
-    glow: `0 0 14px rgba(194,65,12,${0.18 + norm * 0.3})`,
-    gradient: "from-orange-500 to-red-400",
-    intensity: norm,
-  };
-  // 최고 온도— 와인 레드 (중후 노을)
   return {
-    primary: "#9B2020",  // 따뜻한 와인레드 — 시빨겋지 않는 진한 붉
-    soft: "#FEE2E2",
-    glow: `0 0 16px rgba(155,32,32,${0.2 + norm * 0.25})`,
-    gradient: "from-red-400 to-rose-600",
-    intensity: norm,
+    name: "불씨", emoji: "🌡️",
+    color: "#9CA3AF", bg: "#F9FAFB", border: "#E5E7EB",  // gray-400
   };
 }
 
-// ── 불꽃 이모지 (온도에 따라 개수) ──────────────────
-function FlameIndicator({ temp, size = "sm" }: { temp: number; size?: "sm" | "xs" }) {
-  const norm = Math.max(0, Math.min(1, (temp - 36.5) / (90 - 36.5)));
-  const count = norm < 0.15 ? 0 : norm < 0.4 ? 1 : norm < 0.65 ? 2 : norm < 0.85 ? 3 : 4;
-  if (count === 0) return null;
-  return (
-    <span className={`tabular-nums leading-none ${size === "xs" ? "text-[10px]" : "text-xs"}`}>
-      {"🔥".repeat(count)}
-    </span>
-  );
-}
 
-// ── 온도 바 — 선셋 그라데이션 고정 ───────────────────────────
-// 전체 스펙트럼을 일정한 바에 보여주면 단계가 보여서 즐거움
-function TempBar({ temp }: { temp: number }) {
-  // 전체 범위 (36.5~100도) 기준 내 체워진 버퍼
-  const pct = Math.max(4, Math.min(100, ((temp - 36.5) / (100 - 36.5)) * 100));
-  // 선셋 다중 스톱: 황금 → 암버 → 오렌지 → 코랄 → 와인
-  const barBg = "linear-gradient(to right, #FCD34D, #F59E0B, #EA580C, #C2410C, #9B2020)";
-  return (
-    <div className="relative h-[5px] w-full rounded-full bg-gray-100 overflow-hidden mt-1.5">
-      {/* 전체 그라데이션 본체 */}
-      <div className="absolute inset-y-0 left-0 right-0" style={{ background: barBg }} />
-      {/* 오른쪽 마스크 — 채워지지 않은 부분을 덩덀 */}
-      <motion.div
-        className="absolute inset-y-0 right-0 bg-gray-100"
-        initial={{ width: "100%" }}
-        animate={{ width: `${100 - pct}%` }}
-        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-      />
-    </div>
-  );
-}
 
-// ── 1위 히어로 카드 ───────────────────────────────────
-function FirstPlaceCard({ user, isMe, title }: { user: RankUser; isMe?: boolean; title?: string }) {
-  const temp = calcTemp(user.postCount);
-  const tc = getTempColor(temp);
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="mx-4 mb-3 rounded-2xl overflow-hidden relative"
-      style={{ boxShadow: `0 4px 24px ${tc.primary}22` }}
-    >
-      {/* 배경 그라디언트 */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(135deg, ${tc.primary}14 0%, ${tc.primary}06 100%)`,
-        }}
-      />
-      {/* 우측 상단 장식용 큰 온도 숫자 */}
-      <div
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-[72px] font-black leading-none tabular-nums select-none pointer-events-none"
-        style={{ color: tc.primary, opacity: 0.07 }}
-      >
-        {temp.toFixed(0)}°
-      </div>
-
-      <div className="relative flex items-center gap-4 px-5 py-4">
-        {/* 프로필 */}
-        <div className="relative flex-shrink-0">
-          <div
-            className={`absolute -inset-[3px] rounded-full bg-gradient-to-br ${tc.gradient}`}
-            style={{ boxShadow: tc.glow, opacity: 0.55 + tc.intensity * 0.35 }}
-          />
-          <div className="relative rounded-full overflow-hidden bg-white ring-2 ring-white">
-            <ProfileImg url={user.profileImageUrl ?? undefined} size={62} />
-          </div>
-          {isMe && (
-            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#412A2A] ring-2 ring-white flex items-center justify-center">
-              <span className="text-white text-[8px] font-black">나</span>
-            </div>
-          )}
-        </div>
-
-        {/* 정보 */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-base leading-none">👑</span>
-            <span className="text-[11px] font-bold text-gray-400 tracking-widest uppercase">1st</span>
-          </div>
-          <div className="font-black text-[18px] text-gray-900 truncate leading-tight mb-1.5">
-            {user.nickName}
-          </div>
-          {/* 칭호 */}
-          {title && (
-            <span
-              className="inline-block text-[10px] font-black px-2 py-0.5 rounded-full"
-              style={{ color: tc.primary, backgroundColor: `${tc.primary}12`, border: `1px solid ${tc.primary}25` }}
-            >
-              {title}
-            </span>
-          )}
-          <div className="flex items-center gap-2 mt-1.5">
-            {(user.weeklyCount ?? 0) > 0 && (
-              <span className="text-[11px] text-gray-500">
-                이번 주 <span className="font-bold text-gray-700">{user.weeklyCount}회</span>
-              </span>
-            )}
-            {(user.streakWeeks ?? 0) >= 2 && (
-              <>
-                <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
-                <span className="text-[11px] font-bold text-gray-500">{user.streakWeeks}주 연속</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* 온도 */}
-        <div className="flex-shrink-0 text-right">
-          <div className="flex flex-col items-end">
-            <FlameIndicator temp={temp} size="sm" />
-            <span
-              className="text-[26px] font-black tabular-nums leading-tight"
-              style={{ color: tc.primary }}
-            >
-              {temp.toFixed(1)}
-              <span className="text-[16px]">°</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 하단 온도 바 */}
-      <div className="px-5 pb-4">
-        <TempBar temp={temp} />
-      </div>
-    </motion.div>
-  );
-}
-
-// ── 2·3위 사이드 카드 ──────────────────────────────────
-function RunnerUpCard({ user, isMe, index, title }: { user: RankUser; isMe?: boolean; index: number; title?: string }) {
-  const temp = calcTemp(user.postCount);
-  const tc = getTempColor(temp);
-  const medal = user.rank === 2 ? "🥈" : "🥉";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1 + index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      className="flex-1 rounded-2xl border border-gray-100 px-3.5 py-3.5 flex flex-col gap-2.5 bg-white"
-      style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}
-    >
-      {/* 상단: 순위 + 메달 */}
-      <div className="flex items-center justify-between mb-0.5">
-        <span className="text-xs font-bold text-gray-300 tracking-widest uppercase">
-          {user.rank === 2 ? "2nd" : "3rd"}
-        </span>
-        <span className="text-base">{medal}</span>
-      </div>
-      {/* 칭호 */}
-      {title && (
-        <span
-          className="inline-block text-[9px] font-black px-1.5 py-[2px] rounded-full mb-1"
-          style={{ color: tc.primary, backgroundColor: `${tc.primary}10`, border: `1px solid ${tc.primary}20` }}
-        >
-          {title}
-        </span>
-      )}
-
-      {/* 프로필 */}
-      <div className="relative self-start">
-        <div
-          className={`absolute -inset-[2.5px] rounded-full bg-gradient-to-br ${tc.gradient}`}
-          style={{ opacity: 0.4 + tc.intensity * 0.4, boxShadow: tc.glow }}
-        />
-        <div className="relative rounded-full overflow-hidden bg-white ring-[1.5px] ring-white">
-          <ProfileImg url={user.profileImageUrl ?? undefined} size={44} />
-        </div>
-        {isMe && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#412A2A] ring-2 ring-white flex items-center justify-center">
-            <span className="text-white text-[7px] font-black">나</span>
-          </div>
-        )}
-      </div>
-
-      {/* 닉네임 */}
-      <div className="font-bold text-[14px] text-gray-900 truncate" title={user.nickName}>
-        {user.nickName}
-      </div>
-
-      {/* 온도 + 바 */}
-      <div>
-        <div className="flex items-center justify-between mb-1">
-          <FlameIndicator temp={temp} size="xs" />
-          <span
-            className="text-[15px] font-black tabular-nums leading-none"
-            style={{ color: tc.primary }}
-          >
-            {temp.toFixed(1)}°
-          </span>
-        </div>
-        <TempBar temp={temp} />
-      </div>
-    </motion.div>
-  );
-}
-
-// ── 일반 랭킹 아이템 ─────────────────────────────────
+// ── 랭킹 아이템 ─────────────────────────────────
 function RankItem({
   user,
   isMe,
   index,
   categoryTitle,
-  hideTemp,
+  tabVariant,
 }: {
   user: RankUser;
   isMe?: boolean;
   index: number;
   categoryTitle?: string;
-  hideTemp?: boolean;
+  tabVariant: "overall" | "category";
 }) {
   const temp = calcTemp(user.postCount);
-  const tc = getTempColor(temp);
+  const tier = getPassionTier(temp);
+  const rankText =
+    user.rank === 1 ? "text-amber-500"
+    : user.rank === 2 ? "text-slate-400"
+    : user.rank === 3 ? "text-orange-400"
+    : "text-gray-300";
 
   return (
     <motion.div
@@ -307,29 +90,13 @@ function RankItem({
       }`}
     >
       {/* 순위 */}
-      <div
-        className={`w-6 flex-shrink-0 text-center font-black text-[13px] ${
-          user.rank === 1
-            ? "text-amber-500"
-            : user.rank === 2
-            ? "text-slate-400"
-            : user.rank === 3
-            ? "text-orange-400"
-            : "text-gray-300"
-        }`}
-      >
+      <div className={`w-6 flex-shrink-0 text-center font-black text-[13px] ${rankText}`}>
         {user.rank}
       </div>
 
-      {/* 프로필 + 온도 링 */}
+      {/* 프로필 (링/glow 없음) */}
       <div className="relative flex-shrink-0">
-        {!hideTemp && (
-          <div
-            className={`absolute -inset-[2.5px] rounded-full bg-gradient-to-br ${tc.gradient}`}
-            style={{ opacity: 0.25 + tc.intensity * 0.55, boxShadow: tc.glow }}
-          />
-        )}
-        <div className="relative rounded-full overflow-hidden bg-white ring-[1px] ring-white">
+        <div className="rounded-full overflow-hidden">
           <ProfileImg url={user.profileImageUrl ?? undefined} size={40} />
         </div>
         {isMe && (
@@ -339,24 +106,18 @@ function RankItem({
         )}
       </div>
 
-      {/* 이름 + 메타 */}
+      {/* 이름 + 칭호 + 서브 통계 */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-          <span
-            className={`font-bold text-[14px] truncate ${
-              isMe ? "text-orange-700" : "text-gray-900"
-            }`}
-          >
+          <span className={`font-bold text-[14px] truncate ${isMe ? "text-orange-700" : "text-gray-900"}`}>
             {user.nickName}
           </span>
           {categoryTitle && (
-            <span className="flex-shrink-0 text-[9px] font-bold text-orange-600 bg-orange-50 px-1.5 py-[2px] rounded-md border border-orange-100">
+            <span className="flex-shrink-0 text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-[2px] rounded border border-orange-100">
               {categoryTitle}
             </span>
           )}
         </div>
-
-        {/* 서브 통계 */}
         <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
           {(user.weeklyCount ?? 0) > 0 && (
             <span>이번 주 <span className="font-semibold text-gray-500">{user.weeklyCount}회</span></span>
@@ -368,32 +129,22 @@ function RankItem({
             </>
           )}
         </div>
-
-        {/* 온도 게이지 바 (전체 탭만) */}
-        {!hideTemp && <TempBar temp={temp} />}
       </div>
 
-      {/* 우측: 수치 */}
+      {/* 우측 수치 */}
       <div className="flex-shrink-0 min-w-[52px] text-right">
-        {hideTemp ? (
+        {tabVariant === "overall" ? (
           <>
-            <div className="text-[9px] font-bold text-gray-300 tracking-widest uppercase mb-0.5">인증</div>
-            <div className="text-[15px] font-black text-gray-700 tabular-nums leading-tight">
-              {user.postCount}
-              <span className="text-[10px] font-semibold text-gray-400 ml-0.5">회</span>
+            <div className="text-[9px] font-bold text-gray-400 tracking-widest uppercase mb-0.5">온도</div>
+            <div className="text-[15px] font-black tabular-nums leading-tight" style={{ color: tier.color }}>
+              {temp.toFixed(1)}<span className="text-[11px] font-semibold">°</span>
             </div>
           </>
         ) : (
           <>
-            <div className="flex items-center justify-end mb-0.5">
-              <FlameIndicator temp={temp} size="xs" />
-            </div>
-            <div
-              className="text-[15px] font-black tabular-nums leading-tight"
-              style={{ color: tc.primary }}
-            >
-              {temp.toFixed(1)}
-              <span className="text-[11px] font-semibold">°</span>
+            <div className="text-[9px] font-bold text-gray-400 tracking-widest uppercase mb-0.5">인증</div>
+            <div className="text-[15px] font-black text-gray-800 tabular-nums leading-tight">
+              {user.postCount}<span className="text-[10px] font-semibold text-gray-400 ml-0.5">회</span>
             </div>
           </>
         )}
@@ -455,7 +206,7 @@ function EmptyState({ label }: { label: string }) {
   );
 }
 
-// ── 전체 랭킹 ─────────────────────────────────────────
+// ── 전체 랭킹 (관심운동 탭과 동일한 클린 스타일) ────────────────
 function OverallRanking({ currentUserId }: { currentUserId?: number }) {
   const { data, isLoading, isError } = useQuery<RankUser[]>({
     queryKey: ["ranking", "overall"],
@@ -477,15 +228,28 @@ function OverallRanking({ currentUserId }: { currentUserId?: number }) {
 
   return (
     <div className="flex flex-col mt-2 px-1">
-      {data.map((user, i) => (
-        <RankItem
-          key={user.memberId}
-          user={user}
-          isMe={currentUserId === user.memberId}
-          index={i}
-          categoryTitle={(user as any).title}
-        />
-      ))}
+      {data.map((user, i) => {
+        let title = (user as any).title as string | undefined;
+        
+        if (title) {
+          title = title.replace(/👑|🔥/g, "").trim();
+        }
+
+        if (user.rank === 1) title = `👑 ${title ?? "열정왕"}`;
+        else if (user.rank <= 3) title = title ? `🔥 ${title}` : undefined;
+        else title = undefined;
+
+        return (
+          <RankItem
+            key={user.memberId}
+            user={user}
+            isMe={currentUserId === user.memberId}
+            index={i}
+            categoryTitle={title}
+            tabVariant="overall"
+          />
+        );
+      })}
     </div>
   );
 }
@@ -575,9 +339,10 @@ function InterestRanking({
             className="px-1"
           >
             {data.map((user, i) => {
-              let catTitle = undefined;
-              if (user.rank === 1) catTitle = `👑 ${selectedCat} 열정왕`;
-              else if (user.rank <= 3) catTitle = `🔥 ${selectedCat} 열정러`;
+              const catTitle =
+                user.rank === 1 ? `👑 ${selectedCat} 열정왕`
+                : user.rank <= 3 ? `🔥 ${selectedCat} 열정러`
+                : undefined;
               return (
                 <RankItem
                   key={user.memberId}
@@ -585,13 +350,61 @@ function InterestRanking({
                   isMe={currentUserId === user.memberId}
                   index={i}
                   categoryTitle={catTitle}
-                  hideTemp
+                  tabVariant="category"
                 />
               );
             })}
           </motion.div>
         </AnimatePresence>
       )}
+    </div>
+  );
+}
+
+// ── 크루 랭킹 ────────────────────────────────────────
+function CrewRanking() {
+  const { data, isLoading, isError } = useQuery<RankUser[]>({
+    queryKey: ["ranking", "crew"],
+    queryFn: async () => {
+      const res = await fetch("/api/ranking?type=crew");
+      if (!res.ok) throw new Error();
+      return (await res.json()).data ?? [];
+    },
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  if (isLoading) return (
+    <div className="flex flex-col mt-2">
+      {Array(5).fill(0).map((_, i) => <RankSkeleton key={i} index={i} />)}
+    </div>
+  );
+  if (isError || !data || data.length === 0) return <EmptyState label="크루" />;
+
+  return (
+    <div className="flex flex-col mt-2 px-1">
+      {data.map((user, i) => {
+        let title = (user as any).title as string | undefined;
+
+        if (title) {
+          title = title.replace(/👑|🔥/g, "").trim();
+        }
+
+        if (user.rank === 1) title = `👑 ${title ?? "핫 크루"}`;
+        else if (user.rank <= 3) title = title ? `🔥 ${title}` : undefined;
+        else title = undefined;
+
+        return (
+          <RankItem
+            key={user.memberId}
+            user={user}
+            isMe={false}
+            index={i}
+            categoryTitle={title}
+            tabVariant="overall"
+          />
+        );
+      })}
     </div>
   );
 }
@@ -624,7 +437,7 @@ export default function RankingPage({ currentUserId, user, isMobile = false }: R
 
         {/* 탭 */}
         <div className="flex px-5 gap-6">
-          {(["전체", "관심운동"] as RankTab[]).map((tab) => (
+          {(["전체", "관심운동", "크루"] as RankTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -658,7 +471,7 @@ export default function RankingPage({ currentUserId, user, isMobile = false }: R
             >
               <OverallRanking currentUserId={currentUserId} />
             </motion.div>
-          ) : (
+          ) : activeTab === "관심운동" ? (
             <motion.div
               key="interest"
               initial={{ opacity: 0, x: 8 }}
@@ -670,6 +483,16 @@ export default function RankingPage({ currentUserId, user, isMobile = false }: R
                 currentUserId={currentUserId}
                 userCategories={userCategories}
               />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="crew"
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <CrewRanking />
             </motion.div>
           )}
         </AnimatePresence>
