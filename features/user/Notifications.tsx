@@ -81,22 +81,18 @@ export default function Notifications() {
   const notifications = data?.pages.flatMap((p) => p.content) ?? [];
 
   return (
-    <div className="flex-1">
+    <div className="flex min-h-full flex-1 flex-col">
       {isLoading && (
-        <div className="divide-y divide-black/15">
-          {Array(10)
-            .fill(0)
-            .map((_, idx) => (
-              <NotificationSkeleton key={idx} />
-            ))}
+        <div className="flex flex-1 items-center justify-center py-12">
+          <LoadingIcon color="text-theme" />
         </div>
       )}
       {notifications.length === 0 && !isLoading && (
-        <p className="h-full flex justify-center items-center text-[#808080]">
+        <p className="flex flex-1 items-center justify-center text-center text-sm text-[#808080]">
           아직 받은 응원이 없어요.
         </p>
       )}
-      <ul className="w-full flex flex-col">
+      <ul className="w-full flex flex-col pb-8">
         {notifications.map((n, idx) => {
           const Icon = cheeringMeta[n.cheeringCategory].icon;
           const color = cheeringMeta[n.cheeringCategory].color;
@@ -112,13 +108,13 @@ export default function Notifications() {
                     idx === 0 ? "" : "mt-5"
                   } mb-3`}
                 >
-                  <div className="font-semibold text-xl bg-theme text-white rounded-sm px-4 py-1.5">
+                  <div className="rounded-md bg-theme px-4 py-1.5 text-lg font-semibold text-white">
                     {postCache.get(n.articleId)?.category}
                   </div>
-                  <p className="text-[#808080] font-light">
+                  <p className="text-sm font-light text-[#808080]">
                     {postCache.get(n.articleId)?.authorCategorySeq}번째 이야기
                   </p>
-                  <button className="ml-auto">
+                  <button type="button" className="ml-auto">
                     <svg
                       width="25"
                       height="26"
@@ -143,17 +139,19 @@ export default function Notifications() {
                 <Link href={`/${n.senderName}`}>
                   <ProfileImg url={n.senderProfileImageUrl} size={50} />
                 </Link>
-                <div className="flex-1 flex gap-2.5 items-center">
-                  <Link href={`/${n.senderName}`} className="font-semibold">
-                    {n.senderName}
-                  </Link>
-                  <p className="font-light text-black/50">
-                    {dateFormatter(n.createdAt)}
-                  </p>
+                <div className="flex flex-1 items-center gap-2.5">
+                  <div className="min-w-0">
+                    <Link href={`/${n.senderName}`} className="font-semibold">
+                      {n.senderName}
+                    </Link>
+                    <p className="font-light text-black/50">
+                      {dateFormatter(n.createdAt)}
+                    </p>
+                  </div>
                   {/* 응원 버튼 */}
                   <div
                     style={{ backgroundColor: color, borderColor: color }}
-                    className="ml-auto text-[15px] sm:text-base flex items-center gap-[2px] sm:gap-1 rounded-full border px-3 py-1 text-white"
+                    className="ml-auto flex shrink-0 items-center gap-[2px] rounded-full border px-3 py-1 text-[15px] text-white sm:gap-1 sm:text-base"
                   >
                     <p>{n.cheeringCategory}</p>
                     <Icon active />
@@ -171,16 +169,5 @@ export default function Notifications() {
         </div>
       )}
     </div>
-  );
-}
-
-function NotificationSkeleton() {
-  return (
-    <li className={`flex gap-2.5 items-center py-2`}>
-      <div className="w-[50px] rounded-full aspect-square bg-loading animate-pulse" />
-      <div className="flex-1 flex gap-2.5 items-center">
-        <div className="h-6 w-40 bg-loading animate-pulse rounded-md" />
-      </div>
-    </li>
   );
 }
