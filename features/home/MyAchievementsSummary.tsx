@@ -155,8 +155,10 @@ export default function MyAchievementsSummary({
   }, [userId]);
 
   // 열정 온도 계산 로직, 현재 게시글당 0.4, 계획 세우고 하면 추가로 0.1, 주 3회 완성하면 1.5
+  // 계획 데이터 백엔드 이관 전까지는 제외하고 사용
   const passionTemp = useMemo(() => {
-    const calculated = 36.5 + 0.4 * totalCount + 0.1 * completedGoalCount + 1.5 * streakWeeks;
+    const calculated = 36.5 + 0.4 * totalCount + 1.5 * streakWeeks;
+    // const calculated = 36.5 + 0.4 * totalCount + 0.1 * completedGoalCount + 1.5 * streakWeeks;
     return Math.max(36.5, Math.min(100, Number(calculated.toFixed(1))));
   }, [completedGoalCount, streakWeeks, totalCount]);
 
