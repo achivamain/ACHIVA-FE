@@ -88,9 +88,7 @@ export function calculateMemberTemperature(
   );
 }
 
-export function calculateCrewTemperature(
-  score: number,
-) {
+export function calculateCrewTemperature(score: number) {
   return Number((36.5 + score * 0.8).toFixed(1));
 }
 
@@ -113,11 +111,11 @@ export function normalizeOverallRanking(
       if (b.temperature !== a.temperature) {
         return b.temperature - a.temperature;
       }
-      if (b.articleCount !== a.articleCount) {
-        return b.articleCount - a.articleCount;
-      }
       if (b.continuousGoalWeeks !== a.continuousGoalWeeks) {
         return b.continuousGoalWeeks - a.continuousGoalWeeks;
+      }
+      if (b.articleCount !== a.articleCount) {
+        return b.articleCount - a.articleCount;
       }
       return a.nickName.localeCompare(b.nickName, "ko");
     })

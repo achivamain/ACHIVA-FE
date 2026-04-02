@@ -7,10 +7,11 @@ import { AnimatePresence, motion } from "motion/react";
 import ProfileImg from "@/components/ProfileImg";
 import { categories as allCategories } from "@/types/Categories";
 import type { User } from "@/types/User";
-import type {
-  CategoryRankingItem,
-  CrewRankingItem,
-  OverallRankingItem,
+import {
+  calculateCrewTemperature,
+  type CategoryRankingItem,
+  type CrewRankingItem,
+  type OverallRankingItem,
 } from "@/lib/ranking";
 
 type RankTab = "전체" | "관심운동" | "크루";
@@ -34,9 +35,16 @@ function isActiveCrewRankingItem(crew: CrewRankingItem) {
 
 function getRankTextClass(rank: number) {
   if (rank === 1) return "text-amber-500";
-  if (rank === 2) return "text-slate-400";
-  if (rank === 3) return "text-orange-400";
+  if (rank === 2) return "text-slate-500";
+  if (rank === 3) return "text-amber-700";
   return "text-gray-300";
+}
+
+function getRankRowClass(rank: number) {
+  if (rank === 1) return "border border-amber-200 bg-amber-50/40";
+  if (rank === 2) return "border border-slate-300 bg-slate-50";
+  if (rank === 3) return "border border-amber-700/20 bg-amber-50/30";
+  return "border border-transparent hover:bg-gray-50/70";
 }
 
 function formatMetricValue(value: number) {
@@ -82,6 +90,13 @@ function EmptyState({ label }: { label: string }) {
   );
 }
 
+type RankingMetric = {
+  key: string;
+  text: string;
+  highlight?: boolean;
+  highlightTone?: "orange" | "mocha";
+};
+
 function UserRankingRow({
   rank,
   nickName,
@@ -94,7 +109,7 @@ function UserRankingRow({
   rank: number;
   nickName: string;
   profileImageUrl: string | null;
-  metrics: string[];
+  metrics: RankingMetric[];
   metricLabel: string;
   metricValue: string;
   index: number;
@@ -104,7 +119,7 @@ function UserRankingRow({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, delay: index * 0.04 }}
-      className="flex items-center gap-3 px-4 py-3.5 rounded-xl mb-1 transition-colors hover:bg-gray-50/70"
+      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl mb-1 transition-colors ${getRankRowClass(rank)}`}
     >
       <div
         className={`w-6 flex-shrink-0 text-center font-black text-[13px] ${getRankTextClass(rank)}`}
@@ -123,7 +138,28 @@ function UserRankingRow({
         {metrics.length > 0 && (
           <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium flex-wrap">
             {metrics.map((metric) => (
-              <span key={metric}>{metric}</span>
+              metric.highlight ? (
+                <span
+                  key={metric.key}
+                  className={`relative inline-flex items-center px-1.5 py-[1px] text-[11px] font-medium ${
+                    metric.highlightTone === "mocha"
+                      ? "text-[#8A6A57]"
+                      : "text-[#D96B2B]"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`absolute inset-0 -translate-y-px rounded-[4px] ${
+                      metric.highlightTone === "mocha"
+                        ? "bg-[#F6F1EC]"
+                        : "bg-[#FFF1E8]"
+                    }`}
+                  />
+                  <span className="relative z-10">{metric.text}</span>
+                </span>
+              ) : (
+                <span key={metric.key}>{metric.text}</span>
+              )
             ))}
           </div>
         )}
@@ -148,6 +184,7 @@ function CrewRankingRow({
   crew: CrewRankingItem;
   index: number;
 }) {
+  const crewTemperature = calculateCrewTemperature(crew.score);
   const badges = [
     crew.isOfficial ? "공식" : null,
     crew.isPrivate ? "비공개" : null,
@@ -158,7 +195,7 @@ function CrewRankingRow({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, delay: index * 0.04 }}
-      className="flex items-center gap-3 px-4 py-3.5 rounded-xl mb-1 transition-colors hover:bg-gray-50/70"
+      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl mb-1 transition-colors ${getRankRowClass(crew.rank)}`}
     >
       <div
         className={`w-6 flex-shrink-0 text-center font-black text-[13px] ${getRankTextClass(crew.rank)}`}
@@ -183,11 +220,12 @@ function CrewRankingRow({
         <div className="text-[11px] text-gray-500 line-clamp-1 mb-1">
           {crew.description || "소개가 아직 없어요."}
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium flex-wrap">
-          <span>
-            멤버 <span className="font-semibold text-gray-500">{crew.memberCount}</span>
-            {" / "}
-            <span className="font-semibold text-gray-500">{crew.maxMember}</span>
+        <div className="flex items-center gap-x-2 gap-y-1 text-[11px] text-gray-400 font-medium flex-wrap">
+          <span className="inline-flex items-center gap-[3px] rounded-[4px] bg-gray-100 px-1.5 py-[1px] leading-none text-gray-500">
+            <span>멤버</span>
+            <span className="font-semibold text-gray-600">{crew.memberCount}</span>
+            <span className="text-gray-400">/</span>
+            <span className="font-semibold text-gray-600">{crew.maxMember}</span>
           </span>
           {crew.categories.map((category) => (
             <span key={category} className="text-gray-500">
@@ -199,10 +237,10 @@ function CrewRankingRow({
 
       <div className="flex-shrink-0 min-w-[52px] text-right">
         <div className="text-[9px] font-bold text-gray-400 tracking-widest uppercase mb-0.5">
-          점수
+          온도
         </div>
         <div className="text-[15px] font-black text-gray-800 tabular-nums leading-tight">
-          {crew.score}
+          {formatMetricValue(crewTemperature)}
         </div>
       </div>
     </motion.div>
@@ -248,9 +286,22 @@ function OverallRanking() {
           nickName={user.nickName}
           profileImageUrl={user.profileImageUrl}
           metrics={[
-            `누적 인증 ${user.articleCount}회`,
-            `이번 주 ${user.weeklyWorkoutCount}회`,
-            `${user.continuousGoalWeeks}주 연속`,
+            {
+              key: "articleCount",
+              text: `누적 인증 ${user.articleCount}회`,
+            },
+            {
+              key: "weeklyWorkoutCount",
+              text: `이번 주 ${user.weeklyWorkoutCount}회`,
+              highlight: user.weeklyWorkoutCount >= 3,
+              highlightTone: "mocha",
+            },
+            {
+              key: "continuousGoalWeeks",
+              text: `${user.continuousGoalWeeks}주 연속`,
+              highlight: user.continuousGoalWeeks >= 3,
+              highlightTone: "orange",
+            },
           ]}
           metricLabel="온도"
           metricValue={formatMetricValue(user.temperature)}
@@ -371,7 +422,12 @@ function InterestRanking({
                 rank={user.rank}
                 nickName={user.nickName}
                 profileImageUrl={user.profileImageUrl}
-                metrics={[`${selectedCat} 인증 ${user.articleCount}회`]}
+                metrics={[
+                  {
+                    key: "articleCount",
+                    text: `${selectedCat} 인증 ${user.articleCount}회`,
+                  },
+                ]}
                 metricLabel="인증"
                 metricValue={`${user.articleCount}회`}
                 index={index}
@@ -447,7 +503,7 @@ export default function RankingPage({
   const tabDescription = useMemo(() => {
     if (activeTab === "전체") return "열정온도 기준";
     if (activeTab === "관심운동") return "인증 수 기준";
-    return "점수 기준";
+    return "열정온도 기준";
   }, [activeTab]);
 
   return (
