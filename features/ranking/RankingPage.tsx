@@ -33,6 +33,7 @@ function isActiveCrewRankingItem(crew: CrewRankingItem) {
   return crew.score > 0;
 }
 
+// 1~3등 표시
 function getRankTextClass(rank: number) {
   if (rank === 1) return "text-amber-500";
   if (rank === 2) return "text-slate-500";
@@ -187,7 +188,6 @@ function CrewRankingRow({
   const crewTemperature = calculateCrewTemperature(crew.score);
   const badges = [
     crew.isOfficial ? "공식" : null,
-    crew.isPrivate ? "비공개" : null,
   ].filter(Boolean) as string[];
 
   return (
@@ -352,6 +352,7 @@ function InterestRanking({
     retry: false,
   });
 
+  // 구조상 userCategories가 반드시 있어야 하긴 함
   if (categoryView === "interest" && userCategories.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-2.5">
