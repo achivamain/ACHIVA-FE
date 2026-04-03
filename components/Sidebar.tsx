@@ -8,13 +8,11 @@ import {
   HomeIcon,
   GoalIcon,
   FeedIcon,
-  SideBarHeartIcon,
   MyPageIcon,
+  RankingIcon,
 } from "./Icons";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useState } from "react";
-import Drawer from "./Drawer";
-import Notifications from "@/features/user/Notifications";
 
 type NavItem =
   | {
@@ -57,21 +55,17 @@ export default function Sidebar() {
     refetchOnWindowFocus: false,
   });
 
-  // 사이드바에 drawer로 열리는 다른 것이 들어가지 않을 것 같아서
-  // 변수명도 바꾸고, drawerContext도 뺐습니다
-  const [isCheerDrawerOpen, setIsCheerDrawerOpen] = useState<boolean>(false);
-
   const pathname = decodeURIComponent(usePathname());
 
   let initialSelectedItem;
-  if (isCheerDrawerOpen) {
-    initialSelectedItem = "응원";
-  } else if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
+  if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
     initialSelectedItem = "홈";
   } else if (pathname.startsWith("/moim")) {
     initialSelectedItem = "모임";
   } else if (pathname === "/feed" || pathname.startsWith("/post")) {
     initialSelectedItem = "피드";
+  } else if (pathname.startsWith("/ranking")) {
+    initialSelectedItem = "랭킹";
   } else {
     initialSelectedItem = "MY";
   }
@@ -95,9 +89,9 @@ export default function Sidebar() {
       Icon: FeedIcon,
     },
     {
-      label: "응원",
-      onClick: () => setIsCheerDrawerOpen(true),
-      Icon: SideBarHeartIcon,
+      label: "랭킹",
+      href: `/ranking`,
+      Icon: RankingIcon,
     },
     {
       label: "MY",
@@ -110,24 +104,14 @@ export default function Sidebar() {
     <>
       <motion.nav
         layoutScroll
-        className={`text-theme z-10 h-dvh fixed bottom-0 top-0 flex flex-col items-center w-auto lg:w-[250px] ${
-          isCheerDrawerOpen ? "!w-auto" : ""
-        } py-8 border-r border-r-[#412A2A] bg-white`}
+        className="text-theme z-10 h-dvh fixed bottom-0 top-0 flex flex-col items-center w-auto lg:w-[250px] py-8 border-r border-r-[#412A2A] bg-white"
       >
-        <div
-          className={`mb-15 w-full h-[39.29px] flex px-6 justify-start lg:hidden ${
-            isCheerDrawerOpen ? "!block" : ""
-          }`}
-        >
+        <div className="mb-15 w-full h-[39.29px] flex px-6 justify-start lg:hidden">
           <Link href="/" className="h-full flex items-end">
             <Logo />
           </Link>
         </div>
-        <div
-          className={`mb-15 w-full justify-start px-6 hidden lg:flex ${
-            isCheerDrawerOpen ? "!hidden" : ""
-          }`}
-        >
+        <div className="mb-15 w-full justify-start px-6 hidden lg:flex">
           <Link href="/">
             <TextLogo />
           </Link>
@@ -141,7 +125,7 @@ export default function Sidebar() {
           {navItems.map((item) => {
             const listItem = (
               <ListItem
-                isNavFolded={!!isCheerDrawerOpen}
+                isNavFolded={false}
                 label={item.label}
                 selected={selectedItem === item.label}
                 Icon={item.Icon}
@@ -169,13 +153,6 @@ export default function Sidebar() {
           })}
         </ul>
       </motion.nav>
-      <AnimatePresence>
-        {isCheerDrawerOpen && (
-          <Drawer title="응원" onClose={() => setIsCheerDrawerOpen(false)}>
-            <Notifications />
-          </Drawer>
-        )}
-      </AnimatePresence>
     </>
   );
 }

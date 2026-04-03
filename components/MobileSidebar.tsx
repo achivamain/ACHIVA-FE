@@ -7,8 +7,8 @@ import {
   HomeIcon,
   GoalIcon,
   FeedIcon,
-  SideBarHeartIcon,
   MyPageIcon,
+  RankingIcon,
 } from "./Icons";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -43,14 +43,14 @@ export default function Sidebar() {
   const pathname = decodeURIComponent(usePathname());
 
   let initialSelectedItem;
-  if (pathname === `/accounts/notifications`) {
-    initialSelectedItem = "응원";
-  } else if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
+  if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
     initialSelectedItem = "홈";
   } else if (pathname.startsWith("/moim") || pathname.startsWith("/m/moim")) {
     initialSelectedItem = "모임";
   } else if (pathname === "/feed" || pathname.startsWith("/post")) {
     initialSelectedItem = "피드";
+  } else if (pathname.startsWith("/ranking") || pathname.startsWith("/m/ranking")) {
+    initialSelectedItem = "랭킹";
   } else {
     initialSelectedItem = "MY";
   }
@@ -93,9 +93,9 @@ export default function Sidebar() {
       Icon: FeedIcon,
     },
     {
-      label: "응원",
-      href: "/accounts/notifications",
-      Icon: SideBarHeartIcon,
+      label: "랭킹",
+      href: `/ranking`,
+      Icon: RankingIcon,
     },
     {
       label: "MY",
