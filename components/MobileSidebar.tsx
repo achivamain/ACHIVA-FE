@@ -108,7 +108,7 @@ export default function Sidebar() {
     <>
       <motion.nav
         layoutScroll
-        className="text-theme w-full shadow-[0px_-5px_15px_0_rgba(0,0,0,0.05)] h-auto fixed bottom-0 items-center bg-white z-50"
+        className="text-theme fixed inset-x-0 bottom-0 z-50 h-auto w-full items-center border-t border-[#ECE7E2] bg-white"
       >
         <ul
           className={`flex w-full justify-around px-[7px] py-[19px] ${

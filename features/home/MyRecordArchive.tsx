@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LoadingIcon } from "@/components/Icons";
 import { inter } from "@/lib/fonts";
 import type { PostRes } from "@/types/Post";
@@ -20,6 +20,9 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const selectedDate = searchParams.get("date");
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const observerRef = useRef<HTMLDivElement | null>(null);
+  const [shouldFetch, setShouldFetch] = useState(Boolean(selectedDate));
 
   async function fetchArticles(pageParam: number = 0): Promise<PostsData> {
     const response = await fetch(
@@ -45,12 +48,34 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
         const next = lastPage.number + 1;
         return next < lastPage.totalPages ? next : undefined;
       },
+      enabled: shouldFetch,
     });
 
-  const observerRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (selectedDate) {
+      setShouldFetch(true);
+    }
+  }, [selectedDate]);
 
   useEffect(() => {
-    if (!observerRef.current) return;
+    if (shouldFetch || !containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        setShouldFetch(true);
+        observer.disconnect();
+      },
+      { rootMargin: "1200px 0px" },
+    );
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [shouldFetch]);
+
+  useEffect(() => {
+    if (!shouldFetch || !observerRef.current) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -61,7 +86,7 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
     );
     observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, shouldFetch]);
 
   const allPosts: PostRes[] = data?.pages.flatMap((page) => page.content) ?? [];
 
@@ -78,6 +103,16 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
     router.replace(pathname, { scroll: false });
   };
 
+  if (!shouldFetch) {
+    return (
+      <div id="record-archive" ref={containerRef} className="px-5">
+        <div className="sm:w-[768px] mx-auto py-10">
+          <div className="h-[220px] rounded-[24px] bg-white/70 ring-1 ring-[#F0EBE3] shadow-[0_2px_20px_rgba(0,0,0,0.04)] animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div id="record-archive" className="flex justify-center py-10">
@@ -87,7 +122,7 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
   }
 
   return (
-    <div id="record-archive" className="px-5">
+    <div id="record-archive" ref={containerRef} className="px-5">
       <div className="sm:w-[768px] mx-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[22px] sm:text-[26px] font-bold text-black">

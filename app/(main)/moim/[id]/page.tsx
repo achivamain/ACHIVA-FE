@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CloseIcon } from "@/components/Icons";
 import type { Moim } from "@/types/moim";
 import {
@@ -36,6 +36,7 @@ export default function MoimDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
@@ -232,6 +233,15 @@ export default function MoimDetailPage() {
   );
   const visibleMembers = sortedMembers.slice(0, visibleMemberCount);
   const hasMoreMembers = sortedMembers.length > visibleMemberCount;
+  const debugTemp = (() => {
+    const raw = searchParams.get("debugTemp");
+    if (!raw) return null;
+
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) return null;
+
+    return Math.max(36.5, Math.min(100, Number(parsed.toFixed(1))));
+  })();
 
   return (
     <div className="flex flex-col h-full bg-gray-50 pb-20 lg:pb-0">
@@ -382,19 +392,28 @@ export default function MoimDetailPage() {
             🔥 우리 모임 열정 온도
           </h3>
           {(() => {
-            const passionTemp = Math.max(
+            const calculatedTemp = Math.max(
               36.5,
               Math.min(100, 36.5 + 0.8 * moimDetail.score),
             );
+            const passionTemp = debugTemp ?? calculatedTemp;
 
             // 모임 특화 상태 매핑
             const getStatus = (temp: number) => {
-              if (temp < 40)
+              if (temp === 36.5)
                 return {
                   label: "🌱 작은 불씨 지피기",
                   gradient: "from-amber-200 to-amber-300",
                   bg: "bg-amber-50",
                   text: "text-amber-600",
+                };
+
+              if (36.5 < temp && temp < 40)
+                return {
+                  label: "🌱 작은 불씨 지피기",
+                  gradient: "from-[#CDBA96] to-yellow-400",
+                  bg: "bg-gray-50",
+                  text: "text-gray-600",
                 };
               if (temp < 50)
                 return {
@@ -457,19 +476,21 @@ export default function MoimDetailPage() {
 
                 {/* 온도바 (Progress Bar) */}
                 <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                  {/* 기본 체온 36.5도 마커 */}
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-gray-300 z-10 shadow-sm"
-                    style={{ left: `36.5%` }}
-                    title="기본 체온 (36.5°C)"
-                  />
+                  {/* 기본 체온 36.5도 마커 / 너무 낮으면 progress가 막대기에 가려짐 */}
+                  {passionTemp > 37.6 && (
+                    <div
+                      className="absolute top-0 bottom-0 w-0.5 bg-gray-300 z-10 shadow-sm"
+                      style={{ left: `36.5%` }}
+                      title="기본 체온 (36.5°C)"
+                    />
+                  )}
                   <div
                     className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${statusInfo.gradient}`}
                     style={{ width: `${Math.max(2, percent)}%` }} // 최소 2%는 보여서 둥근 모서리 유지
                   />
                 </div>
 
-                <div className="flex justify-between text-[10px] sm:text-xs text-gray-400 font-medium px-2 mt-0.5 relative">
+                <div className="flex justify-between text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5 relative">
                   <span>0°C</span>
                   <span className="absolute left-[36.5%] -translate-x-1/2 text-theme font-bold">
                     36.5°C
