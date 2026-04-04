@@ -142,43 +142,43 @@ export default function LiveActivityTicker() {
   if (activities.length === 0) return null;
 
   return (
-    <div className="mx-5 mb-2 overflow-hidden rounded-[16px] bg-white px-4 py-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)] ring-1 ring-[#F0EBE3] flex items-center gap-2.5">
-      <span className="text-[15px] animate-pulse">🔥</span>
-      <div className="flex-1 relative h-[20px] overflow-hidden">
-        {activities.map((act, index) => {
-          // 상태 및 위치 계산
-          const offsetIndex = index - currentIndex;
-          // 배열의 끝에서 처음으로 자연스럽게 넘어가게 하기 위한 약간의 트릭
-          let transformY = offsetIndex * 100;
-          const opacity = index === currentIndex ? 1 : 0;
+    <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
+      <div className="flex w-full min-w-0 items-center gap-2.5 overflow-hidden rounded-[20px] border border-[#FFF4EC] bg-[#FFF4EC] px-4 py-2 shadow-sm sm:px-5">
+        <span className="text-[15px] animate-pulse">🔥</span>
+        <div className="relative h-[20px] flex-1 overflow-hidden">
+          {activities.map((act, index) => {
+            const offsetIndex = index - currentIndex;
+            let transformY = offsetIndex * 100;
+            const opacity = index === currentIndex ? 1 : 0;
 
-          if (offsetIndex < 0) {
-            transformY = (activities.length + offsetIndex) * 100;
-          }
+            if (offsetIndex < 0) {
+              transformY = (activities.length + offsetIndex) * 100;
+            }
 
-          return (
-            <div
-              key={act.id}
-              className="absolute left-0 w-full flex items-center gap-1.5 transition-all duration-500 ease-in-out"
-              style={{
-                transform: `translateY(${transformY}%)`,
-                opacity: opacity,
-              }}
-            >
-              <span className="truncate text-[13px] font-medium text-[#4B5563]">
-                <strong className="font-bold text-[#D96B2B]">
-                  {act.memberNickName}
-                </strong>
-                님이{" "}
-                <strong className="font-bold text-[#1A1A1A]">
-                  주 {act.weeklyCount}회 운동
-                </strong>
-                을 달성했어요! 🎉
-              </span>
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={act.id}
+                className="absolute left-0 flex w-full items-center gap-1.5 transition-all duration-500 ease-in-out"
+                style={{
+                  transform: `translateY(${transformY}%)`,
+                  opacity,
+                }}
+              >
+                <span className="truncate pt-[1px] text-[13px] font-medium text-[#4B5563]">
+                  <strong className="font-bold text-[#D96B2B]">
+                    {act.memberNickName}
+                  </strong>
+                  님이{" "}
+                  <strong className="font-bold text-[#1A1A1A]">
+                    주 {act.weeklyCount}회 운동
+                  </strong>
+                  을 달성했어요! 🎉
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

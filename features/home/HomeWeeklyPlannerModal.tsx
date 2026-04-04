@@ -78,7 +78,10 @@ export default function HomeWeeklyPlannerModal({
   onWriteCategory,
   onMoveToArchive,
 }: HomeWeeklyPlannerModalProps) {
-  const isOpen = selectedDate !== null;
+  if (!selectedDate) {
+    return null;
+  }
+
   const activeWriteCategory =
     dayStatus === "today" ? plannedCategories[plannedCategories.length - 1] : null;
 
@@ -87,17 +90,11 @@ export default function HomeWeeklyPlannerModal({
       <button
         type="button"
         aria-label="닫기"
-        className={cn(
-          "fixed inset-0 z-40 bg-black/35 transition-opacity",
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
+        className="fixed inset-0 z-40 bg-black/35 transition-opacity"
         onClick={onClose}
       />
       <div
-        className={cn(
-          "fixed bottom-0 left-0 right-0 z-50 rounded-t-[28px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out sm:left-1/2 sm:right-auto sm:w-full sm:max-w-[640px] sm:-translate-x-1/2",
-          isOpen ? "translate-y-0" : "translate-y-full",
-        )}
+        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-[28px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-out sm:left-1/2 sm:right-auto sm:w-full sm:max-w-[640px] sm:-translate-x-1/2"
       >
         <div className="flex justify-center pt-3 pb-1">
           <div className="h-1 w-10 rounded-full bg-[#E5E7EB]" />

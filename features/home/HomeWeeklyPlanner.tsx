@@ -174,7 +174,7 @@ function PlannerDayButton({
             : hasCompletedPlanned
               ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
             : isToday(date)
-              ? "bg-[#FFF4EC] ring-1 ring-[#D96B2B]/35"
+              ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
               : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
         )}
       >
@@ -184,7 +184,7 @@ function PlannerDayButton({
             isSelected
               ? "text-white"
               : isToday(date)
-                ? "text-[#D96B2B]"
+                ? "text-[#5B6470]"
                 : dayIndex === 6
                   ? "text-[#EF4444]"
                 : dayIndex === 5
@@ -216,7 +216,7 @@ function PlannerDayButton({
           : hasCompletedPlanned
             ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
           : isToday(date)
-            ? "bg-[#FFF4EC] ring-1 ring-[#D96B2B]/35"
+            ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
             : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
         modifiers.outside && "opacity-35",
       )}
@@ -227,7 +227,7 @@ function PlannerDayButton({
           isSelected
             ? "text-white"
             : isToday(date)
-              ? "text-[#D96B2B]"
+              ? "text-[#5B6470]"
               : dayIndex === 6
                 ? "text-[#EF4444]"
                 : dayIndex === 5
@@ -562,8 +562,9 @@ export default function HomeWeeklyPlanner({
 
   return (
     <>
-      <section className="mx-5 overflow-hidden rounded-[24px] bg-white shadow-[0_2px_20px_rgba(0,0,0,0.07)] ring-1 ring-[#F0EBE3] sm:mx-auto sm:w-full sm:max-w-[640px]">
-        <div className="flex items-start justify-between px-5 pt-5 pb-4">
+      <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
+        <div className="flex w-full min-w-0 flex-col overflow-hidden rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
+        <div className="flex items-start justify-between pb-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">
               {viewMode === "weekly" ? "Weekly Plan" : "Monthly Plan"}
@@ -602,7 +603,7 @@ export default function HomeWeeklyPlanner({
         </div>
 
         {viewMode === "monthly" && (
-          <div className="flex items-center justify-between gap-2 px-5 pb-2">
+          <div className="flex items-center justify-between gap-2 pb-2">
             <button
               type="button"
               onClick={() =>
@@ -624,7 +625,7 @@ export default function HomeWeeklyPlanner({
           </div>
         )}
 
-        <div className="px-4 pb-4 sm:px-5">
+        <div className="min-w-0 overflow-hidden pb-4">
           <DayPicker
             mode="single"
             locale={ko}
@@ -636,8 +637,19 @@ export default function HomeWeeklyPlanner({
             hideNavigation
             showOutsideDays={viewMode === "weekly"}
             styles={{
+              root: {
+                maxWidth: "100%",
+              },
+              months: {
+                maxWidth: "100%",
+              },
+              month: {
+                maxWidth: "100%",
+              },
               month_grid: {
                 tableLayout: "fixed",
+                width: "100%",
+                maxWidth: "100%",
               },
               week: {
                 height: `${calendarCellHeight}px`,
@@ -653,9 +665,9 @@ export default function HomeWeeklyPlanner({
               },
             }}
             classNames={{
-              root: "w-full",
-              months: "w-full",
-              month: "w-full",
+              root: "w-full max-w-full overflow-hidden",
+              months: "w-full max-w-full",
+              month: "w-full max-w-full",
               month_caption: "hidden",
               month_grid: "w-full table-fixed border-separate border-spacing-[4px]",
               weekdays:
@@ -689,7 +701,7 @@ export default function HomeWeeklyPlanner({
           />
         </div>
 
-        <div className="flex justify-end px-5 pb-4">
+        <div className="flex justify-end">
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-1.5 rounded-full bg-[#FFF4EC] px-3 py-1.5 text-[12px] font-semibold text-[#D96B2B]">
               <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동</span>
@@ -706,6 +718,7 @@ export default function HomeWeeklyPlanner({
               <span>개</span>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
