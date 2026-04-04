@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { format, parseISO } from "date-fns";
-import { useSearchParams } from "next/navigation";
 import { inter } from "@/lib/fonts";
 import {
   localPlannerPlanRepository,
@@ -21,18 +20,7 @@ export default function MyAchievementsSummary({
   streakWeeks?: number;
   thisWeekCount?: number;
 }) {
-  const searchParams = useSearchParams();
-  const [completedGoalCount, setCompletedGoalCount] = useState(0);
-  const activityScore = totalCount + completedGoalCount + streakWeeks;
-  const debugTemp = useMemo(() => {
-    const raw = searchParams.get("debugTemp");
-    if (!raw) return null;
-
-    const parsed = Number(raw);
-    if (!Number.isFinite(parsed)) return null;
-
-    return Math.max(36.5, Math.min(100, Number(parsed.toFixed(1))));
-  }, [searchParams]);
+  const [, setCompletedGoalCount] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -175,7 +163,7 @@ export default function MyAchievementsSummary({
     const calculated = 36.5 + 0.4 * totalCount + 1.5 * streakWeeks;
     // const calculated = 36.5 + 0.4 * totalCount + 0.1 * completedGoalCount + 1.5 * streakWeeks;
     return Math.max(36.5, Math.min(100, Number(calculated.toFixed(1))));
-  }, [completedGoalCount, streakWeeks, totalCount]);
+  }, [streakWeeks, totalCount]);
 
   // 구간을 6단계로 세밀하게 나누고 긍정적인 문구 반영
   const tempStatus = useMemo(() => {
@@ -235,93 +223,91 @@ export default function MyAchievementsSummary({
       icon: "🌱",
       gradient: "from-gray-300 to-gray-400",
     };
-  }, [activityScore, passionTemp]);
+  }, [passionTemp]);
 
-  const isWeekGoalCompleted= thisWeekCount < 3;
+  const isWeekGoalCompleted = thisWeekCount < 3;
 
   return (
-    <section className="mx-5 sm:mx-auto sm:max-w-[640px] sm:w-full overflow-hidden rounded-[24px] bg-white shadow-[0_2px_20px_rgba(0,0,0,0.07)] ring-1 ring-gray-100 px-5 py-5">
-      <div className="flex items-end justify-between mb-4">
-        {/* 왼쪽: 온도 정보 */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-theme">
-              Passion Temp
-            </p>
+    <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
+      <div className="flex w-full min-w-0 flex-col overflow-hidden rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-theme">
+                Passion Temp
+              </p>
+            </div>
+            <div className="mt-0.5 flex items-baseline gap-1.5">
+              <h3
+                className={`text-[24px] sm:text-[28px] font-black tracking-tight text-gray-900 leading-none ${inter.className}`}
+              >
+                {passionTemp}
+                <span className="ml-[2px] text-[16px] font-bold">℃</span>
+              </h3>
+              <span
+                className={`ml-1 flex items-center gap-1 rounded-[8px] px-2.5 py-1 text-[11px] font-bold ${tempStatus.bg} ${tempStatus.color}`}
+              >
+                <span>{tempStatus.icon}</span>
+                <span>{tempStatus.label}</span>
+              </span>
+            </div>
           </div>
-          <div className="flex items-baseline gap-1.5 mt-0.5">
-            <h3
-              className={`text-[24px] sm:text-[28px] font-black tracking-tight text-gray-900 leading-none ${inter.className}`}
-            >
-              {passionTemp}
-              <span className="text-[16px] ml-[2px] font-bold">℃</span>
-            </h3>
-            <span
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-[8px] ${tempStatus.bg} ${tempStatus.color} font-bold text-[11px] ml-1`}
-            >
-              <span>{tempStatus.icon}</span>
-              <span>{tempStatus.label}</span>
-            </span>
+
+          <div className="flex flex-shrink-0 flex-col items-end gap-2">
+            <div className="flex items-center gap-1.5 rounded-full bg-[#F5F3F0] px-3 py-1 text-[12px] font-semibold text-[#4B5563]">
+              <span className="text-[10px] uppercase text-[#9CA3AF]">Total</span>
+              <span className={`font-bold text-[#1A1A1A] ${inter.className}`}>
+                {totalCount}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full bg-[#FFF4EC] px-3 py-1 text-[12px] font-semibold text-[#D96B2B]">
+              <span className="text-[10px] uppercase text-[#F6C89A]">Streak</span>
+              <span className={`font-bold ${inter.className}`}>
+                {streakWeeks}주
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* 통계 칩들  */}
-        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-          <div className="flex items-center gap-1.5 rounded-full bg-[#F5F3F0] px-3 py-1 text-[12px] font-semibold text-[#4B5563]">
-            <span className="text-[#9CA3AF] text-[10px] uppercase">Total</span>
-            <span className={`text-[#1A1A1A] font-bold ${inter.className}`}>
-              {totalCount}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-[#FFF4EC] px-3 py-1 text-[12px] font-semibold text-[#D96B2B]">
-            <span className="text-[#F6C89A] text-[10px] uppercase">Streak</span>
-            <span className={`font-bold ${inter.className}`}>
-              {streakWeeks}주
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 온도바 */}
-      <div className="mt-5 mb-3">
-        <div className="relative h-2.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-          {passionTemp > 37.6 && (
+        <div className="mb-3 mt-5">
+          <div className="relative h-2.5 overflow-hidden rounded-full bg-gray-100 shadow-inner">
+            {passionTemp > 37.6 && (
+              <div
+                className="absolute top-0 bottom-0 z-10 w-0.5 bg-gray-300 shadow-sm"
+                style={{ left: `36.5%` }}
+              />
+            )}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-gray-300 z-10 shadow-sm"
-              style={{ left: `36.5%` }}
+              className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r transition-all duration-1000 ease-out ${tempStatus.gradient}`}
+              style={{ width: `${Math.max(2, passionTemp)}%` }}
             />
-          )}
-          <div
-            className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${tempStatus.gradient}`}
-            style={{ width: `${Math.max(2, passionTemp)}%` }}
-          />
+          </div>
+
+          <div className="relative mt-2 flex justify-between text-[10px] font-medium text-gray-400 sm:text-xs">
+            <span>0°C</span>
+            <span className="absolute left-[36.5%] -translate-x-1/2 font-bold text-theme">
+              36.5°C
+            </span>
+            <span>100°C</span>
+          </div>
         </div>
 
-        <div className="flex justify-between text-[10px] sm:text-xs text-gray-400 font-medium mt-2 relative">
-          <span>0°C</span>
-          <span className="absolute left-[36.5%] -translate-x-1/2 text-theme font-bold">
-            36.5°C
-          </span>
-          <span>100°C</span>
+        <div className="flex flex-col gap-1 text-[12px] font-medium text-gray-400 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            이번 주 운동 횟수:{" "}
+            <span
+              className={`font-bold ${inter.className} ${thisWeekCount >= 3 ? "text-theme" : "text-gray-600"}`}
+            >
+              {thisWeekCount}
+            </span>{" "}
+            / 3회
+          </p>
+          <p className="text-[11px] sm:text-[12px]">
+            {isWeekGoalCompleted
+              ? "주 3회를 채워 온기를 계속 유지해보세요!"
+              : "🔥 완벽합니다! 열정이 꾸준히 오르고 있어요!"}
+          </p>
         </div>
-      </div>
-
-      {/* 하단 캡션 */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-[12px] text-gray-400 font-medium gap-1">
-        <p>
-          이번 주 운동 횟수:{" "}
-          <span
-            className={`font-bold ${inter.className} ${thisWeekCount >= 3 ? "text-theme" : "text-gray-600"}`}
-          >
-            {thisWeekCount}
-          </span>{" "}
-          / 3회
-        </p>
-        <p className="text-[11px] sm:text-[12px]">
-          {isWeekGoalCompleted
-            ? "주 3회를 채워 온기를 계속 유지해보세요!"
-            : "🔥 완벽합니다! 열정이 꾸준히 오르고 있어요!"}
-        </p>
       </div>
     </section>
   );

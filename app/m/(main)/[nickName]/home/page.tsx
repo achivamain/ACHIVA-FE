@@ -2,6 +2,7 @@ import Logout from "@/components/Logout";
 import { Category } from "@/types/Categories";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
+import LiveActivityTicker from "@/features/home/LiveActivityTicker";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
 import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import AiReportWidget from "@/features/home/AiReportWidget";
@@ -35,14 +36,21 @@ export default async function MobileHomePageRoute({
     } = await getHomeData(user.id, token);
 
     return (
-      <div className="min-h-dvh w-full bg-[#F9F9F9] pb-[104px] flex flex-col">
+      <div className="min-h-dvh w-full pb-[104px] flex flex-col">
+        <div className="px-5 py-5 flex items-end justify-between">
+          <h1 className="text-[22px] font-black tracking-tight text-gray-900 leading-none">
+            🏠 홈
+          </h1>
+        </div>
+        <LiveActivityTicker />
+        <div className="h-6" />
         <MyCategorys
           myCategories={user.categories}
           categoryCounts={categoryCounts}
           weeklyCategoryCounts={weeklyCategoryCounts}
           categoryCharCounts={categoryCharCounts}
         />
-        <div className="h-4" />
+        <div className="h-6" />
         <HomeWeeklyPlanner
           userId={user.id}
           categories={user.categories as Category[]}
