@@ -85,7 +85,7 @@ export default function Sidebar() {
     },
     {
       label: "피드",
-      href: "/",
+      href: "/feed",
       Icon: FeedIcon,
     },
     {

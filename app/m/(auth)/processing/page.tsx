@@ -28,7 +28,27 @@ export default function Page() {
         const isInit = (await res.json()).data;
 
         if (isInit) {
-          router.replace("/");
+          const meRes = await fetch(`/api/members/me`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!meRes.ok) {
+            window.location.replace("/api/auth/logout");
+            return;
+          }
+
+          const user = (await meRes.json()).data as { nickName?: string };
+          const nickName = user?.nickName;
+
+          if (!nickName) {
+            window.location.replace("/api/auth/logout");
+            return;
+          }
+
+          router.replace(`/${encodeURIComponent(nickName)}/home`);
           return;
         }
 

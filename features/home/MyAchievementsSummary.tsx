@@ -38,6 +38,7 @@ export default function MyAchievementsSummary({
     let isMounted = true;
     const controller = new AbortController();
 
+    // 개인 점수에 목표 달성한 것 반영하기 위해서.. 백엔드 전환 시 반영 필요
     async function fetchCompletedGoalCount(plans: PlannerPlanMap) {
       const plannedEntries = Object.values(plans).filter(
         (entry) => entry.categories.length > 0,
@@ -185,7 +186,7 @@ export default function MyAchievementsSummary({
       return {
         color: "text-[#D96B2B]",
         bg: "bg-[#FFF4EC]",
-        label: "한계를 넘는 시너지!",
+        label: "한계를 넘는 열정!",
         icon: "🌋",
         gradient: "from-purple-500 via-red-500 to-yellow-500",
       };
@@ -200,7 +201,7 @@ export default function MyAchievementsSummary({
     if (passionTemp >= 65)
       return {
         color: "text-[#D96B2B]",
-        bg: "bg-[##FFF4EC]",
+        bg: "bg-[#FFF4EC]",
         label: "궤도에 오른 뜨거움",
         icon: "⚡",
         gradient: "from-red-400 to-rose-500",
@@ -239,7 +240,7 @@ export default function MyAchievementsSummary({
     };
   }, [activityScore, passionTemp]);
 
-  const isCoolingDown = thisWeekCount < 3;
+  const isWeekGoalCompleted= thisWeekCount < 3;
 
   return (
     <section className="mx-5 sm:mx-auto sm:max-w-[640px] sm:w-full overflow-hidden rounded-[24px] bg-white shadow-[0_2px_20px_rgba(0,0,0,0.07)] ring-1 ring-gray-100 px-5 py-5">
@@ -291,7 +292,6 @@ export default function MyAchievementsSummary({
             <div
               className="absolute top-0 bottom-0 w-0.5 bg-gray-300 z-10 shadow-sm"
               style={{ left: `36.5%` }}
-              title="기본 체온 (36.5°C)"
             />
           )}
           <div
@@ -321,7 +321,7 @@ export default function MyAchievementsSummary({
           / 3회
         </p>
         <p className="text-[11px] sm:text-[12px]">
-          {isCoolingDown
+          {isWeekGoalCompleted
             ? "주 3회를 채워 온기를 계속 유지해보세요!"
             : "🔥 완벽합니다! 열정이 꾸준히 오르고 있어요!"}
         </p>
