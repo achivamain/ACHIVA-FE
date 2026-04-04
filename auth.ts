@@ -28,7 +28,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return {
           ...token,
           id: decoded.sub,
-          nickName: decoded.username,
           access_token: account.access_token,
           refresh_token: account.refresh_token,
           id_token: account.id_token,
@@ -87,12 +86,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       session.user.id = token.id as string;
-      session.user.nickName = token.nickName as string;
       session.access_token = token.access_token;
       session.error = token.error;
       return session;
     },
-    async redirect({ url, baseUrl }) {
+    async redirect({ baseUrl }) {
       // 로그인/회원가입이 끝나고 여기로 리다이렉트
       return `${baseUrl}/processing`;
     },

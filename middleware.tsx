@@ -51,7 +51,9 @@ export default auth((req) => {
       return NextResponse.rewrite(new URL("/onboarding", req.url));
     }
 
-    return NextResponse.redirect(new URL("/feed", req.url));
+    // Cognito 토큰의 닉네임과 실제 DB 닉네임이 다를 수 있으므로
+    // 루트 진입에서는 닉네임 문자열을 직접 신뢰하지 않고 processing에서 최신 유저 정보를 조회한다.
+    return NextResponse.redirect(new URL("/processing", req.url));
   }
 
   // -------------------------
