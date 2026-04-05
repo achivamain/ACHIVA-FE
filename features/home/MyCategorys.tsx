@@ -9,12 +9,10 @@ import { usePathname } from "next/navigation";
 import { Category } from "@/types/Categories";
 
 export function MyCategorys({
-  myCategories,
   categoryCounts,
   weeklyCategoryCounts,
   categoryCharCounts = [],
 }: {
-  myCategories: string[];
   categoryCounts: CategoryCount[];
   weeklyCategoryCounts: CategoryCount[];
   categoryCharCounts?: CategoryCharCount[];
@@ -26,7 +24,13 @@ export function MyCategorys({
     ? "/m/post/create"
     : "/post/create";
 
-  const categorysData = myCategories
+  const categorysData = Array.from(
+    new Set([
+      ...categoryCounts.map((item) => item.category),
+      ...weeklyCategoryCounts.map((item) => item.category),
+      ...categoryCharCounts.map((item) => item.category),
+    ]),
+  )
     .map((cat) => {
       const countData = categoryCounts.find((i) => i.category == cat);
       const charCountData = categoryCharCounts.find((i) => i.category == cat);
@@ -63,67 +67,80 @@ export function MyCategorys({
             오늘의 운동 기록
           </h3>
           <Link
-            href="/categories"
+            href={createPostPath}
+            onClick={resetPost}
             className="flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-1.5 text-[13px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
           >
-            종목 설정
+            기록하러 가기
           </Link>
         </div>
 
-        <div className="overflow-x-auto pb-1 -mx-4 sm:-mx-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="flex min-w-max items-start gap-4 pr-1 px-4 sm:px-5 sm:gap-5">
-            {categorysData.map((cat) => {
-              const imageSrc = categoryImages[cat.category as Category];
-              const hasAnyPost = cat.count > 0;
-              const isActiveThisWeek = cat.weeklyCount > 0;
-              const ringClass = hasAnyPost
-                ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
-                : "from-[#8A94A3] to-[#E2E8F0]";
-              const badgeLabel = hasAnyPost ? `🔥 ${cat.count}` : "New";
+        {categorysData.length === 0 ? (
+          <div className="rounded-2xl bg-[#F9F6F2] px-5 py-8 text-center">
+            <p className="text-sm font-semibold text-[#4A433D]">
+              아직 기록된 운동 카테고리가 없어요.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[#8A817A]">
+              첫 운동 기록을 남기면 여기에서 카테고리별로 바로 이어서 작성할 수
+              있어요.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto pb-1 -mx-4 sm:-mx-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex min-w-max items-start gap-4 pr-1 px-4 sm:px-5 sm:gap-5">
+              {categorysData.map((cat) => {
+                const imageSrc = categoryImages[cat.category as Category];
+                const hasAnyPost = cat.count > 0;
+                const isActiveThisWeek = cat.weeklyCount > 0;
+                const ringClass = hasAnyPost
+                  ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
+                  : "from-[#8A94A3] to-[#E2E8F0]";
+                const badgeLabel = hasAnyPost ? `🔥 ${cat.count}` : "New";
 
-              return (
-                <Link
-                  key={cat.category}
-                  href={createPostPath}
-                  onClick={() => handleCategoryClick(cat)}
-                  className="group flex w-[76px] cursor-pointer flex-col items-center gap-3 sm:w-[92px]"
-                >
-                  <div
-                    className={`relative flex h-[76px] w-[76px] items-center justify-center rounded-full bg-gradient-to-br ${ringClass} p-[2.5px] shadow-[0_10px_24px_rgba(0,0,0,0.10)] transition-transform duration-300 group-hover:scale-105 group-active:scale-95 sm:h-[92px] sm:w-[92px]`}
+                return (
+                  <Link
+                    key={cat.category}
+                    href={createPostPath}
+                    onClick={() => handleCategoryClick(cat)}
+                    className="group flex w-[76px] cursor-pointer flex-col items-center gap-3 sm:w-[92px]"
                   >
                     <div
-                      className={`absolute bottom-0 left-1/2 z-20 -translate-x-1/2 translate-y-[24%] whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-extrabold leading-none shadow-md ring-2 ring-white sm:px-3.5 sm:py-1.5 sm:text-[15px] ${
-                        isActiveThisWeek
-                          ? "bg-[#FFF2E8] text-[#C75B12]"
-                          : "bg-[#F6F7F9] text-[#7C8696]"
-                      }`}
+                      className={`relative flex h-[76px] w-[76px] items-center justify-center rounded-full bg-gradient-to-br ${ringClass} p-[2.5px] shadow-[0_10px_24px_rgba(0,0,0,0.10)] transition-transform duration-300 group-hover:scale-105 group-active:scale-95 sm:h-[92px] sm:w-[92px]`}
                     >
-                      {badgeLabel}
+                      <div
+                        className={`absolute bottom-0 left-1/2 z-20 -translate-x-1/2 translate-y-[24%] whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-extrabold leading-none shadow-md ring-2 ring-white sm:px-3.5 sm:py-1.5 sm:text-[15px] ${
+                          isActiveThisWeek
+                            ? "bg-[#FFF2E8] text-[#C75B12]"
+                            : "bg-[#F6F7F9] text-[#7C8696]"
+                        }`}
+                      >
+                        {badgeLabel}
+                      </div>
+
+                      <div className="relative z-10 flex h-full w-full items-center justify-center rounded-full bg-[#FCFCFA] p-2.5 shadow-inner sm:p-3">
+                        {imageSrc && (
+                          <Image
+                            src={imageSrc}
+                            alt={cat.category}
+                            width={60}
+                            height={60}
+                            className="h-full w-full object-contain drop-shadow-sm"
+                          />
+                        )}
+                      </div>
                     </div>
 
-                    <div className="relative z-10 flex h-full w-full items-center justify-center rounded-full bg-[#FCFCFA] p-2.5 shadow-inner sm:p-3">
-                      {imageSrc && (
-                        <Image
-                          src={imageSrc}
-                          alt={cat.category}
-                          width={60}
-                          height={60}
-                          className="h-full w-full object-contain drop-shadow-sm"
-                        />
-                      )}
+                    <div className="flex flex-col items-center">
+                      <span className="w-full truncate text-center text-[13px] font-semibold leading-tight text-gray-800 sm:text-[14px]">
+                        {cat.category}
+                      </span>
                     </div>
-                  </div>
-
-                  <div className="flex flex-col items-center">
-                    <span className="w-full truncate text-center text-[13px] font-semibold leading-tight text-gray-800 sm:text-[14px]">
-                      {cat.category}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

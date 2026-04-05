@@ -48,7 +48,6 @@ export default async function HomePage({
                 </p>
               </div>
               <MyCategorys
-                myCategories={user.categories}
                 categoryCounts={categoryCounts}
                 weeklyCategoryCounts={weeklyCategoryCounts}
                 categoryCharCounts={categoryCharCounts}

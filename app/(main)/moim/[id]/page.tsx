@@ -6,31 +6,9 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CloseIcon } from "@/components/Icons";
 import type { Moim } from "@/types/moim";
-import {
-  categories as ALL_CATEGORIES,
-  type Category,
-} from "@/types/Categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FeedPost from "@/features/feed/FeedPost";
 import type { PostRes } from "@/types/Post";
-
-// 카테고리별 임시 이모지 매핑
-const CATEGORY_ICONS: Record<string, string> = {
-  헬스: "💪",
-  맨몸운동: "🤸",
-  크로스핏: "🏋️",
-  러닝: "🏃",
-  걷기: "🚶",
-  사이클: "🚲",
-  축구: "⚽",
-  농구: "🏀",
-  야구: "⚾",
-  수영: "🏊",
-  등산: "🧗",
-  요가: "🧘",
-};
-
-const getCategoryIcon = (cat: string) => CATEGORY_ICONS[cat] || "🎯";
 
 export default function MoimDetailPage() {
   const params = useParams();
@@ -43,7 +21,6 @@ export default function MoimDetailPage() {
   const [isMemberManagementOpen, setIsMemberManagementOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [editCategories, setEditCategories] = useState<Category[]>([]);
   const [editMaxMember, setEditMaxMember] = useState("10");
   const [editIsPrivate, setEditIsPrivate] = useState(false);
   const [editPassword, setEditPassword] = useState("");
@@ -71,7 +48,6 @@ export default function MoimDetailPage() {
     mutationFn: async (payload: {
       name: string;
       description: string;
-      categories: string[];
       maxMember: number;
       isPrivate: boolean;
       password?: string;
@@ -209,7 +185,6 @@ export default function MoimDetailPage() {
   const parsedEditMaxMember = Number(editMaxMember);
   const isNameInvalid = !trimmedEditName;
   const isDescriptionInvalid = !trimmedEditDescription;
-  const isCategoriesInvalid = editCategories.length === 0;
   const isMaxMemberInvalid =
     !editMaxMember.trim() ||
     !Number.isInteger(parsedEditMaxMember) ||
@@ -219,7 +194,6 @@ export default function MoimDetailPage() {
     updateSettingsMutation.isPending ||
     isNameInvalid ||
     isDescriptionInvalid ||
-    isCategoriesInvalid ||
     isMaxMemberInvalid ||
     isPrivatePasswordInvalid;
   // 이번 주 streak -> 이번 달 post 수 순서로 정렬
@@ -324,9 +298,6 @@ export default function MoimDetailPage() {
                 if (isLeader) {
                   setEditName(moimDetail.name || "");
                   setEditDescription(moimDetail.description || "");
-                  setEditCategories(
-                    (moimDetail.categories || []) as Category[],
-                  );
                   setEditMaxMember(String(moimDetail.maxMember || 10));
                   setEditIsPrivate(moimDetail.isPrivate || false);
                   setEditPassword(""); // 비밀번호는 초기화해 둠
@@ -364,14 +335,6 @@ export default function MoimDetailPage() {
         {/* 모임 기본 정보 카드 */}
         <section className="bg-white p-6 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100 flex flex-col justify-center">
           <div className="flex gap-2 flex-wrap mb-3">
-            {moimDetail.categories.map((cat: string) => (
-              <span
-                key={cat}
-                className="flex items-center gap-1 text-xs bg-theme/10 text-theme px-3 py-1.5 rounded-full font-bold"
-              >
-                <span>{getCategoryIcon(cat)}</span> {cat}
-              </span>
-            ))}
             {moimDetail.isOfficial && (
               <span className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold shadow-sm">
                 OFFICIAL
@@ -700,42 +663,6 @@ export default function MoimDetailPage() {
                     </p>
                   )}
                 </div>
-                {/* 카테고리 선택 */}
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    운동 종목
-                  </label>
-                  <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1">
-                    {ALL_CATEGORIES.map((cat) => {
-                      const selected = editCategories.includes(cat);
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() =>
-                            setEditCategories((prev) =>
-                              selected
-                                ? prev.filter((c) => c !== cat)
-                                : [...prev, cat],
-                            )
-                          }
-                          className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
-                            selected
-                              ? "bg-theme text-white border-theme"
-                              : "bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300"
-                          }`}
-                        >
-                          {cat}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {isCategoriesInvalid && (
-                    <p className="text-xs text-red-500 mt-1.5">
-                      운동 종목을 1개 이상 선택해주세요.
-                    </p>
-                  )}
-                </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">
                     최대 인원 제한 (명)
@@ -947,7 +874,6 @@ export default function MoimDetailPage() {
                     updateSettingsMutation.mutate({
                       name: trimmedEditName,
                       description: trimmedEditDescription,
-                      categories: editCategories,
                       maxMember: parsedEditMaxMember,
                       isPrivate: editIsPrivate,
                       ...(editPassword && { password: editPassword }),

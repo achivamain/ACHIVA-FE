@@ -53,19 +53,6 @@ export function Profile({ user, currentUserId, currentUserFriends }: Props) {
           </div>
         </div>
         <p className="text-[#7F7F7F]">{user.description}</p>
-        <div className="flex flex-col gap-1.5">
-          <p className="font-bold text-lg">관심 카테고리</p>
-          <div className="flex flex-wrap gap-2">
-            {user.categories.map((category) => (
-              <div
-                key={category}
-                className="flex-shrink-0 rounded-sm w-auto font-semibold text-theme text-sm px-2.5 py-0.5 bg-theme/15"
-              >
-                {category}
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -113,19 +100,6 @@ export default function MobileProfile({
               currentUserFriends={currentUserFriends}
             />
           )}
-        </div>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <p className="font-bold text-lg">관심 카테고리</p>
-        <div className="flex flex-wrap gap-2">
-          {user.categories.map((category) => (
-            <div
-              key={category}
-              className="flex-shrink-0 rounded-sm w-auto font-semibold text-theme text-sm px-2.5 py-0.5 bg-theme/15"
-            >
-              {category}
-            </div>
-          ))}
         </div>
       </div>
     </div>

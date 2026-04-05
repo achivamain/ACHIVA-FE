@@ -4,9 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import type { User } from "@/types/User";
 import type { Moim } from "@/types/moim";
-import { categories, type Category } from "@/types/Categories";
 import { SearchIcon, CloseIcon } from "@/components/Icons";
 import { MyCrewCard, OfficialChallengeCard } from "@/features/moim/moimCard";
 import Banner from "@/features/event/Banner";
@@ -14,12 +12,6 @@ import useDragScroll from "@/hooks/useDragScroll";
 
 export default function MoimExplorePage() {
   const router = useRouter();
-  const {
-    scrollRef: categoryScrollRef,
-    isDragging: isCategoryDragging,
-    dragProps: categoryDragProps,
-    shouldSuppressClick: shouldSuppressCategoryClick,
-  } = useDragScroll<HTMLDivElement>();
   const {
     scrollRef: officialMoimsScrollRef,
     isDragging: isOfficialMoimsDragging,
@@ -33,10 +25,8 @@ export default function MoimExplorePage() {
     shouldSuppressClick: shouldSuppressMyMoimClick,
   } = useDragScroll<HTMLDivElement>();
 
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [categoryTab, setCategoryTab] = useState<"MY" | "ALL">("MY");
 
   // 검색창 디바운스 (500ms)
   useEffect(() => {
@@ -47,35 +37,6 @@ export default function MoimExplorePage() {
   }, [searchQuery]);
 
   const isSearching = debouncedSearch.length > 0;
-
-  const { data: user } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const res = await fetch(`/api/members/me`, { method: "GET" });
-      if (!res.ok) throw new Error("network error");
-      return (await res.json()).data as User;
-    },
-    staleTime: 5 * 1000,
-  });
-
-  const myCategories = (user?.categories || []) as Category[];
-  const displayedCategories =
-    categoryTab === "MY" && myCategories.length > 0
-      ? categories.filter((c) => myCategories.includes(c))
-      : categories;
-
-  const toggleCategory = (cat: Category) => {
-    if (selectedCategories.includes(cat)) {
-      setSelectedCategories((prev) => prev.filter((c) => c !== cat));
-    } else {
-      setSelectedCategories((prev) => [...prev, cat]);
-    }
-  };
-
-  const handleCategoryClick = (cat: Category) => {
-    if (shouldSuppressCategoryClick()) return;
-    toggleCategory(cat);
-  };
 
   const handleOfficialMoimClick = (moimId: number) => {
     if (shouldSuppressOfficialMoimClick()) return;
@@ -97,17 +58,10 @@ export default function MoimExplorePage() {
   });
 
   const { data: moimsData, isLoading } = useQuery({
-    queryKey: ["moims", debouncedSearch, selectedCategories, categoryTab],
+    queryKey: ["moims", debouncedSearch],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (debouncedSearch) params.append("keyword", debouncedSearch);
-
-      const catsToFetch = displayedCategories;
-      if (categoryTab === "MY" && catsToFetch.length > 0 && !debouncedSearch) {
-        catsToFetch.forEach((c) => params.append("categories", c));
-      } else if (selectedCategories.length > 0 && !debouncedSearch) {
-        selectedCategories.forEach((c) => params.append("categories", c));
-      }
 
       const res = await fetch(`/api/moim?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch moims");
@@ -322,63 +276,6 @@ export default function MoimExplorePage() {
             {/* ================= 구분선 ================= */}
             <div className="h-2 bg-gray-50 -mx-5 mb-8"></div>
 
-            {/* 카테고리 필터 영역 - 검색 중엔 숨김 */}
-            {!isSearching && (
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-theme">크루 탐색</h2>
-                  <div className="flex bg-gray-100 p-1 rounded-lg">
-                    <button
-                      onClick={() => {
-                        setCategoryTab("MY");
-                        setSelectedCategories([]);
-                      }}
-                      className={`text-xs px-3 py-1.5 rounded-md font-bold transition-colors ${categoryTab === "MY" ? "bg-white text-theme shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-                    >
-                      나의 관심 종목
-                    </button>
-                    <button
-                      onClick={() => {
-                        setCategoryTab("ALL");
-                        setSelectedCategories([]);
-                      }}
-                      className={`text-xs px-3 py-1.5 rounded-md font-bold transition-colors ${categoryTab === "ALL" ? "bg-white text-theme shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-                    >
-                      전체 종목
-                    </button>
-                  </div>
-                </div>
-
-                <div
-                  ref={categoryScrollRef}
-                  {...categoryDragProps}
-                  className={`flex gap-2 overflow-x-auto pb-2 scrollbar-hide select-none ${
-                    isCategoryDragging ? "cursor-grabbing" : "cursor-grab"
-                  }`}
-                >
-                  {displayedCategories.length === 0 && categoryTab === "MY" ? (
-                    <div className="text-sm text-gray-400 py-1">
-                      관심 종목이 없습니다. 전체 종목을 확인해보세요!
-                    </div>
-                  ) : (
-                    displayedCategories.map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => handleCategoryClick(cat)}
-                        className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium border transition-colors flex-shrink-0 ${
-                          selectedCategories.includes(cat)
-                            ? "bg-theme text-white border-theme"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* 모임 리스트 - 검색 중엔 숨김 */}
             {!isSearching && (
               <div className="space-y-4">
@@ -431,16 +328,6 @@ export default function MoimExplorePage() {
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {moim.description}
                       </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {moim.categories.map((cat) => (
-                          <span
-                            key={cat}
-                            className="text-[11px] bg-theme/5 text-theme border border-theme/20 px-2 py-0.5 rounded-full font-medium"
-                          >
-                            {cat}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   );
                   })

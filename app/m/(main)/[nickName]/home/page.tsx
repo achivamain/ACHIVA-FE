@@ -40,7 +40,6 @@ export default async function MobileHomePageRoute({
           </h1>
         </div>
         <MyCategorys
-          myCategories={user.categories}
           categoryCounts={categoryCounts}
           weeklyCategoryCounts={weeklyCategoryCounts}
           categoryCharCounts={categoryCharCounts}

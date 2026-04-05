@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import ProfileImg from "@/components/ProfileImg";
 import { categories as allCategories } from "@/types/Categories";
@@ -14,8 +13,7 @@ import {
   type OverallRankingItem,
 } from "@/lib/ranking";
 
-type RankTab = "전체" | "관심운동" | "크루";
-type InterestCategoryView = "all" | "interest";
+type RankTab = "전체" | "종목별" | "크루";
 
 // 기록 0회인 사람/모임 보이게 할 지 설정 
 const SHOW_INACTIVE_OVERALL_RANKING = false;
@@ -227,11 +225,6 @@ function CrewRankingRow({
             <span className="text-gray-400">/</span>
             <span className="font-semibold text-gray-600">{crew.maxMember}</span>
           </span>
-          {crew.categories.map((category) => (
-            <span key={category} className="text-gray-500">
-              #{category}
-            </span>
-          ))}
         </div>
       </div>
 
@@ -312,21 +305,11 @@ function OverallRanking() {
   );
 }
 
-function InterestRanking({
-  userCategories,
-  categoryView,
-}: {
-  userCategories: string[];
-  categoryView: InterestCategoryView;
-}) {
-  const availableCategories = useMemo(
-    () =>
-      categoryView === "all"
-        ? [...allCategories]
-        : userCategories,
-    [categoryView, userCategories],
+function InterestRanking() {
+  const availableCategories = useMemo<string[]>(() => [...allCategories], []);
+  const [selectedCat, setSelectedCat] = useState<string>(
+    availableCategories[0] ?? "",
   );
-  const [selectedCat, setSelectedCat] = useState(availableCategories[0] ?? "");
 
   useEffect(() => {
     if (availableCategories.length === 0) {
@@ -351,25 +334,6 @@ function InterestRanking({
     staleTime: 60_000,
     retry: false,
   });
-
-  // 구조상 userCategories가 반드시 있어야 하긴 함
-  if (categoryView === "interest" && userCategories.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-2.5">
-        <div className="text-4xl mb-1">⚡</div>
-        <p className="text-gray-600 text-sm font-semibold">관심 운동을 설정해보세요</p>
-        <p className="text-gray-400 text-xs">
-          내 종목에서 어떤 기록이 쌓이고 있는지 확인할 수 있어요
-        </p>
-        <Link
-          href="/accounts/profile"
-          className="mt-2 text-xs font-bold text-[#412A2A] bg-[#412A2A]/5 px-4 py-2 rounded-full hover:bg-[#412A2A]/10 transition-colors"
-        >
-          프로필 편집하기 →
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col mt-4">
@@ -493,17 +457,14 @@ type RankingPageProps = {
 
 export default function RankingPage({
   currentUserId: _currentUserId,
-  user,
+  user: _user,
   isMobile = false,
 }: RankingPageProps) {
   const [activeTab, setActiveTab] = useState<RankTab>("전체");
-  const [interestCategoryView, setInterestCategoryView] =
-    useState<InterestCategoryView>("interest");
-  const userCategories = useMemo(() => user?.categories ?? [], [user]);
 
   const tabDescription = useMemo(() => {
     if (activeTab === "전체") return "열정온도 기준";
-    if (activeTab === "관심운동") return "인증 수 기준";
+    if (activeTab === "종목별") return "인증 수 기준";
     return "열정온도 기준";
   }, [activeTab]);
 
@@ -525,7 +486,7 @@ export default function RankingPage({
 
         <div className="flex items-end justify-between px-5 gap-3">
           <div className="flex gap-6">
-            {(["전체", "관심운동", "크루"] as RankTab[]).map((tab) => (
+            {(["전체", "종목별", "크루"] as RankTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -544,23 +505,6 @@ export default function RankingPage({
               </button>
             ))}
           </div>
-
-          {activeTab === "관심운동" && (
-            <div className="mb-1">
-              <button
-                onClick={() =>
-                  setInterestCategoryView((prev) =>
-                    prev === "all" ? "interest" : "all",
-                  )
-                }
-                className="rounded-full bg-gray-100 px-3 py-1.5 text-[11px] font-bold text-gray-600 transition-colors hover:bg-gray-200"
-              >
-                {interestCategoryView === "all"
-                  ? "관심 카테고리 보기"
-                  : "전체 카테고리 보기"}
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -582,7 +526,7 @@ export default function RankingPage({
             >
               <OverallRanking />
             </motion.div>
-          ) : activeTab === "관심운동" ? (
+          ) : activeTab === "종목별" ? (
             <motion.div
               key="interest"
               initial={{ opacity: 0, x: 8 }}
@@ -590,10 +534,7 @@ export default function RankingPage({
               exit={{ opacity: 0, x: 8 }}
               transition={{ duration: 0.2 }}
             >
-              <InterestRanking
-                userCategories={userCategories}
-                categoryView={interestCategoryView}
-              />
+              <InterestRanking />
             </motion.div>
           ) : (
             <motion.div

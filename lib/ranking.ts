@@ -8,7 +8,6 @@ export type RankingApiResponse<T> = {
 export type MemberRankingApiItem = {
   nickName: string;
   profileImageUrl: string | null;
-  categories: string[];
   articleCount: number;
   weeklyWorkoutCount: number;
   continuousGoalWeeks: number;
@@ -28,7 +27,6 @@ export type MoimRankingApiItem = {
   id: number;
   name: string;
   description: string;
-  categories: string[];
   memberCount: number;
   maxMember: number;
   score: number;
@@ -47,7 +45,6 @@ export type CrewRankingItem = {
   id: number;
   name: string;
   description: string;
-  categories: string[];
   memberCount: number;
   maxMember: number;
   score: number;
@@ -149,7 +146,6 @@ export function normalizeCrewRanking(
       id: item.id,
       name: item.name,
       description: item.description,
-      categories: item.categories,
       memberCount: item.memberCount,
       maxMember: item.maxMember,
       score: item.score,

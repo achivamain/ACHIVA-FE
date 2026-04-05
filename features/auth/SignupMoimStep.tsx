@@ -270,18 +270,6 @@ export default function SignupMoimStep() {
                   <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#7E6A63]">
                     {moim.description || "같은 목표를 가진 사람들과 함께 운동해요."}
                   </p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {moim.categories.map((category) => (
-                      <span
-                        key={`${moim.id}-${category}`}
-                        className="rounded-full bg-[#F7F2EE] px-3 py-1 text-xs font-medium text-[#6F5A52]"
-                      >
-                        {category}
-                      </span>
-                    ))}
-                  </div>
-
                   <button
                     type="button"
                     disabled={action.disabled || isPending}

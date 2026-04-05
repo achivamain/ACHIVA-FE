@@ -23,7 +23,6 @@ export async function PUT(req: NextRequest) {
       birth: user.birth,
       gender: user.gender,
       region: user.region || "",
-      categories: user.categories,
       description: user.description,
     }),
   });
