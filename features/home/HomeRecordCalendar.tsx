@@ -8,6 +8,7 @@ import {
   format,
   isBefore,
   isSameDay,
+  isSameMonth,
   isToday,
   parseISO,
   startOfDay,
@@ -21,24 +22,13 @@ import {
   type DayButtonProps,
   type WeekProps,
 } from "react-day-picker";
-import HomeWeeklyPlannerModal from "@/features/home/HomeWeeklyPlannerModal";
-import {
-  localPlannerPlanRepository,
-  type PlannerPlanMap,
-} from "@/features/home/plannerPlanRepository";
-import { useDraftPostStore } from "@/store/CreatePostStore";
-import type { Category } from "@/types/Categories";
-import type { CategoryCount } from "@/types/Post";
 import type { PostsData } from "@/types/responses";
 
-type HomeWeeklyPlannerProps = {
+type HomeRecordCalendarProps = {
   userId: string;
-  categories: Category[];
-  categoryCounts: CategoryCount[];
 };
 
 type ViewMode = "weekly" | "monthly";
-type DayStatus = "past" | "today" | "future";
 
 const WEEK_STARTS_ON = 1 as const;
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -57,98 +47,18 @@ function getDateKey(date: Date) {
   return format(date, "yyyy-MM-dd");
 }
 
-function getDayStatus(date: Date): DayStatus {
-  if (isToday(date)) return "today";
-  return isBefore(startOfDay(date), startOfDay(new Date())) ? "past" : "future";
-}
-
-function getCompletedPlannedCount(
-  dates: string[],
-  plans: PlannerPlanMap,
-  completedCategoriesByDate: Record<string, string[]>,
-) {
-  return dates.reduce((count, dateKey) => {
-    const plannedCategories = plans[dateKey]?.categories ?? [];
-    const completedCategories = new Set(completedCategoriesByDate[dateKey] ?? []);
-
-    return (
-      count +
-      plannedCategories.filter((category) => completedCategories.has(category))
-        .length
-    );
-  }, 0);
-}
-
-function getCompletedCount(
-  dates: string[],
-  completedPostCountByDate: Record<string, number>,
-) {
-  return dates.reduce(
-    (count, dateKey) => count + (completedPostCountByDate[dateKey] ?? 0),
-    0,
-  );
-}
-
-function getCompletedPlannedDates(
-  dates: string[],
-  plans: PlannerPlanMap,
-  completedCategoriesByDate: Record<string, string[]>,
-) {
-  return new Set(
-    dates.filter((dateKey) => {
-      const plannedCategories = plans[dateKey]?.categories ?? [];
-      const completedCategories = new Set(completedCategoriesByDate[dateKey] ?? []);
-
-      return plannedCategories.some((category) => completedCategories.has(category));
-    }),
-  );
-}
-
-function DayDots({
-  hasPlanned,
-  hasCompleted,
-  bright,
-}: {
-  hasPlanned: boolean;
-  hasCompleted: boolean;
-  bright?: boolean;
-}) {
-  return (
-    <div className="mt-1 flex min-h-[8px] translate-y-1 items-center justify-center gap-1">
-      {hasPlanned && (
-        <span
-          className={cn(
-            "h-1.5 w-1.5 rounded-full",
-            bright ? "bg-white/55" : "bg-[#C9C1B6]",
-          )}
-        />
-      )}
-      {hasCompleted && (
-        <span
-          className={cn(
-            "h-1.5 w-1.5 rounded-full",
-            bright ? "bg-[#FCD6BE]" : "bg-[#D96B2B]",
-          )}
-        />
-      )}
-    </div>
-  );
-}
-
-function PlannerDayButton({
+function RecordDayButton({
   day,
   modifiers,
   variant,
-  plannedDates,
   completedDates,
-  completedPlannedDates,
+  completedPostCountByDate,
   className,
   ...buttonProps
 }: DayButtonProps & {
   variant: ViewMode;
-  plannedDates: Set<string>;
   completedDates: Set<string>;
-  completedPlannedDates: Set<string>;
+  completedPostCountByDate: Record<string, number>;
 }) {
   const date = day.date;
   const dateKey = getDateKey(date);
@@ -156,10 +66,49 @@ function PlannerDayButton({
   const isSelected = Boolean(modifiers.selected);
   const isPast = startOfDay(date) < startOfDay(new Date()) && !isToday(date);
   const isWeekend = dayIndex >= 5;
-  const hasPlanned = plannedDates.has(dateKey);
   const hasCompleted = completedDates.has(dateKey);
-  const hasCompletedPlanned = completedPlannedDates.has(dateKey);
+  const completedCount = completedPostCountByDate[dateKey] ?? 0;
   const shouldDimPast = isPast && !isSelected;
+  const isDisabled = Boolean(modifiers.disabled);
+
+  const content = (
+    <>
+      <span
+        className={cn(
+          variant === "weekly" ? "text-[18px]" : "text-[13px]",
+          "font-extrabold leading-none",
+          isSelected
+            ? "text-white"
+            : isToday(date)
+              ? "text-[#5B6470]"
+              : dayIndex === 6
+                ? "text-[#EF4444]"
+                : dayIndex === 5
+                  ? "text-[#3B82F6]"
+                  : "text-[#4A433D]",
+          isWeekend && variant === "monthly" && !isSelected && "font-extrabold",
+          shouldDimPast && "opacity-55",
+          isDisabled && "opacity-35",
+        )}
+      >
+        {format(date, "d")}
+      </span>
+      <div className="mt-1 flex min-h-[16px] items-center justify-center">
+        {hasCompleted ? (
+          <span
+            className={cn(
+              "inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+              isSelected
+                ? "bg-white text-[#4A433D]"
+                : "bg-[#FFF4EC] text-[#D96B2B]",
+            )}
+          >
+            {completedCount}
+          </span>
+        ) : null}
+      </div>
+    </>
+  );
 
   if (variant === "weekly") {
     return (
@@ -171,35 +120,15 @@ function PlannerDayButton({
           "flex h-[76px] w-full flex-col items-center justify-center gap-1.5 rounded-[18px] px-1 py-3 transition-all duration-200 active:scale-95",
           isSelected
             ? "bg-[#6B625A] shadow-lg shadow-black/15"
-            : hasCompletedPlanned
+            : hasCompleted
               ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
-            : isToday(date)
-              ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
-              : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
+              : isToday(date)
+                ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
+                : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
+          isDisabled && "cursor-default hover:bg-inherit",
         )}
       >
-        <span
-          className={cn(
-            "text-[18px] font-extrabold leading-none",
-            isSelected
-              ? "text-white"
-              : isToday(date)
-                ? "text-[#5B6470]"
-                : dayIndex === 6
-                  ? "text-[#EF4444]"
-                : dayIndex === 5
-                    ? "text-[#3B82F6]"
-                    : "text-[#4A433D]",
-            shouldDimPast && "opacity-55",
-          )}
-        >
-          {format(date, "d")}
-        </span>
-        <DayDots
-          hasPlanned={hasPlanned}
-          hasCompleted={hasCompleted}
-          bright={isSelected}
-        />
+        {content}
       </button>
     );
   }
@@ -213,37 +142,16 @@ function PlannerDayButton({
         "flex h-[58px] w-full flex-col items-center justify-center gap-1 rounded-[14px] px-1 py-2 transition-all duration-200 active:scale-95",
         isSelected
           ? "bg-[#6B625A] shadow-md shadow-black/15"
-          : hasCompletedPlanned
+          : hasCompleted
             ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
-          : isToday(date)
-            ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
-            : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
+            : isToday(date)
+              ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
+              : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
         modifiers.outside && "opacity-35",
+        isDisabled && "cursor-default hover:bg-inherit",
       )}
     >
-      <span
-        className={cn(
-          "text-[13px] font-bold leading-none",
-          isSelected
-            ? "text-white"
-            : isToday(date)
-              ? "text-[#5B6470]"
-              : dayIndex === 6
-                ? "text-[#EF4444]"
-                : dayIndex === 5
-                  ? "text-[#3B82F6]"
-                  : "text-[#4A433D]",
-          isWeekend && !isSelected && "font-extrabold",
-          shouldDimPast && !modifiers.outside && "opacity-55",
-        )}
-      >
-        {format(date, "d")}
-      </span>
-      <DayDots
-        hasPlanned={hasPlanned}
-        hasCompleted={hasCompleted}
-        bright={isSelected}
-      />
+      {content}
     </button>
   );
 }
@@ -266,24 +174,20 @@ function WeeklyRow({
   return <tr {...props} className={cn(className, !isVisibleWeek && "hidden")} />;
 }
 
-export default function HomeWeeklyPlanner({
+export default function HomeRecordCalendar({
   userId,
-  categories,
-  categoryCounts,
-}: HomeWeeklyPlannerProps) {
+}: HomeRecordCalendarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const resetPost = useDraftPostStore.use.resetPost();
-  const setPost = useDraftPostStore.use.setPost();
   const today = useMemo(() => new Date(), []);
+  const todayMonth = useMemo(() => startOfMonth(today), [today]);
   const currentWeekStart = useMemo(
     () => startOfWeek(today, { weekStartsOn: WEEK_STARTS_ON }),
     [today],
   );
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
-  const [monthlyDisplayDate, setMonthlyDisplayDate] = useState(today);
+  const [monthlyDisplayDate, setMonthlyDisplayDate] = useState(todayMonth);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [plans, setPlans] = useState<PlannerPlanMap>({});
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
   const [completedPostCountByDate, setCompletedPostCountByDate] = useState<
     Record<string, number>
@@ -302,101 +206,24 @@ export default function HomeWeeklyPlanner({
   const weekEndExclusive = useMemo(() => addDays(weekStart, 7), [weekStart]);
   const calendarCellHeight = viewMode === "weekly" ? 76 : 58;
   const selectedDateKey = selectedDate ? getDateKey(selectedDate) : null;
-  const selectedPlan = selectedDateKey ? plans[selectedDateKey] : undefined;
-  const selectedCategories = selectedPlan?.categories ?? [];
   const selectedCompletedCategories = selectedDateKey
     ? (completedCategoriesByDate[selectedDateKey] ?? [])
     : [];
-  const selectedDayStatus = selectedDate ? getDayStatus(selectedDate) : null;
-  const isPastSelectedDate = selectedDate
-    ? startOfDay(selectedDate) < startOfDay(today) && !isToday(selectedDate)
-    : false;
-  const categoryCountMap = useMemo(
-    () =>
-      new Map(
-        categoryCounts.map((item) => [item.category, item.count] as const),
-      ),
-    [categoryCounts],
-  );
-  const plannedDates = useMemo(
-    () =>
-      new Set(
-        Object.values(plans)
-          .filter((entry) => entry.categories.length > 0)
-          .map((entry) => entry.date),
-      ),
-    [plans],
-  );
-  const weeklyDateKeys = useMemo(
-    () =>
-      Array.from({ length: 7 }, (_, index) =>
-        getDateKey(addDays(weekStart, index)),
-      ),
-    [weekStart],
-  );
-  const monthlyDateKeys = useMemo(() => {
-    const keys: string[] = [];
-
-    for (
-      let cursor = currentMonth;
-      !isBefore(monthEnd, cursor);
-      cursor = addDays(cursor, 1)
-    ) {
-      keys.push(getDateKey(cursor));
-    }
-
-    return keys;
-  }, [currentMonth, monthEnd]);
-  const completedPlannedDates = useMemo(
-    () =>
-      viewMode === "weekly"
-        ? getCompletedPlannedDates(weeklyDateKeys, plans, completedCategoriesByDate)
-        : getCompletedPlannedDates(monthlyDateKeys, plans, completedCategoriesByDate),
-    [completedCategoriesByDate, monthlyDateKeys, plans, viewMode, weeklyDateKeys],
-  );
-  const visibleCompletedPlannedCount = useMemo(
-    () =>
-      viewMode === "weekly"
-        ? getCompletedPlannedCount(weeklyDateKeys, plans, completedCategoriesByDate)
-        : getCompletedPlannedCount(monthlyDateKeys, plans, completedCategoriesByDate),
-    [completedCategoriesByDate, monthlyDateKeys, plans, viewMode, weeklyDateKeys],
-  );
-  const visibleCompletedCount = useMemo(
-    () =>
-      viewMode === "weekly"
-        ? getCompletedCount(weeklyDateKeys, completedPostCountByDate)
-        : getCompletedCount(monthlyDateKeys, completedPostCountByDate),
-    [completedPostCountByDate, monthlyDateKeys, viewMode, weeklyDateKeys],
-  );
+  const selectedCompletedCount = selectedDateKey
+    ? (completedPostCountByDate[selectedDateKey] ?? 0)
+    : 0;
 
   const headerLabel =
     viewMode === "monthly"
       ? format(currentMonth, "yyyy년 M월", { locale: ko })
-      : "이번 주 운동 계획";
+      : "이번 주 운동 기록";
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadPlans() {
-      const loadedPlans = await localPlannerPlanRepository.listPlans(userId);
-      if (!isMounted) return;
-      setPlans(loadedPlans);
+    if (!selectedDate) return;
+    if (viewMode === "monthly" && !isSameMonth(selectedDate, currentMonth)) {
+      setSelectedDate(null);
     }
-
-    loadPlans();
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== `home-planner-plans:${userId}`) return;
-      loadPlans();
-    };
-
-    window.addEventListener("storage", handleStorage);
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener("storage", handleStorage);
-    };
-  }, [userId]);
+  }, [currentMonth, selectedDate, viewMode]);
 
   useEffect(() => {
     if (!userId) return;
@@ -423,7 +250,7 @@ export default function HomeWeeklyPlanner({
           );
 
           if (!response.ok) {
-            throw new Error("Failed to fetch planner posts");
+            throw new Error("Failed to fetch record calendar posts");
           }
 
           const json = await response.json();
@@ -442,8 +269,9 @@ export default function HomeWeeklyPlanner({
             }
 
             if (
-              isBefore(postDate, monthEndExclusive) ||
-              isBefore(postDate, weekEndExclusive)
+              (isBefore(postDate, monthEndExclusive) ||
+                isBefore(postDate, weekEndExclusive)) &&
+              !isBefore(postDate, fetchFloor)
             ) {
               const dateKey = getDateKey(postDate);
               nextCompletedDates.add(dateKey);
@@ -476,7 +304,7 @@ export default function HomeWeeklyPlanner({
         );
       } catch (error) {
         if ((error as Error).name === "AbortError") return;
-        console.error("Failed to fetch planner completion", error);
+        console.error("Failed to fetch record calendar data", error);
       }
     }
 
@@ -486,54 +314,23 @@ export default function HomeWeeklyPlanner({
   }, [currentMonth, monthEndExclusive, userId, weekEndExclusive, weekStart]);
 
   const handleSelect = (date: Date | undefined) => {
-    if (!date) return;
+    if (!date) {
+      setSelectedDate(null);
+      return;
+    }
+    if (selectedDate && isSameDay(selectedDate, date)) {
+      setSelectedDate(null);
+      return;
+    }
     if (viewMode === "monthly") {
-      setMonthlyDisplayDate(date);
+      setMonthlyDisplayDate(startOfMonth(date));
     }
     setSelectedDate(date);
-  };
-
-  const handleToggleCategory = async (category: Category) => {
-    if (!selectedDateKey || isPastSelectedDate) return;
-
-    const nextCategories = selectedCategories.includes(category)
-      ? selectedCategories.filter((item) => item !== category)
-      : [...selectedCategories, category];
-
-    setPlans((current) => {
-      const nextPlans = { ...current };
-
-      if (nextCategories.length === 0) {
-        delete nextPlans[selectedDateKey];
-      } else {
-        nextPlans[selectedDateKey] = {
-          date: selectedDateKey,
-          categories: nextCategories,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-
-      return nextPlans;
-    });
-
-    try {
-      const savedPlans = await localPlannerPlanRepository.upsertPlan(
-        userId,
-        selectedDateKey,
-        nextCategories,
-      );
-      setPlans(savedPlans);
-    } catch (error) {
-      console.error("Failed to save planner plan", error);
-      const restoredPlans = await localPlannerPlanRepository.listPlans(userId);
-      setPlans(restoredPlans);
-    }
   };
 
   const moveToArchive = () => {
     if (!selectedDate) return;
 
-    setSelectedDate(null);
     const dateText = getDateKey(selectedDate);
     const recordArchive = document.getElementById("record-archive");
 
@@ -550,24 +347,13 @@ export default function HomeWeeklyPlanner({
     router.push(`${pathname}?date=${dateText}#record-archive`);
   };
 
-  const handleWriteCategory = (category: Category) => {
-    resetPost();
-    setPost({
-      category,
-      categoryCount: categoryCountMap.get(category) ?? 0,
-    });
-
-    router.push(pathname.startsWith("/m/") ? "/m/post/create" : "/post/create");
-  };
-
   return (
-    <>
-      <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
-        <div className="flex w-full min-w-0 flex-col overflow-hidden rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
+    <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
+      <div className="flex w-full min-w-0 flex-col overflow-hidden rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
         <div className="flex items-start justify-between pb-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">
-              {viewMode === "weekly" ? "Weekly Plan" : "Monthly Plan"}
+              {viewMode === "weekly" ? "Weekly Record" : "Monthly Record"}
             </p>
             <h3 className="mt-0.5 text-[18px] font-bold tracking-tight text-[#4A433D]">
               {headerLabel}
@@ -616,9 +402,14 @@ export default function HomeWeeklyPlanner({
             <button
               type="button"
               onClick={() =>
-                setMonthlyDisplayDate((current) => addMonths(current, 1))
+                setMonthlyDisplayDate((current) =>
+                  isSameMonth(current, todayMonth)
+                    ? current
+                    : addMonths(current, 1),
+                )
               }
-              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
+              disabled={isSameMonth(currentMonth, todayMonth)}
+              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB] disabled:cursor-default disabled:text-[#C7CBD1] disabled:hover:bg-white"
             >
               다음 달
             </button>
@@ -636,6 +427,7 @@ export default function HomeWeeklyPlanner({
             onMonthChange={setMonthlyDisplayDate}
             hideNavigation
             showOutsideDays={viewMode === "weekly"}
+            disabled={{ after: today }}
             styles={{
               root: {
                 maxWidth: "100%",
@@ -673,21 +465,20 @@ export default function HomeWeeklyPlanner({
               weekdays:
                 "[&_th:nth-child(6)]:text-[#3B82F6] [&_th:nth-child(7)]:text-[#EF4444]",
               weekday: "h-8 text-center text-[11px] font-bold text-[#9CA3AF]",
-              week: "",
               day: "p-0 align-middle",
               day_button: "w-full",
+              disabled: "pointer-events-none",
             }}
             formatters={{
               formatWeekdayName: (date) => DAY_LABELS[getDayIndex(date)],
             }}
             components={{
               DayButton: (props) => (
-                <PlannerDayButton
+                <RecordDayButton
                   {...props}
                   variant={viewMode}
-                  plannedDates={plannedDates}
                   completedDates={completedDates}
-                  completedPlannedDates={completedPlannedDates}
+                  completedPostCountByDate={completedPostCountByDate}
                 />
               ),
               ...(viewMode === "weekly"
@@ -701,38 +492,59 @@ export default function HomeWeeklyPlanner({
           />
         </div>
 
-        <div className="flex justify-end">
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-1.5 rounded-full bg-[#FFF4EC] px-3 py-1.5 text-[12px] font-semibold text-[#D96B2B]">
-              <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동</span>
-              <span className="font-bold text-[#4A433D]">
-                {visibleCompletedCount}
-              </span>
-              <span>개</span>
+        {selectedDate && (
+          <div className="mt-4 rounded-[18px] border border-[#F0EBE3] bg-[#FAFAF8] px-4 py-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[12px] font-bold text-[#D96B2B]">
+                  {DAY_LABELS[getDayIndex(selectedDate)]}요일
+                </p>
+                <h4 className="mt-0.5 text-[18px] font-extrabold text-[#4A433D]">
+                  {format(selectedDate, "M월 d일", { locale: ko })}
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={moveToArchive}
+                className="rounded-full bg-[#4A433D] px-3 py-1.5 text-[12px] font-bold text-white"
+              >
+                기록 보기
+              </button>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-[#FFF8D9] px-3 py-1.5 text-[12px] font-semibold text-[#8A5A14]">
-              <span>{viewMode === "weekly" ? "이번 주" : "이번 달"} 완료한 운동 계획</span>
-              <span className="font-bold text-[#4A433D]">
-                {visibleCompletedPlannedCount}
-              </span>
-              <span>개</span>
+
+            <div className="mt-4 flex flex-col gap-3">
+              <div>
+                <p className="mb-2 text-[12px] font-semibold text-[#9CA3AF]">
+                  기록한 운동
+                </p>
+                {selectedCompletedCategories.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCompletedCategories.map((category) => (
+                      <span
+                        key={category}
+                        className="rounded-full bg-[#FFF4EC] px-3 py-1.5 text-[13px] font-semibold text-[#D96B2B] ring-1 ring-[#D96B2B]/20"
+                      >
+                        {category}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[12px] text-[#C8C0B4]">
+                    이 날짜에는 기록이 없습니다
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 text-[12px] font-medium text-[#6B7280]">
+                <span>작성한 기록 수</span>
+                <span className="rounded-full bg-white px-2.5 py-1 font-bold text-[#1A1A1A] ring-1 ring-[#E5E7EB]">
+                  {selectedCompletedCount}개
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        </div>
-      </section>
-
-      <HomeWeeklyPlannerModal
-        selectedDate={selectedDate}
-        dayStatus={selectedDayStatus}
-        plannedCategories={selectedCategories}
-        completedCategories={selectedCompletedCategories}
-        allCategories={categories}
-        onClose={() => setSelectedDate(null)}
-        onToggleCategory={handleToggleCategory}
-        onWriteCategory={handleWriteCategory}
-        onMoveToArchive={moveToArchive}
-      />
-    </>
+        )}
+      </div>
+    </section>
   );
 }

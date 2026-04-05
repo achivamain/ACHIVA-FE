@@ -58,10 +58,6 @@ export type PostRes = {
   weeklyWorkoutCount: number;
   continuousGoalWeeks: number;
   cheerings?: Cheering[];
-  bookArticle?: {
-    bookId: string;
-    bookTitle: string;
-  }[];
 };
 
 export type Question = {

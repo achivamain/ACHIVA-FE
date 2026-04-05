@@ -1,11 +1,8 @@
 import Logout from "@/components/Logout";
-import { Category } from "@/types/Categories";
 import { MyCategorys } from "@/features/home/MyCategorys";
-import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
-import LiveActivityTicker from "@/features/home/LiveActivityTicker";
+import HomeRecordCalendar from "@/features/home/HomeRecordCalendar";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
 import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
-import AiReportWidget from "@/features/home/AiReportWidget";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
 import { notFound, redirect } from "next/navigation";
@@ -42,8 +39,6 @@ export default async function MobileHomePageRoute({
             🏠 홈
           </h1>
         </div>
-        <LiveActivityTicker />
-        <div className="h-6" />
         <MyCategorys
           myCategories={user.categories}
           categoryCounts={categoryCounts}
@@ -51,20 +46,13 @@ export default async function MobileHomePageRoute({
           categoryCharCounts={categoryCharCounts}
         />
         <div className="h-6" />
-        <HomeWeeklyPlanner
-          userId={user.id}
-          categories={user.categories as Category[]}
-          categoryCounts={categoryCounts}
-        />
+        <HomeRecordCalendar userId={user.id} />
         <div className="h-6" />
         <MyAchievementsSummary
-          userId={user.id}
           totalCount={user.articleCount}
           streakWeeks={streakWeeks}
           thisWeekCount={weeklyArticleCount}
         />
-        <div className="h-6" />
-        <AiReportWidget userId={user.id} />
         <div className="h-6" />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>

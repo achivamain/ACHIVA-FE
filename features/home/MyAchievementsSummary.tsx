@@ -1,167 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { useMemo } from "react";
 import { inter } from "@/lib/fonts";
-import {
-  localPlannerPlanRepository,
-  type PlannerPlanMap,
-} from "@/features/home/plannerPlanRepository";
-import type { PostsData } from "@/types/responses";
 
 export default function MyAchievementsSummary({
-  userId,
   totalCount = 0,
   streakWeeks = 0,
   thisWeekCount = 0,
 }: {
-  userId: string;
   totalCount?: number;
   streakWeeks?: number;
   thisWeekCount?: number;
 }) {
-  const [, setCompletedGoalCount] = useState(0);
-
-  useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    // 개인 점수에 목표 달성한 것 반영하기 위해서.. 백엔드 전환 시 반영 필요
-    async function fetchCompletedGoalCount(plans: PlannerPlanMap) {
-      const plannedEntries = Object.values(plans).filter(
-        (entry) => entry.categories.length > 0,
-      );
-
-      if (plannedEntries.length === 0) {
-        if (isMounted) {
-          setCompletedGoalCount(0);
-        }
-        return;
-      }
-
-      const plannedDateKeys = new Set(
-        plannedEntries.map((entry) => entry.date),
-      );
-      const earliestPlannedDate = plannedEntries.reduce(
-        (earliest, entry) => (entry.date < earliest ? entry.date : earliest),
-        plannedEntries[0].date,
-      );
-      const completedCategoriesByDate = new Map<string, Set<string>>();
-      let page = 0;
-
-      while (true) {
-        const response = await fetch(
-          `/api/members/getPosts?pageParam=${page}&size=30&id=${userId}&sort=DESC`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            cache: "no-store",
-            signal: controller.signal,
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch posts");
-        }
-
-        const json = await response.json();
-        const data = json.data as PostsData;
-        const posts = data?.content ?? [];
-
-        if (posts.length === 0) {
-          break;
-        }
-
-        let reachedBeforePlannedRange = false;
-
-        for (const post of posts) {
-          const postDateKey = format(parseISO(post.createdAt), "yyyy-MM-dd");
-
-          if (postDateKey < earliestPlannedDate) {
-            reachedBeforePlannedRange = true;
-            break;
-          }
-
-          if (!plannedDateKeys.has(postDateKey)) {
-            continue;
-          }
-
-          const categoriesForDate =
-            completedCategoriesByDate.get(postDateKey) ?? new Set<string>();
-          categoriesForDate.add(post.category);
-          completedCategoriesByDate.set(postDateKey, categoriesForDate);
-        }
-
-        if (reachedBeforePlannedRange || data.last) {
-          break;
-        }
-
-        page += 1;
-      }
-
-      const nextCompletedGoalCount = plannedEntries.reduce((count, entry) => {
-        const completedCategories =
-          completedCategoriesByDate.get(entry.date) ?? new Set<string>();
-
-        return (
-          count +
-          entry.categories.filter((category) =>
-            completedCategories.has(category),
-          ).length
-        );
-      }, 0);
-
-      if (isMounted) {
-        setCompletedGoalCount(nextCompletedGoalCount);
-      }
-    }
-
-    async function loadCompletedGoalCount() {
-      try {
-        const plans = await localPlannerPlanRepository.listPlans(userId);
-        await fetchCompletedGoalCount(plans);
-      } catch (error) {
-        if ((error as Error).name === "AbortError") {
-          return;
-        }
-        console.error("Failed to load completed goal count", error);
-        if (isMounted) {
-          setCompletedGoalCount(0);
-        }
-      }
-    }
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== `home-planner-plans:${userId}`) return;
-      loadCompletedGoalCount();
-    };
-
-    const handlePlansUpdated = (event: Event) => {
-      const customEvent = event as CustomEvent<{ userId?: string }>;
-      if (customEvent.detail?.userId !== userId) return;
-      loadCompletedGoalCount();
-    };
-
-    loadCompletedGoalCount();
-    window.addEventListener("storage", handleStorage);
-    window.addEventListener("home-planner-plans-updated", handlePlansUpdated);
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-      window.removeEventListener("storage", handleStorage);
-      window.removeEventListener(
-        "home-planner-plans-updated",
-        handlePlansUpdated,
-      );
-    };
-  }, [userId]);
-
-  // 열정 온도 계산 로직, 현재 게시글당 0.4, 계획 세우고 하면 추가로 0.1, 주 3회 완성하면 1.5
-  // 계획 데이터 백엔드 이관 전까지는 제외하고 사용
+  // 열정 온도 계산 로직은 기록 수와 주간 스트릭만 반영합니다.
   const passionTemp = useMemo(() => {
     const calculated = 36.5 + 0.4 * totalCount + 1.5 * streakWeeks;
-    // const calculated = 36.5 + 0.4 * totalCount + 0.1 * completedGoalCount + 1.5 * streakWeeks;
     return Math.max(36.5, Math.min(100, Number(calculated.toFixed(1))));
   }, [streakWeeks, totalCount]);
 

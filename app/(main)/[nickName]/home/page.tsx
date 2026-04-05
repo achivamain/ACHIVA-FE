@@ -1,16 +1,13 @@
 import Banner from "@/features/event/Banner";
-import { Category } from "@/types/Categories";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
-import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
+import HomeRecordCalendar from "@/features/home/HomeRecordCalendar";
 import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
-import LiveActivityTicker from "@/features/home/LiveActivityTicker";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getMe, isOwner } from "@/lib/getUser";
-import AiReportWidget from "@/features/home/AiReportWidget";
 
 export default async function HomePage({
   params,
@@ -50,7 +47,6 @@ export default async function HomePage({
                   오늘도 열심히 운동하는 당신을 응원합니다!
                 </p>
               </div>
-              <LiveActivityTicker />
               <MyCategorys
                 myCategories={user.categories}
                 categoryCounts={categoryCounts}
@@ -58,21 +54,14 @@ export default async function HomePage({
                 categoryCharCounts={categoryCharCounts}
               />
               <div className="h-8"></div>
-              <HomeWeeklyPlanner
-                userId={user.id}
-                categories={user.categories as Category[]}
-                categoryCounts={categoryCounts}
-              />
+              <HomeRecordCalendar userId={user.id} />
               <div className="h-6"></div>
               <MyAchievementsSummary
-                userId={user.id}
                 totalCount={user.articleCount}
                 streakWeeks={streakWeeks}
                 thisWeekCount={weeklyArticleCount}
               />
               <div className="h-6"></div>
-              <AiReportWidget userId={user.id} />
-              <div className="h-10"></div>
               <MyRecordArchive userId={user.id} />
               <div className="h-10"></div>
             </div>
