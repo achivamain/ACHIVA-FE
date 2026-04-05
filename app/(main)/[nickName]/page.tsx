@@ -9,20 +9,25 @@ import { getUser, isOwner } from "@/lib/getUser";
 import { WebProfileSummary } from "@/features/home/ProfileSummary";
 import { getSummeryData } from "@/lib/getData";
 import WeeklyCalendar from "@/features/user/WeeklyCalendar";
+import { looksLikeStaticAssetPathSegment } from "@/lib/routeGuards";
 
 export default async function Page({
   params,
 }: {
   params: Promise<{ nickName: string }>;
 }) {
+  const { nickName } = await params; // 이 페이지 유저 닉네임
+
+  if (looksLikeStaticAssetPathSegment(nickName)) {
+    notFound();
+  }
+
   const session = await auth();
   if (session?.error) {
     return <Logout />;
   }
   const token = session?.access_token;
   const currentUser = session!.user;
-
-  const { nickName } = await params; // 이 페이지 유저 닉네임
 
   async function getMyFriends() {
     // 로그인한 유저의 친구 목록

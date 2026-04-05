@@ -9,6 +9,7 @@ import { getSummeryData } from "@/lib/getData";
 import { getUser, isOwner } from "@/lib/getUser";
 import { MobileProfileSummary } from "@/features/home/ProfileSummary";
 import WeeklyCalendar from "@/features/user/WeeklyCalendar";
+import { looksLikeStaticAssetPathSegment } from "@/lib/routeGuards";
 
 export default async function Page({
   params,
@@ -17,6 +18,11 @@ export default async function Page({
 }) {
   try {
     const { nickName } = await params; // 이 페이지 유저 닉네임
+
+    if (looksLikeStaticAssetPathSegment(nickName)) {
+      notFound();
+    }
+
     const session = await auth();
     if (session?.error) {
       return <Logout />;
