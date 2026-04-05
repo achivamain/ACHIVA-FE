@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import FeedTabs, { type FeedTab } from "@/features/feed/FeedTabs";
+import FeedTabs, {
+  defaultFeedTab,
+  type FeedTab,
+} from "@/features/feed/FeedTabs";
 import { LoadingIcon, SideBarHeartIcon } from "@/components/Icons";
 import { AnimatePresence } from "motion/react";
 
@@ -29,7 +32,7 @@ const Notifications = dynamic(
 );
 
 export default function FeedPage() {
-  const [activeTab, setActiveTab] = useState<FeedTab>("전체");
+  const [activeTab, setActiveTab] = useState<FeedTab>(defaultFeedTab);
   const [isCheerOpen, setIsCheerOpen] = useState(false);
 
   return (
