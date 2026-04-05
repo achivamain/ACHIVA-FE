@@ -4,7 +4,10 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import Footer from "@/components/Footer";
-import FeedTabs, { type FeedTab } from "@/features/feed/FeedTabs";
+import FeedTabs, {
+  defaultFeedTab,
+  type FeedTab,
+} from "@/features/feed/FeedTabs";
 import FeedList from "@/features/feed/FeedList";
 import { TextLogo } from "@/components/Logo";
 import { LoadingIcon, SideBarHeartIcon } from "@/components/Icons";
@@ -24,7 +27,7 @@ const refreshIndicator = (
 );
 
 export default function MobileFeedPage() {
-  const [activeTab, setActiveTab] = useState<FeedTab>("전체");
+  const [activeTab, setActiveTab] = useState<FeedTab>(defaultFeedTab);
   const [isCheerOpen, setIsCheerOpen] = useState(false);
   const queryClient = useQueryClient();
 

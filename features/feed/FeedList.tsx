@@ -3,7 +3,6 @@
 // 피드 페이지 리스트 전체적인 관리
 import { useEffect, useRef } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
 import { LoadingIcon } from "@/components/Icons";
 import type { PostsData } from "@/types/responses";
 import type { FeedTab } from "./FeedTabs";
@@ -14,28 +13,11 @@ type FeedListProps = {
 };
 
 export default function FeedList({ activeTab }: FeedListProps) {
-  const { data: session } = useSession();
-  const currentUserId = session?.user?.id;
-
   async function fetchPosts(pageParam: number = 0): Promise<PostsData> {
-    let url: string;
-
-    switch (activeTab) {
-      case "전체":
-        url = `/api/feed?pageParam=${pageParam}`;
-        break;
-      case "관심":
-        url = `/api/feed/interest?memberId=${currentUserId}&pageParam=${pageParam}`;
-        break;
-      case "응원":
-        url = `/api/feed/cheering?pageParam=${pageParam}`;
-        break;
-      case "친구":
-        url = `/api/feed/friends?pageParam=${pageParam}`;
-        break;
-      default:
-        url = `/api/feed?pageParam=${pageParam}`;
-    }
+    const url =
+      activeTab === "모임"
+        ? `/api/feed/moim?pageParam=${pageParam}`
+        : `/api/feed?category=${encodeURIComponent(activeTab)}&pageParam=${pageParam}`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -65,7 +47,7 @@ export default function FeedList({ activeTab }: FeedListProps) {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
-      queryKey: ["feed", activeTab, currentUserId],
+      queryKey: ["feed", activeTab],
       queryFn: ({ pageParam = 0 }) => fetchPosts(pageParam),
       initialPageParam: 0,
       getNextPageParam: (lastPage) => {
@@ -73,7 +55,6 @@ export default function FeedList({ activeTab }: FeedListProps) {
         const next = lastPage.number + 1;
         return next < lastPage.totalPages ? next : undefined;
       },
-      enabled: !!currentUserId,
     });
 
   // 무한 스크롤 센티넬
