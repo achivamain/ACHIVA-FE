@@ -2,7 +2,6 @@ import Friends from "@/features/friends/Friends";
 import { Suspense } from "react";
 import FriendsSkeleton from "@/features/friends/FriendsSkeleton";
 import Logout from "@/components/Logout";
-import { redirect } from "next/navigation";
 import { isOwner } from "@/lib/getUser";
 import { getAuthSession } from "@/lib/getAuthSession";
 

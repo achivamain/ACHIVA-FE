@@ -3,7 +3,6 @@
 import { AnimatePresence } from "motion/react";
 import { motion } from "motion/react";
 import { useSignupStepStore } from "@/store/SignupStore";
-import Footer from "@/components/Footer";
 import Container from "@/features/auth/Container";
 import Terms from "@/features/auth/Terms";
 import CategoryForm, { CategoryNextButton } from "@/features/auth/CategoryForm";

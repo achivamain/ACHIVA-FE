@@ -271,7 +271,7 @@ export default function MoimDetailPage() {
               if (navigator.share) {
                 try {
                   await navigator.share(shareData);
-                } catch (e) {
+                } catch {
                   // 사용자가 취소한 경우 등 무시
                 }
               } else {
@@ -800,9 +800,7 @@ export default function MoimDetailPage() {
                   <div className="rounded-xl bg-red-50 overflow-hidden">
                     <button
                       type="button"
-                      onClick={() =>
-                        setIsMemberManagementOpen((prev) => !prev)
-                      }
+                      onClick={() => setIsMemberManagementOpen((prev) => !prev)}
                       className="w-full flex items-center px-4 py-3 text-left text-red-600 font-bold hover:bg-red-100 transition-colors text-sm rounded-xl"
                     >
                       <span>👥 모임 인원 관리</span>

@@ -1,12 +1,9 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { handleSignIn } from "@/features/onboarding/handleSignIn";
 
 export default function AuthErrorPage() {
-  const searchParams = useSearchParams();
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-theme">
       <div className="flex flex-col items-center justify-center gap-4 my-10">

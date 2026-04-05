@@ -1,8 +1,8 @@
 // 내 운동 통계 프록시 api
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const session = await auth();
   const token = session?.access_token;
 
