@@ -3,17 +3,21 @@
 type ProgressIndicatorProps = {
   currentStep: number;
   totalSteps?: number;
+  startStep?: number;
 };
 
 export default function ProgressIndicator({
   currentStep,
   totalSteps = 6,
+  startStep = 1,
 }: ProgressIndicatorProps) {
+  const normalizedCurrentStep = currentStep - startStep + 1;
+
   return (
-    <div className="flex items-center justify-center gap-3 w-[132px] h-3">
+    <div className="flex h-3 items-center justify-center gap-3">
       {Array.from({ length: totalSteps }, (_, index) => {
         const stepNumber = index + 1;
-        const isActive = stepNumber === currentStep;
+        const isActive = stepNumber === normalizedCurrentStep;
 
         return (
           <div
