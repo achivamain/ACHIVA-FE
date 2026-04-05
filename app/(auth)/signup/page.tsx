@@ -5,11 +5,9 @@ import { motion } from "motion/react";
 import { useSignupStepStore } from "@/store/SignupStore";
 import Container from "@/features/auth/Container";
 import Terms from "@/features/auth/Terms";
-import CategoryForm, { CategoryNextButton } from "@/features/auth/CategoryForm";
 import ProgressIndicator from "@/features/auth/ProgressIndicator";
-import ProfileImageForm from "@/features/auth/ProfileImageForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
-import OathForm from "@/features/auth/OathForm";
+import NicknameForm from "@/features/auth/NicknameForm";
 import { BackIcon } from "@/components/Icons";
 
 export default function Page() {
@@ -33,26 +31,13 @@ export default function Page() {
         </>
       );
       break;
-    case 4: // 프로필사진
+    case 4: // 닉네임
       content = (
         <>
-          <ProfileImageForm />
+          <NicknameForm />
         </>
       );
       break;
-    case 5: // 카테고리
-      content = (
-        <>
-          <CategoryForm />
-        </>
-      );
-      break;
-    case 6: // 서약서
-      content = (
-        <>
-          <OathForm />
-        </>
-      );
   }
 
   return (
@@ -71,11 +56,13 @@ export default function Page() {
                 <BackIcon />
               </button>
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <ProgressIndicator currentStep={currentStep} />
+                <ProgressIndicator
+                  currentStep={currentStep}
+                  totalSteps={3}
+                  startStep={2}
+                />
               </div>
-              <div className="min-w-10 flex justify-end">
-                {currentStep === 5 && <CategoryNextButton />}
-              </div>
+              <div className="min-w-10 flex justify-end" />
             </div>
 
             {/* 메인 컨텐츠 영역 */}

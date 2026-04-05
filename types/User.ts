@@ -4,7 +4,6 @@ export type SignupUser = {
   profileImg?: string;
   birth?: Date;
   gender?: string;
-  categories: string[];
 };
 
 // 서버에서 응답으로 받는 유저 정보

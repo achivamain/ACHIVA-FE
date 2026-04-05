@@ -32,7 +32,6 @@ const initialUser: SignupUser = {
   profileImg: undefined,
   birth: undefined,
   gender: undefined,
-  categories: [],
 };
 
 const useSignupInfoStoreBase = create<EnteredInfoState>((set) => ({
