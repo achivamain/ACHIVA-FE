@@ -24,7 +24,7 @@ export default function MyAchievementsSummary({
       return {
         color: "text-[#D96B2B]",
         bg: "bg-[#FFF4EC]",
-        label: "한계를 넘는 열정!",
+        label: "넘치는 은혜의 불꽃!",
         icon: "🌋",
         gradient: "from-purple-500 via-red-500 to-yellow-500",
       };
@@ -32,7 +32,7 @@ export default function MyAchievementsSummary({
       return {
         color: "text-[#D96B2B]",
         bg: "bg-[#FFF4EC]",
-        label: "멈추지 않는 열정 엔진",
+        label: "날마다 은혜로 충만",
         icon: "🔥",
         gradient: "from-rose-500 to-purple-500",
       };
@@ -40,7 +40,7 @@ export default function MyAchievementsSummary({
       return {
         color: "text-[#D96B2B]",
         bg: "bg-[#FFF4EC]",
-        label: "궤도에 오른 뜨거움",
+        label: "은혜 위에 은혜",
         icon: "⚡",
         gradient: "from-red-400 to-rose-500",
       };
@@ -48,15 +48,15 @@ export default function MyAchievementsSummary({
       return {
         color: "text-[#D96B2B]",
         bg: "bg-[#FFF4EC]",
-        label: "흔들림 없는 꾸준함",
-        icon: "🏃‍♂️",
+        label: "흔들림 없는 신앙",
+        icon: "✝️",
         gradient: "from-orange-400 to-red-400",
       };
     if (passionTemp >= 40)
       return {
         color: "text-[#D96B2B]",
         bg: "bg-[#FFF4EC]",
-        label: "열기가 오르는 중",
+        label: "은혜 안으로 깊이",
         icon: "✨",
         gradient: "from-yellow-300 to-orange-400",
       };
@@ -64,7 +64,7 @@ export default function MyAchievementsSummary({
       return {
         color: "text-[#D96B2B]",
         bg: "bg-[#FFF4EC]",
-        label: "운동 세포 깨우기",
+        label: "은혜의 첫걸음",
         icon: "🌱",
         gradient: "from-[#CDBA96] to-yellow-400",
       };
@@ -72,9 +72,9 @@ export default function MyAchievementsSummary({
     return {
       color: "text-[#D96B2B]",
       bg: "bg-[#FFF4EC]",
-      label: "운동기록 첫걸음",
+      label: "첫 은혜를 기록해보세요",
       icon: "🌱",
-      gradient: "from-gray-300 to-gray-400",
+      gradient: "from-orange-200 to-orange-300",
     };
   }, [passionTemp]);
 
@@ -87,7 +87,7 @@ export default function MyAchievementsSummary({
           <div>
             <div className="mb-2 flex items-center gap-2">
               <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-theme">
-                Passion Temp
+                Grace Temp
               </p>
             </div>
             <div className="mt-0.5 flex items-baseline gap-1.5">
@@ -108,13 +108,13 @@ export default function MyAchievementsSummary({
 
           <div className="flex flex-shrink-0 flex-col items-end gap-2">
             <div className="flex items-center gap-1.5 rounded-full bg-[#F5F3F0] px-3 py-1 text-[12px] font-semibold text-[#4B5563]">
-              <span className="text-[10px] uppercase text-[#9CA3AF]">Total</span>
+              <span className="text-[10px] text-[#9CA3AF]">누적 은혜</span>
               <span className={`font-bold text-[#1A1A1A] ${inter.className}`}>
                 {totalCount}
               </span>
             </div>
             <div className="flex items-center gap-1.5 rounded-full bg-[#FFF4EC] px-3 py-1 text-[12px] font-semibold text-[#D96B2B]">
-              <span className="text-[10px] uppercase text-[#F6C89A]">Streak</span>
+              <span className="text-[10px] text-[#F6C89A]">연속 은혜</span>
               <span className={`font-bold ${inter.className}`}>
                 {streakWeeks}주
               </span>
@@ -147,7 +147,7 @@ export default function MyAchievementsSummary({
 
         <div className="flex flex-col gap-1 text-[12px] font-medium text-gray-400 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            이번 주 운동 횟수:{" "}
+            이번 주 은혜 기록:{" "}
             <span
               className={`font-bold ${inter.className} ${thisWeekCount >= 3 ? "text-theme" : "text-gray-600"}`}
             >
@@ -157,8 +157,8 @@ export default function MyAchievementsSummary({
           </p>
           <p className="text-[11px] sm:text-[12px]">
             {isWeekGoalCompleted
-              ? "주 3회를 채워 온기를 계속 유지해보세요!"
-              : "🔥 완벽합니다! 열정이 꾸준히 오르고 있어요!"}
+              ? "주 3회를 채워 은혜를 쌓아가요!"
+              : "🔥 놀라운 은혜입니다! 날마다 주님과 동행 중이에요!"}
           </p>
         </div>
       </div>

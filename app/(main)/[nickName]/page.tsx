@@ -101,7 +101,7 @@ export default async function Page({
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h3 className="font-bold text-[16px] sm:text-[18px] text-gray-900 tracking-tight flex items-center gap-1.5">
-                  올해의 기록 <span className="text-xl">🏆</span>
+                  올해의 은혜 기록 <span className="text-xl">🕊️</span>
                 </h3>
               </div>
               <div className="bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
