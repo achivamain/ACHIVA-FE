@@ -48,7 +48,7 @@ export default function WeeklyCalendar({ userId }: WeeklyCalendarProps) {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="font-bold text-[16px] sm:text-[18px] text-gray-900 tracking-tight flex items-center gap-1.5">
-            이번 주 스트릭 <span className="text-xl">🔥</span>
+            이번 주 연속 은혜 <span className="text-xl">✨</span>
           </h3>
         </div>
         <div className="bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">

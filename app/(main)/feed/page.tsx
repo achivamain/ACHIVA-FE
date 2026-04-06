@@ -45,10 +45,10 @@ export default function FeedPage() {
               <button
                 onClick={() => setIsCheerOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#412A2A]/20 hover:bg-[#412A2A]/5 transition-colors"
-                aria-label="응원 알림 열기"
+                aria-label="나눔 알림 열기"
               >
                 <SideBarHeartIcon fill={false} />
-                <span className="text-sm font-medium text-theme hidden sm:inline">응원</span>
+                <span className="text-sm font-medium text-theme hidden sm:inline">나눔</span>
               </button>
             </div>
             <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -66,7 +66,7 @@ export default function FeedPage() {
 
       <AnimatePresence>
         {isCheerOpen && (
-          <Drawer title="응원" onClose={() => setIsCheerOpen(false)}>
+          <Drawer title="나눔" onClose={() => setIsCheerOpen(false)}>
             <Notifications />
           </Drawer>
         )}

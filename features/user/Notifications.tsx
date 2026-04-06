@@ -88,10 +88,11 @@ export default function Notifications() {
         </div>
       )}
       {notifications.length === 0 && !isLoading && (
-        <p className="flex flex-1 items-center justify-center text-center text-sm text-[#808080]">
-          아직 받은 응원이 없어요.
-        </p>
-      )}
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 font-medium text-[15px]">
+            아직 받은 나눔이 없어요.
+          </p>
+        </div>)}
       <ul className="w-full flex flex-col pb-8">
         {notifications.map((n, idx) => {
           const Icon = cheeringMeta[n.cheeringCategory].icon;
