@@ -8,7 +8,7 @@ import {
   GoalIcon,
   FeedIcon,
   MyPageIcon,
-  RankingIcon,
+  TemperatureIcon,
 } from "./Icons";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -50,7 +50,7 @@ export default function Sidebar() {
   } else if (pathname === "/feed" || pathname.startsWith("/post")) {
     initialSelectedItem = "피드";
   } else if (pathname.startsWith("/ranking") || pathname.startsWith("/m/ranking")) {
-    initialSelectedItem = "랭킹";
+    initialSelectedItem = "온도";
   } else {
     initialSelectedItem = "MY";
   }
@@ -93,9 +93,9 @@ export default function Sidebar() {
       Icon: FeedIcon,
     },
     {
-      label: "랭킹",
+      label: "온도",
       href: `/ranking`,
-      Icon: RankingIcon,
+      Icon: TemperatureIcon,
     },
     {
       label: "MY",
