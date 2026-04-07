@@ -16,7 +16,7 @@ const useSignupStepStoreBase = create<SignupStepState>()((set) => ({
     set((state) => ({ currentStep: state.currentStep - 1 })),
   handleNextStep: () =>
     set((state) => ({ currentStep: state.currentStep + 1 })),
-  resetStep: () => set({ currentStep: 0 }),
+  resetStep: () => set({ currentStep: 2 }),
 }));
 
 export const useSignupStepStore = createSelectors(useSignupStepStoreBase);
@@ -32,6 +32,8 @@ const initialUser: SignupUser = {
   profileImg: undefined,
   birth: undefined,
   gender: undefined,
+  organizationId: undefined,
+  organizationPassword: undefined,
 };
 
 const useSignupInfoStoreBase = create<EnteredInfoState>((set) => ({
