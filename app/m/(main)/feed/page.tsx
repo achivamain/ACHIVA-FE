@@ -40,7 +40,7 @@ export default function MobileFeedPage() {
     <div className="w-full">
       <div className="sticky top-0 bg-white z-50">
         <div className="flex items-center justify-between px-5 py-4">
-          <TextLogo />
+          <TextLogo width={108} />
           <button
             onClick={() => setIsCheerOpen(true)}
             className="flex items-center gap-1 p-1.5 rounded-full hover:bg-[#412A2A]/5 transition-colors"
