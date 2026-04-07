@@ -10,15 +10,18 @@ import { TextLogo } from "@/components/Logo";
 import Terms from "@/features/auth/Terms";
 import BirthdayForm from "@/features/auth/BirthdayForm";
 import NicknameForm from "@/features/auth/NicknameForm";
+import OrganizationForm from "@/features/auth/OrganizationForm";
 import ProgressIndicator from "@/features/auth/ProgressIndicator";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
   const handlePrevStep = useSignupStepStore.use.handlePrevStep();
+
   let containerHeight = "h-151";
   let content;
+
   switch (currentStep) {
-    case 2: // 약관
+    case 2:
       containerHeight = "h-auto";
       content = (
         <>
@@ -29,7 +32,7 @@ export default function Page() {
         </>
       );
       break;
-    case 3: // 생일
+    case 3:
       content = (
         <>
           <div className="hidden sm:block mb-10">
@@ -39,13 +42,35 @@ export default function Page() {
         </>
       );
       break;
-    case 4: // 닉네임
+    case 4:
       content = (
         <>
           <div className="hidden sm:block mb-10">
             <TextLogo />
           </div>
           <NicknameForm />
+        </>
+      );
+      break;
+    case 5:
+      containerHeight = "h-auto";
+      content = (
+        <>
+          <div className="hidden sm:block mb-10">
+            <TextLogo />
+          </div>
+          <OrganizationForm />
+        </>
+      );
+      break;
+    default:
+      containerHeight = "h-auto";
+      content = (
+        <>
+          <div className="hidden sm:block mb-10">
+            <TextLogo />
+          </div>
+          <Terms />
         </>
       );
       break;
@@ -61,7 +86,7 @@ export default function Page() {
             >
               <ProgressIndicator
                 currentStep={currentStep}
-                totalSteps={3}
+                totalSteps={4}
                 startStep={2}
               />
             </MobileHeader>
