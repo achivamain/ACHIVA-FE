@@ -19,6 +19,88 @@ type SignupRequestBody = {
   organizationPassword?: string;
 };
 
+type OrganizationDescriptionItem = {
+  label: string;
+  value: string;
+};
+
+function parseOrganizationDescription(
+  description: string,
+): OrganizationDescriptionItem[] | null {
+  const trimmedDescription = description.trim();
+
+  if (!trimmedDescription) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(trimmedDescription);
+
+    if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
+      return null;
+    }
+
+    const items = Object.entries(parsed).flatMap(([label, value]) => {
+      if (value === null || value === undefined || value === "") {
+        return [];
+      }
+
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      ) {
+        return [{ label, value: String(value) }];
+      }
+
+      return [{ label, value: JSON.stringify(value) }];
+    });
+
+    return items.length > 0 ? items : null;
+  } catch {
+    return null;
+  }
+}
+
+function getOrganizationDescriptionSearchText(description: string) {
+  const parsedDescription = parseOrganizationDescription(description);
+
+  if (!parsedDescription) {
+    return description;
+  }
+
+  return parsedDescription
+    .map(({ label, value }) => `${label} ${value}`)
+    .join(" ");
+}
+
+function OrganizationDescription({
+  description,
+}: {
+  description: string;
+}) {
+  const parsedDescription = parseOrganizationDescription(description);
+
+  if (!description.trim()) {
+    return <p>설명이 아직 등록되지 않았어요.</p>;
+  }
+
+  if (!parsedDescription) {
+    return <p>{description}</p>;
+  }
+
+  return (
+    <div className="space-y-1">
+      {parsedDescription.map(({ label, value }) => (
+        <p key={`${label}-${value}`}>
+          <span className="font-medium text-[#5F4B44]">{label}</span>
+          {`: ${value}`}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 export default function OrganizationForm() {
   const user = useSignupInfoStore.use.user();
   const setUser = useSignupInfoStore.use.setUser();
@@ -50,7 +132,7 @@ export default function OrganizationForm() {
       if (!res.ok) {
         const errorBody = await res.json().catch(() => ({}));
         throw new Error(
-          errorBody.message || errorBody.error || "조직 목록을 불러오지 못했습니다.",
+          errorBody.message || errorBody.error || "교회 목록을 불러오지 못했습니다.",
         );
       }
 
@@ -66,9 +148,10 @@ export default function OrganizationForm() {
       return true;
     }
 
-    return [organization.name, organization.description].some((value) =>
-      value.toLowerCase().includes(keyword),
-    );
+    return [
+      organization.name,
+      getOrganizationDescriptionSearchText(organization.description),
+    ].some((value) => value.toLowerCase().includes(keyword));
   });
 
   const selectedOrganization =
@@ -90,11 +173,11 @@ export default function OrganizationForm() {
       }
 
       if (!selectedOrganization) {
-        throw new Error("조직을 선택해 주세요.");
+        throw new Error("교회를 선택해 주세요.");
       }
 
       if (selectedOrganization.requiresPassword && !organizationPassword.trim()) {
-        throw new Error("조직 비밀번호를 입력해 주세요.");
+        throw new Error("비밀번호를 입력해 주세요.");
       }
 
       const payload: SignupRequestBody = {
@@ -160,13 +243,10 @@ export default function OrganizationForm() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col text-[#412A2A]">
+    <div className="flex h-full w-full min-w-0 flex-col text-[#412A2A]">
       <div className="w-full text-left mb-6">
         <p className="font-semibold text-2xl leading-[29px] text-black">
-          소속 조직을 선택해 주세요
-        </p>
-        <p className="font-light text-[15px] leading-[20px] text-[#808080] mt-2.5 break-keep">
-          회원가입 전에 조직을 선택하고, 필요한 경우 비밀번호를 함께 입력해요.
+          소속 교회를 선택해 주세요
         </p>
       </div>
 
@@ -174,7 +254,7 @@ export default function OrganizationForm() {
         <input
           type="text"
           value={searchQuery}
-          placeholder="조직 이름으로 검색"
+          placeholder="교회 이름으로 검색"
           onChange={(e) => setSearchQuery(e.target.value)}
           className="h-14 w-full rounded-2xl border border-[#E8DED7] bg-white pl-12 pr-11 text-[15px] outline-none placeholder:text-[#B7AAA2] focus:border-[#412A2A]"
         />
@@ -193,13 +273,10 @@ export default function OrganizationForm() {
         )}
       </div>
 
-      <div className="mt-5 flex items-center justify-between">
-        <div>
+      <div className="mt-5 flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-sm font-semibold">
-            {keyword ? "검색 결과" : "참여 가능한 조직"}
-          </p>
-          <p className="mt-1 text-xs text-[#8E7E76]">
-            선택한 조직 정보가 회원가입 요청에 함께 전달됩니다.
+            {keyword ? "검색 결과" : "참여 가능한 교회"}
           </p>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-[#8E7E76]">
@@ -207,14 +284,15 @@ export default function OrganizationForm() {
         </span>
       </div>
 
-      <div className="mt-4 flex-1 space-y-3 overflow-y-auto pb-6">
+      <div className="-mx-1 mt-4 flex-1 overflow-y-auto px-1 pb-6">
+        <div className="space-y-3">
         {isLoading ? (
           <div className="flex h-40 items-center justify-center rounded-3xl bg-white">
             <LoadingIcon size="size-7" color="text-theme" />
           </div>
         ) : isError ? (
           <div className="rounded-3xl bg-white px-5 py-8 text-center shadow-[0_12px_30px_rgba(65,42,42,0.05)]">
-            <p className="text-base font-semibold">조직 목록을 불러오지 못했어요</p>
+            <p className="text-base font-semibold">교회 목록을 불러오지 못했어요</p>
             <p className="mt-2 text-sm leading-6 text-[#8E7E76]">
               잠시 후 다시 시도해 주세요.
             </p>
@@ -244,77 +322,67 @@ export default function OrganizationForm() {
                 key={organization.id}
                 type="button"
                 onClick={() => handleSelectOrganization(organization)}
-                className={`w-full rounded-3xl border p-5 text-left shadow-[0_12px_30px_rgba(65,42,42,0.05)] transition-colors ${
+                className={`w-full rounded-[20px] border px-5 py-5 text-left shadow-sm ring-1 transition-all duration-200 ${
                   isSelected
-                    ? "border-[#412A2A] bg-[#FFF8F1]"
-                    : "border-transparent bg-white"
+                    ? "border-[#E8DCCF] bg-[#FFFCF8] ring-[#EED9C7] shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+                    : "border-gray-100 bg-white ring-[#F0EBE3]/70 hover:-translate-y-0.5 hover:shadow-md"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-[#F4EEEA] px-2.5 py-1 text-[10px] font-semibold text-[#8E7E76]">
-                        조직
+                    {organization.requiresPassword && (
+                      <span className="inline-flex items-center rounded-full bg-[#F5F3F0] px-3 py-1 text-[12px] font-semibold text-[#4B5563]">
+                        비밀번호 필요
                       </span>
-                      {organization.requiresPassword && (
-                        <span className="rounded-full bg-[#412A2A] px-2.5 py-1 text-[10px] font-semibold text-white">
-                          비밀번호 필요
-                        </span>
-                      )}
-                    </div>
-                    <h2 className="mt-3 text-lg font-semibold leading-6">
+                    )}
+                    <h2 className="mt-3 text-[18px] font-bold leading-6 tracking-tight text-[#4A433D]">
                       {organization.name}
                     </h2>
                   </div>
                   <div
-                    className={`mt-1 h-5 w-5 rounded-full border ${
+                    className={`mt-1 flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
                       isSelected
-                        ? "border-[#412A2A] bg-[#412A2A]"
-                        : "border-[#D9CCC4] bg-white"
+                        ? "border-[#D96B2B] bg-[#FFF4EC]"
+                        : "border-[#D8DDE3] bg-white"
                     }`}
-                  />
+                  >
+                    <div
+                      className={`h-2.5 w-2.5 rounded-full transition-colors ${
+                        isSelected ? "bg-[#D96B2B]" : "bg-transparent"
+                      }`}
+                    />
+                  </div>
                 </div>
 
-                <p className="mt-3 text-sm leading-6 text-[#7E6A63]">
-                  {organization.description || "설명이 아직 등록되지 않았어요."}
-                </p>
+                <div className="mt-3 text-sm leading-6 text-[#8A817A]">
+                  <OrganizationDescription
+                    description={organization.description}
+                  />
+                </div>
               </button>
             );
           })
         )}
+        </div>
       </div>
 
       <div className="space-y-3 border-t border-[#E8DED7] bg-white pt-4">
-        {selectedOrganization && (
-          <div className="rounded-3xl bg-white px-5 py-4 shadow-[0_12px_30px_rgba(65,42,42,0.05)] border border-[#F0E8E2]">
-            <p className="text-xs font-semibold tracking-[0.12em] text-[#8E7E76]">
-              선택한 조직
-            </p>
-            <p className="mt-2 text-base font-semibold">
-              {selectedOrganization.name}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-[#7E6A63]">
-              {selectedOrganization.description || "설명이 아직 등록되지 않았어요."}
-            </p>
-
-            {requiresPassword && (
-              <div className="mt-4">
-                <label
-                  htmlFor="organization-password"
-                  className="text-sm font-medium text-[#7B6D6D]"
-                >
-                  조직 비밀번호
-                </label>
-                <input
-                  id="organization-password"
-                  type="password"
-                  value={organizationPassword}
-                  onChange={(e) => handlePasswordChange(e.target.value)}
-                  placeholder="조직 비밀번호를 입력해 주세요"
-                  className="mt-3 h-12 w-full rounded-2xl border border-[#E8DED7] bg-[#FCFBF7] px-4 text-[15px] outline-none placeholder:text-[#B7AAA2] focus:border-[#412A2A]"
-                />
-              </div>
-            )}
+        {selectedOrganization && requiresPassword && (
+          <div className="rounded-[20px] border border-gray-100 bg-white px-5 py-4 shadow-sm ring-1 ring-[#F0EBE3]/70">
+            <label
+              htmlFor="organization-password"
+              className="text-sm font-medium text-[#4B5563]"
+            >
+              {selectedOrganization.name} 비밀번호
+            </label>
+            <input
+              id="organization-password"
+              type="password"
+              value={organizationPassword}
+              onChange={(e) => handlePasswordChange(e.target.value)}
+              placeholder="교회 비밀번호를 입력해 주세요"
+              className="mt-3 h-12 w-full rounded-2xl border border-[#E8DED7] bg-[#FCFBF7] px-4 text-[15px] outline-none placeholder:text-[#B7AAA2] focus:border-[#412A2A]"
+            />
           </div>
         )}
 

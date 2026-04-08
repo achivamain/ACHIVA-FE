@@ -78,7 +78,7 @@ export default function Page() {
               exit={{
                 opacity: 0,
               }}
-              className="w-full flex-1 flex flex-col min-h-0 overflow-hidden"
+              className="w-full flex-1 flex flex-col min-h-0"
             >
               {content}
             </motion.div>
