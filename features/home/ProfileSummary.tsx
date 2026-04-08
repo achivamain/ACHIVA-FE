@@ -75,7 +75,7 @@ export const MobileProfileSummary: React.FC<ProfileSummaryProps> = ({
         icon="📚"
         value={summaryData.letters}
         title="글자"
-        description="쌓아올린 운동 기록"
+        description="쌓아올린 은혜 기록"
       />
       <MobileSummaryCard
         icon="🎯"
@@ -103,7 +103,7 @@ export const WebProfileSummary: React.FC<ProfileSummaryProps> = ({
         icon="📚"
         value={summaryData.letters}
         title="글자"
-        description="쌓아올린 운동 기록"
+        description="쌓아올린 은혜 기록"
       />
       <WebSummaryCard
         icon="🎯"

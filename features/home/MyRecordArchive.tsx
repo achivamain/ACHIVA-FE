@@ -187,7 +187,7 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
                       <div className="mt-3 flex flex-col gap-3">
                         {post.question.map((questionItem, index) => {
                           const questionLabel =
-                            questionItem?.question?.trim() || `운동 기록 ${index + 1}`;
+                            questionItem?.question?.trim() || `은혜 기록 ${index + 1}`;
 
                           return (
                             <div key={`${post.id}-${index}`}>

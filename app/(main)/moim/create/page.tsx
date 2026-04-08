@@ -64,7 +64,7 @@ export default function MoimCreatePage() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">모임 이름 <span className="text-red-500">*</span></label>
             <input
               type="text"
-              placeholder="예) 강남구 불꽃 러닝 크루"
+              placeholder="예) 강남구 불꽃 청년 구역"
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={30}

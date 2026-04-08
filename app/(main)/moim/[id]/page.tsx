@@ -238,8 +238,8 @@ export default function MoimDetailPage() {
             onClick={async () => {
               const shareUrl = window.location.href;
               const shareData = {
-                title: `[나오완] ${moimDetail?.name || "크루"} 모임에 합류하세요!`,
-                text: `${moimDetail?.description || "같이 운동해요!"} 🔥\n앱이 없다면 먼저 다운로드하세요:\n• iOS: https://apps.apple.com/kr/app/%EB%82%98%EB%8A%94%EC%98%A4%EB%8A%98%EC%9A%B4%EB%8F%99%ED%95%9C%EB%8B%A4/id6759653594\n• Android: https://play.google.com/store/apps/details?id=com.iworkouttoday.app`,
+                title: `[Grace Record] ${moimDetail?.name || "구역"} 모임에 합류하세요!`,
+                text: `${moimDetail?.description || "같이 은혜 나눠요!"} 🔥\n앱이 없다면 먼저 다운로드하세요:\n• iOS: https://apps.apple.com/kr/app/%EB%82%98%EB%8A%94%EC%98%A4%EB%8A%98%EC%9A%B4%EB%8F%99%ED%95%9C%EB%8B%A4/id6759653594\n• Android: https://play.google.com/store/apps/details?id=com.iworkouttoday.app`,
                 url: shareUrl,
               };
               if (navigator.share) {
@@ -401,7 +401,7 @@ export default function MoimDetailPage() {
                 };
               if (temp < 90)
                 return {
-                  label: "🔥 멈추지 않는 열정 크루",
+                  label: "🔥 멈추지 않는 열정 구역",
                   gradient: "from-rose-500 to-purple-500",
                   bg: "bg-purple-50",
                   text: "text-purple-600",

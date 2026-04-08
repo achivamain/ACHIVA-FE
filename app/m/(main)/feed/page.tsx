@@ -44,7 +44,7 @@ export default function MobileFeedPage() {
           <button
             onClick={() => setIsCheerOpen(true)}
             className="flex items-center gap-1 p-1.5 rounded-full hover:bg-[#412A2A]/5 transition-colors"
-            aria-label="응원 알림 열기"
+            aria-label="나눔 알림 열기"
           >
             <SideBarHeartIcon fill={false} />
           </button>
@@ -66,7 +66,7 @@ export default function MobileFeedPage() {
 
       <AnimatePresence>
         {isCheerOpen && (
-          <Drawer title="응원" onClose={() => setIsCheerOpen(false)}>
+          <Drawer title="나눔" onClose={() => setIsCheerOpen(false)}>
             <Notifications />
           </Drawer>
         )}

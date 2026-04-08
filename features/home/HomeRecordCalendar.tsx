@@ -216,7 +216,7 @@ export default function HomeRecordCalendar({
   const headerLabel =
     viewMode === "monthly"
       ? format(currentMonth, "yyyy년 M월", { locale: ko })
-      : "이번 주 운동 기록";
+      : "이번 주 은혜 기록";
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -353,7 +353,7 @@ export default function HomeRecordCalendar({
         <div className="flex items-start justify-between pb-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">
-              {viewMode === "weekly" ? "Weekly Record" : "Monthly Record"}
+              {viewMode === "weekly" ? "Weekly Grace" : "Monthly Grace"}
             </p>
             <h3 className="mt-0.5 text-[18px] font-bold tracking-tight text-[#4A433D]">
               {headerLabel}
@@ -515,7 +515,7 @@ export default function HomeRecordCalendar({
             <div className="mt-4 flex flex-col gap-3">
               <div>
                 <p className="mb-2 text-[12px] font-semibold text-[#9CA3AF]">
-                  기록한 운동
+                  기록한 은혜
                 </p>
                 {selectedCompletedCategories.length > 0 ? (
                   <div className="flex flex-wrap gap-2">

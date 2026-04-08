@@ -103,7 +103,7 @@ export default function MoimExplorePage() {
             <div className="relative mb-6 mt-4 lg:mt-0">
               <input
                 type="text"
-                placeholder="어떤 운동 모임을 찾으시나요?"
+                placeholder="어떤 구역 모임을 찾으시나요?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-theme transition-colors shadow-sm"
@@ -217,7 +217,7 @@ export default function MoimExplorePage() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
                     <h2 className="text-lg font-bold text-theme flex items-center gap-2">
-                      🏃 나의 크루
+                      🏃 나의 구역
                       <span className="bg-theme/10 text-theme text-[10px] px-2 py-0.5 rounded-full font-bold ml-1">
                         {myMoims.length}
                       </span>
@@ -264,9 +264,9 @@ export default function MoimExplorePage() {
                   <div className="text-center py-6 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center">
                     <span className="text-3xl mb-2">🏃‍♀️</span>
                     <p className="text-gray-500 text-sm">
-                      아직 소속된 크루가 없어요.
+                      아직 소속된 구역이 없어요.
                       <br />
-                      새로운 크루를 만들어보세요!
+                      새로운 구역을 만들어보세요!
                     </p>
                   </div>
                 )}
