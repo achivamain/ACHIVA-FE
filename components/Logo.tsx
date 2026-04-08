@@ -1,14 +1,14 @@
 import Image from "next/image";
 
-export function TextLogo({ width = 176 }: { width?: number }) {
+export function TextLogo({ width = 136 }: { width?: number }) {
   return (
     <div
       style={{
-        width, // 원하는 너비
-        aspectRatio: "176 / 24", // viewBox 비율 그대로
+        width,
+        aspectRatio: "164 / 55",
       }}
     >
-      <img className="w-full" src="/textLogo.svg" alt="로고" />
+      <img className="h-auto w-full" src="/feedLogo.svg" alt="나는오늘운동한다 로고" />
     </div>
   );
 }
