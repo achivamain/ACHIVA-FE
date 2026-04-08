@@ -8,17 +8,21 @@ export type SignupUser = {
   organizationPassword?: string;
 };
 
+export type UserGender = "MALE" | "FEMALE";
+
 // 서버에서 응답으로 받는 유저 정보
 export type User = {
   id: string;
   email: string;
   nickName: string;
   birth: string;
-  gender: string;
+  gender: UserGender;
   region: string;
   profileImageUrl: string;
-  role?: string;
+  role: string;
   description: string;
-  createdAt: string;
   articleCount: number;
+  organizationId: number;
+  organizationName: string;
+  createdAt: string;
 };
