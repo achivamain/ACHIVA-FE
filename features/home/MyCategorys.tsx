@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Category } from "@/types/Categories";
+import { createDefaultPostPages } from "@/lib/postDefaults";
 
 export function MyCategorys({
   categoryCounts,
@@ -44,10 +45,14 @@ export function MyCategorys({
   });
 
   const handleCategoryClick = (cat: { category: string; count: number }) => {
+    const selectedCategory = categories.find((i) => i === cat.category);
+
     resetPost();
     setPost({
-      category: categories.find((i) => i === cat.category),
+      category: selectedCategory,
       categoryCount: cat.count,
+      title: "",
+      pages: createDefaultPostPages(selectedCategory),
     });
   };
 
