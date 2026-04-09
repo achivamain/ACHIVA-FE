@@ -34,11 +34,7 @@ export default async function MobileHomePageRoute({
 
     return (
       <div className="min-h-dvh w-full pb-[104px] flex flex-col">
-        <div className="px-5 py-5 flex items-end justify-between">
-          <h1 className="text-[22px] font-black tracking-tight text-gray-900 leading-none">
-            🏠 홈
-          </h1>
-        </div>
+        <div className="h-4" />
         <MyCategorys
           categoryCounts={categoryCounts}
           weeklyCategoryCounts={weeklyCategoryCounts}

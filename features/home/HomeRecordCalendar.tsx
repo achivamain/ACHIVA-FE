@@ -47,6 +47,34 @@ function getDateKey(date: Date) {
   return format(date, "yyyy-MM-dd");
 }
 
+function GraceFlameIcon({
+  active,
+  selected,
+}: {
+  active: boolean;
+  selected: boolean;
+}) {
+  const flameFill = selected ? "#FFFFFF" : active ? "#D96B2B" : "#D8C0AA";
+  const innerGlowFill = selected
+    ? "rgba(255,255,255,0.45)"
+    : active
+      ? "#F4C675"
+      : "#EBDDD0";
+
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path
+        d="M10.039 1.784C10.376 3.449 9.796 5.071 8.52 6.528C7.684 7.482 6.861 8.28 6.509 9.451C6.06 10.948 6.462 12.47 7.448 13.579C8.084 14.292 8.923 14.753 9.992 14.968C9.497 14.362 9.221 13.673 9.197 12.898C9.153 11.53 9.893 10.356 10.969 9.216C11.858 8.274 12.858 7.316 13.453 6.159C13.996 6.883 14.49 7.599 14.921 8.391C15.555 9.556 15.957 10.765 15.957 12.082C15.957 15.258 13.386 17.778 10.197 17.778C6.848 17.778 4.479 15.23 4.479 12.127C4.479 10.312 5.252 8.767 6.496 7.425C7.836 5.979 9.45 4.551 10.039 1.784Z"
+        fill={flameFill}
+      />
+      <path
+        d="M10.628 5.322C10.742 6.447 10.308 7.385 9.487 8.337C8.94 8.97 8.384 9.608 8.181 10.391C7.883 11.528 8.149 12.53 8.921 13.4C9.301 13.827 9.805 14.168 10.489 14.366C10.303 13.891 10.233 13.385 10.287 12.811C10.387 11.768 11.003 10.931 11.707 10.103C12.286 9.423 12.894 8.744 13.244 7.964C13.758 8.913 14.075 9.833 14.075 10.834C14.075 13.164 12.22 14.934 9.985 14.934C7.743 14.934 6.11 13.191 6.11 11.014C6.11 9.594 6.749 8.405 7.723 7.328C8.73 6.217 9.943 5.289 10.628 5.322Z"
+        fill={innerGlowFill}
+      />
+    </svg>
+  );
+}
+
 function RecordDayButton({
   day,
   modifiers,
@@ -97,13 +125,13 @@ function RecordDayButton({
         {hasCompleted ? (
           <span
             className={cn(
-              "inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-              isSelected
-                ? "bg-white text-[#4A433D]"
-                : "bg-[#FFF4EC] text-[#D96B2B]",
+              "inline-flex h-[18px] items-center justify-center rounded-full px-1.5",
+              isSelected ? "bg-white/18" : "bg-[#FFF4EC]",
             )}
+            aria-label={`${completedCount}개의 기록`}
+            title={`${completedCount}개의 기록`}
           >
-            {completedCount}
+            <GraceFlameIcon active={completedCount > 0} selected={isSelected} />
           </span>
         ) : null}
       </div>
@@ -185,7 +213,7 @@ export default function HomeRecordCalendar({
     () => startOfWeek(today, { weekStartsOn: WEEK_STARTS_ON }),
     [today],
   );
-  const [viewMode, setViewMode] = useState<ViewMode>("weekly");
+  const [viewMode, setViewMode] = useState<ViewMode>("monthly");
   const [monthlyDisplayDate, setMonthlyDisplayDate] = useState(todayMonth);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());

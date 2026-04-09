@@ -60,15 +60,22 @@ export function MyCategorys({
     <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
       <div className="flex w-full min-w-0 flex-col rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
         <div className="mb-4 -mt-2 flex items-center justify-between">
-          <h3 className="text-[18px] font-bold tracking-tight text-[#4A433D]">
-            오늘의 은혜 기록
-          </h3>
+          <div>
+            <h3 className="text-[18px] font-bold tracking-tight text-[#4A433D]">
+              오늘의 은혜 기록 쓰기
+            </h3>
+            <p className="mt-1 text-[12px] font-medium text-[#9D8F83]">
+              카테고리를 고르면 바로 글쓰기가 시작돼요
+            </p>
+          </div>
           <Link
             href={createPostPath}
             onClick={resetPost}
-            className="flex items-center justify-center rounded-full bg-[#FFF4EC] px-4 py-1.5 text-[13px] font-bold text-[#D96B2B] shadow-sm transition-colors hover:bg-[#FFE8D6]"
+            className="flex items-center justify-center rounded-full bg-[#D96B2B] px-4 py-2 text-[13px] font-bold text-white shadow-sm transition-colors hover:bg-[#c75d20]"
           >
-            {totalRecords === 0 ? "첫 번째 은혜 기록하기" : `${totalRecords + 1}번째 은혜 기록하기`}
+            {totalRecords === 0
+              ? "지금 첫 은혜 쓰기"
+              : `${totalRecords + 1}번째 은혜 쓰기`}
           </Link>
         </div>
 
