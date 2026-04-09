@@ -37,16 +37,16 @@ export default function CreatePostPage(/*{
   let content: React.ReactNode;
   switch (currentStep) {
     case 0:
-      title = "사진 추가";
-      content = <ImageUploader />;
-      break;
-
-    case 1:
       content = (
         <div>
           <Writing />
         </div>
       );
+      break;
+
+    case 1:
+      title = "표지 사진 선택";
+      content = <ImageUploader />;
       break;
 
     case 2:
