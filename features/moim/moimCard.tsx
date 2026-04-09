@@ -65,34 +65,34 @@ export function MyCrewCard({ moim, onClick }: MoimCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative h-[160px] w-[280px] min-w-[280px] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-[#F2DDE1] bg-[#FFF7F8] shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+      className="group relative h-[158px] w-[272px] min-w-[272px] shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-[#EDE5DA] bg-white shadow-[0_4px_20px_rgba(160,120,80,0.09)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_32px_rgba(160,120,80,0.16)]"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#FFFFFF_0%,#FFF6F8_34%,#FFECEF_72%,#FFDADF_100%)] p-5">
-        <div className="flex h-full flex-col">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <h3 className="line-clamp-2 text-lg font-bold leading-tight text-[#2F2A26]">
-              {moim.name}
-            </h3>
-            {moim.isPrivate && (
-              <span className="shrink-0 rounded-full bg-white/75 px-2 py-1 text-xs font-medium text-[#8F6B6B] ring-1 ring-[#F2DDE1]">
-                🔒 비공개
-              </span>
-            )}
-          </div>
+      {/* 상단 오렌지 accent bar */}
+      <div className="h-1 w-full bg-gradient-to-r from-[#F4A86B] via-[#E87848] to-[#D96030] opacity-80" />
 
-          <p className="line-clamp-2 text-sm leading-5 text-[#8E95A9]">
-            {moim.description || "모임 소개가 아직 없어요."}
-          </p>
+      {/* 배경 ambient orb */}
+      <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#FDE8D0]/50 blur-2xl" />
 
-          <div className="mt-auto flex items-center justify-between gap-2">
-            <span className="flex items-center rounded-md bg-[#FFF5F7] px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-[#F2DDE1]/80">
-              <MemberCountIndicatorIcon />
-              {moim.memberCount} / {moim.maxMember}
-            </span>
-            <span className="rounded-md bg-[#FFF2F4] px-2 py-1 text-xs font-bold text-gray-500 ring-1 ring-[#F3CDD5]/90">
-              🔥 {temp.toFixed(1)}°C
-            </span>
-          </div>
+      <div className="flex h-[calc(100%-4px)] flex-col p-4">
+        <div className="mb-1.5 flex items-start justify-between gap-2">
+          <h3 className="line-clamp-1 text-[17px] font-extrabold leading-tight tracking-tight text-[#3A2418]">
+            {moim.isPrivate && <span className="mr-1 text-sm text-[#C8A080]">🔒</span>}
+            {moim.name}
+          </h3>
+        </div>
+
+        <p className="flex-1 line-clamp-2 text-[12px] leading-relaxed text-[#9A8272]">
+          {moim.description || "함께 은혜를 나누는 공동체"}
+        </p>
+
+        <div className="mt-2 flex items-center justify-between">
+          <span className="flex items-center gap-1 text-[12px] text-[#A89078]">
+            <MemberCountIndicatorIcon />
+            <span className="font-semibold">{moim.memberCount}명</span>
+          </span>
+          <span className="rounded-full bg-[#FFF5EC] px-2.5 py-1 text-[12px] font-bold text-[#D06530] ring-1 ring-[#F2C89A]/60">
+            🔥 {temp.toFixed(1)}°C
+          </span>
         </div>
       </div>
     </div>
