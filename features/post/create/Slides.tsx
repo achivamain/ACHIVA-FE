@@ -7,6 +7,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { useDraftPostStore } from "@/store/CreatePostStore";
+import { getPostPageSurface, getPostPageTone } from "@/lib/postPageTheme";
 
 type Props = {
   currentPage: number;
@@ -126,6 +127,7 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
           {draft.pages?.map((page) => {
             // 소제목 있을 시 7줄, 없을 시 10줄
             const maxHeight = page.subtitle ? 168 : 240;
+            const tone = getPostPageTone(draft.backgroundColor);
             return (
               <SwiperSlide key={page.id}>
                 <div ref={containerRef}>
@@ -133,15 +135,19 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                     style={{
                       transform: `scale(${size / 430})`,
                       transformOrigin: "top left",
-                      backgroundColor: draft.backgroundColor,
+                      ...getPostPageSurface(draft.backgroundColor),
                     }}
-                    className={`aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${
-                      draft.backgroundColor === "#f9f9f9"
-                        ? "text-black"
-                        : "text-white"
-                    }`}
+                    className={`relative overflow-hidden aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${tone.shellTextClassName}`}
                   >
-                    <div>
+                    <div
+                      className="absolute left-[20px] right-[20px] top-[78px] h-px"
+                      style={{ background: tone.accentLineColor }}
+                    />
+                    <div
+                      className="absolute w-[160px] h-[160px] rounded-full blur-[42px] -top-[48px] -left-[20px]"
+                      style={{ background: tone.ornamentColor }}
+                    />
+                    <div className="relative z-10">
                       {page.subtitle !== undefined && (
                         <input
                           maxLength={14}
@@ -155,17 +161,13 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                             }));
                           }}
                           value={page.subtitle}
-                          className="w-full font-semibold text-[32px] mb-[24px] leading-[50px]"
+                          className={`w-full font-semibold text-[32px] mb-[24px] leading-[50px] bg-transparent ${tone.subtitleClassName}`}
                         />
                       )}
 
                       <textarea
                         style={{ maxHeight: maxHeight }}
-                        className={`w-full text-[16px] font-[inherit] ${
-                          draft.backgroundColor === "#f9f9f9"
-                            ? "text-theme"
-                            : "text-white"
-                        } resize-none outline-none overflow-hidden`}
+                        className={`w-full text-[16px] font-[inherit] ${tone.contentClassName} bg-transparent resize-none outline-none overflow-hidden placeholder:text-current placeholder:opacity-55`}
                         value={page.content ?? ""}
                         onChange={(e) => {
                           if (e.target.scrollHeight <= maxHeight) {

@@ -2,6 +2,7 @@ import { PostRes } from "@/types/Post";
 import type { Question } from "@/types/Post";
 import PostImg from "@/components/PostImg";
 import { format } from "date-fns";
+import { getPostPageSurface, getPostPageTone } from "@/lib/postPageTheme";
 
 type Props = {
   size: number;
@@ -149,25 +150,37 @@ export function ContentPage({
   page: Question;
   backgroundColor: string;
 }) {
+  const tone = getPostPageTone(backgroundColor);
+
   return (
     <div style={{ height: size, width: size }}>
       <div
         style={{
           transform: `scale(${size / 430})`,
           transformOrigin: "top left",
-          backgroundColor: backgroundColor,
+          ...getPostPageSurface(backgroundColor),
         }}
-        className={`aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${
-          backgroundColor === "#f9f9f9" ? "text-black" : "text-white"
-        }`}
+        className={`relative overflow-hidden aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${tone.shellTextClassName}`}
       >
-        <div>
+        <div
+          className="absolute left-[20px] right-[20px] top-[78px] h-px"
+          style={{ background: tone.accentLineColor }}
+        />
+        <div
+          className="absolute w-[160px] h-[160px] rounded-full blur-[42px] -top-[48px] -left-[20px]"
+          style={{ background: tone.ornamentColor }}
+        />
+        <div className="relative z-10">
           {page.question && (
-            <h2 className="font-semibold text-[32px] mb-[24px] leading-[50px]">
+            <h2
+              className={`font-semibold text-[32px] mb-[24px] leading-[50px] ${tone.subtitleClassName}`}
+            >
               {page.question}
             </h2>
           )}
-          <div className="whitespace-pre-wrap">{page.content}</div>
+          <div className={`whitespace-pre-wrap ${tone.contentClassName}`}>
+            {page.content}
+          </div>
         </div>
       </div>
     </div>
