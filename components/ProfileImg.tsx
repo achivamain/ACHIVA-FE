@@ -15,21 +15,19 @@ export default function ProfileImg({ url, size }: ProfileImgProps) {
       style={{ width: size, height: size }}
       className={`aspect-square rounded-full overflow-hidden relative`}
     >
-      {(!loaded || !url) && (
+      {!loaded && (
         <div>
           <div className="bg-loading absolute inset-0 animate-pulse"></div>
         </div>
       )}
-      {url && (
-        <Image
-          className={`w-full h-full object-cover ${loaded ? "" : "opacity-0"}`}
-          src={url || defaultProfileImg}
-          alt="profile image"
-          width={size}
-          height={size}
-          onLoad={() => setLoaded(true)}
-        ></Image>
-      )}
+      <Image
+        className={`w-full h-full object-cover ${loaded ? "" : "opacity-0"}`}
+        src={url || defaultProfileImg}
+        alt="profile image"
+        width={size}
+        height={size}
+        onLoad={() => setLoaded(true)}
+      />
     </div>
   );
 }

@@ -1,18 +1,26 @@
 "use client";
 
 // 피드 페이지 리스트 전체적인 관리
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { LoadingIcon } from "@/components/Icons";
 import type { PostsData } from "@/types/responses";
 import type { FeedTab } from "./FeedTabs";
 import FeedPost from "./FeedPost";
+import BibleReadingFeedList from "@/features/bible/BibleReadingFeedList";
+import BibleReadingFeedCard from "@/features/bible/BibleReadingFeedCard";
+import {
+  getLatestBiblePostsByAuthor,
+  useBibleReadingFeed,
+} from "@/features/bible/feedStore";
 
 type FeedListProps = {
   activeTab: FeedTab;
 };
 
 export default function FeedList({ activeTab }: FeedListProps) {
+  const { posts: biblePosts } = useBibleReadingFeed();
+
   async function fetchPosts(pageParam: number = 0): Promise<PostsData> {
     const url =
       activeTab === "모임"
@@ -50,6 +58,7 @@ export default function FeedList({ activeTab }: FeedListProps) {
       queryKey: ["feed", activeTab],
       queryFn: ({ pageParam = 0 }) => fetchPosts(pageParam),
       initialPageParam: 0,
+      enabled: activeTab !== "성경 일독",
       getNextPageParam: (lastPage) => {
         if (lastPage.last) return undefined;
         const next = lastPage.number + 1;
@@ -75,6 +84,42 @@ export default function FeedList({ activeTab }: FeedListProps) {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const posts = data?.pages.flatMap((p) => p.content) ?? [];
+  const latestBiblePosts = useMemo(
+    () => getLatestBiblePostsByAuthor(biblePosts),
+    [biblePosts],
+  );
+  const biblePostsByAuthor = useMemo(() => {
+    return biblePosts.reduce<Record<string, typeof biblePosts>>((acc, post) => {
+      const key = post.authorHandle || post.authorName;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(post);
+      return acc;
+    }, {});
+  }, [biblePosts]);
+  const mergedFeedItems = useMemo(() => {
+    if (activeTab !== "오늘 은혜") {
+      return [];
+    }
+
+    return [
+      ...posts.map((post) => ({
+        kind: "post" as const,
+        createdAt: post.createdAt,
+        data: post,
+      })),
+      ...latestBiblePosts.map((post) => ({
+        kind: "bible" as const,
+        createdAt: post.createdAt,
+        data: post,
+      })),
+    ].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }, [activeTab, latestBiblePosts, posts]);
+
+  if (activeTab === "성경 일독") {
+    return <BibleReadingFeedList />;
+  }
 
   return (
     <div className="flex flex-col gap-7">
@@ -84,15 +129,33 @@ export default function FeedList({ activeTab }: FeedListProps) {
         </div>
       )}
 
-      {!isLoading && posts.length === 0 && (
+      {!isLoading &&
+        ((activeTab === "오늘 은혜" && mergedFeedItems.length === 0) ||
+          (activeTab !== "오늘 은혜" && posts.length === 0)) && (
         <div className="flex flex-col items-center justify-center py-20 text-[#7f7f7f]">
           <p>표시할 게시글이 없습니다</p>
         </div>
       )}
 
-      {posts.map((post) => {
-        return <FeedPost key={post.id} post={post} />;
-      })}
+      {activeTab === "오늘 은혜"
+        ? mergedFeedItems.map((item) =>
+            item.kind === "post" ? (
+              <FeedPost key={item.data.id} post={item.data} />
+            ) : (
+              <BibleReadingFeedCard
+                key={item.data.id}
+                post={item.data}
+                authorPosts={
+                  biblePostsByAuthor[item.data.authorHandle || item.data.authorName] ?? [
+                    item.data,
+                  ]
+                }
+              />
+            ),
+          )
+        : posts.map((post) => {
+            return <FeedPost key={post.id} post={post} />;
+          })}
 
       <div ref={loaderRef}></div>
 
