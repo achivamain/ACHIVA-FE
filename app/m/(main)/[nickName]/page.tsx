@@ -118,7 +118,7 @@ export default async function Page({
             </div>
           )}
           <div className="flex-1 flex flex-co pb-8">
-            <Posts userId={user.id} />
+            <Posts userId={user.id} isMyProfile={isMyProfile} />
           </div>
         </div>
         <Footer />

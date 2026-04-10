@@ -9,8 +9,15 @@ import Link from "next/link";
 import { Category, categories } from "@/types/Categories";
 import type { CategoryCount } from "@/types/Post";
 import { AnimatePresence, motion } from "motion/react";
+import BibleProgressFeedCard from "@/features/bible/BibleProgressFeedCard";
 
-export default function Posts({ userId }: { userId: string }) {
+export default function Posts({
+  userId,
+  isMyProfile = false,
+}: {
+  userId: string;
+  isMyProfile?: boolean;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const size = containerWidth ? (containerWidth - 2) / 3 : 0;
@@ -41,15 +48,20 @@ export default function Posts({ userId }: { userId: string }) {
       if (!response.ok) throw new Error("Failed to fetch");
       const { data } = await response.json();
 
-      setAllcategories([
-        "전체",
-        ...data.categoryCounts.reduce((acc: Category[], c: CategoryCount) => {
+      const categoriesWithPosts = data.categoryCounts.reduce(
+        (acc: Category[], c: CategoryCount) => {
           if (c.count > 0) {
             return [...acc, c.category];
           } else {
             return acc;
           }
-        }, []),
+        },
+        [],
+      );
+
+      setAllcategories([
+        "전체",
+        ...Array.from(new Set<Category>([...categoriesWithPosts, "성경 일독"])),
       ]);
     }
     fetchPostsCategory();
@@ -105,6 +117,7 @@ export default function Posts({ userId }: { userId: string }) {
 
   const posts = data?.pages.flatMap((p) => p.content) ?? [];
   const postsCnt = data?.pages[0]?.totalElements ?? 0;
+  const showBibleReadingPanel = category === "성경 일독" && isMyProfile;
 
   return (
     <div className="flex-1 flex flex-col">
@@ -125,21 +138,28 @@ export default function Posts({ userId }: { userId: string }) {
           <LoadingIcon color="text-theme" />
         </div>
       )}
-      {posts.length === 0 && !isLoading && (
+      {posts.length === 0 && !isLoading && !showBibleReadingPanel && (
         <div className="flex-1 flex flex-col justify-center text-center text-[#7f7f7f]">
           <p>여기에 당신의 성취 기록이 담겨요</p>
           <p>첫 성취를 기록해보세요</p>
         </div>
       )}
-      <div ref={containerRef} className="grid grid-cols-3 gap-[1px]">
-        {posts.map((post) => {
-          return (
-            <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
-              <TitlePage size={size} post={post} />
-            </Link>
-          );
-        })}
-      </div>
+      {showBibleReadingPanel && (
+        <div className="px-5 pb-4">
+          <BibleProgressFeedCard />
+        </div>
+      )}
+      {!showBibleReadingPanel && (
+        <div ref={containerRef} className="grid grid-cols-3 gap-[1px]">
+          {posts.map((post) => {
+            return (
+              <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
+                <TitlePage size={size} post={post} />
+              </Link>
+            );
+          })}
+        </div>
+      )}
       <div ref={loaderRef}></div>
       {isFetchingNextPage && (
         <div className="w-full flex my-2 justify-center">
