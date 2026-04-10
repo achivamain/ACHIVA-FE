@@ -2,7 +2,6 @@ import Banner from "@/features/event/Banner";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeRecordCalendar from "@/features/home/HomeRecordCalendar";
-import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
@@ -30,8 +29,6 @@ export default async function HomePage({
       categoryCounts,
       weeklyCategoryCounts,
       categoryCharCounts,
-      weeklyArticleCount,
-      streakWeeks,
     } = await getHomeData(user.id, token);
 
     return (
@@ -54,12 +51,6 @@ export default async function HomePage({
               />
               <div className="h-8"></div>
               <HomeRecordCalendar userId={user.id} />
-              <div className="h-6"></div>
-              <MyAchievementsSummary
-                totalCount={user.articleCount}
-                streakWeeks={streakWeeks}
-                thisWeekCount={weeklyArticleCount}
-              />
               <div className="h-6"></div>
               <MyRecordArchive userId={user.id} />
               <div className="h-10"></div>

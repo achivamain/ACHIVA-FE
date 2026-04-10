@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import createSelectors from "./createSelectors";
 import type { DraftPost } from "@/types/Post";
+import { createInitialDraftPost } from "@/lib/postDefaults";
 
 type CreatePostStepState = {
   currentStep: number;
@@ -29,16 +30,8 @@ type EnteredDraftState = {
   resetPost: () => void;
 };
 
-const initialPost: DraftPost = {
-  backgroundColor: "#f9f9f9",
-  pages: [
-    { id: crypto.randomUUID(), subtitle: "오늘의 운동 일지", content: "" },
-    { id: crypto.randomUUID(), subtitle: "느낀 점", content: "" },
-  ],
-};
-
 const useDraftPostStoreBase = create<EnteredDraftState>((set) => ({
-  post: initialPost,
+  post: createInitialDraftPost(),
   setPost: (updates) =>
     set((state) => {
       const prev = state.post;
@@ -47,7 +40,7 @@ const useDraftPostStoreBase = create<EnteredDraftState>((set) => ({
     }),
   resetPost: () =>
     set({
-      post: initialPost,
+      post: createInitialDraftPost(),
     }),
 }));
 

@@ -126,7 +126,7 @@ export default function MyRecordArchive({ userId }: { userId: string }) {
       <div className="sm:w-[768px] mx-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[22px] sm:text-[26px] font-bold text-black">
-            {isFiltered ? `${selectedDate} 기록` : "나의 기록 보관소"}
+            {isFiltered ? `${selectedDate} 기록` : "나의 은혜 기록장"}
           </h2>
           {isFiltered && (
             <button

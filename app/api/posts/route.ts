@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import type { DraftPost } from "@/types/Post";
+import { getDefaultPostTitle } from "@/lib/postDefaults";
 
 export async function POST(req: NextRequest) {
   const { post } = await req.json();
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           photoUrls: draft.photoUrls,
-          title: draft.title || "오늘의 운동",
+          title: draft.title || getDefaultPostTitle(draft.category),
           category: draft.category,
           question: draft.pages!.map(({ subtitle, content }) => ({
             question: subtitle ?? "",

@@ -16,15 +16,15 @@ function MyMoimsSkeleton() {
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="h-[160px] w-[280px] min-w-[280px] overflow-hidden rounded-2xl border border-[#F2DDE1] bg-[#FFF7F8] shadow-sm"
+            className="h-[168px] w-[292px] min-w-[292px] overflow-hidden rounded-[24px] border border-[#E9D9C9] bg-[#FFFDF9] shadow-sm"
           >
-            <div className="flex h-full flex-col bg-[radial-gradient(circle_at_top_left,#FFFFFF_0%,#FFF6F8_34%,#FFECEF_72%,#FFDADF_100%)] p-5">
+            <div className="flex h-full flex-col bg-[radial-gradient(circle_at_top_left,#FFFFFF_0%,#FFF8EE_34%,#F8EBDD_68%,#EED8C0_100%)] p-5">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="space-y-2">
                   <div className="h-5 w-28 rounded-full bg-white/80 animate-pulse" />
                   <div className="h-5 w-20 rounded-full bg-white/70 animate-pulse" />
                 </div>
-                <div className="h-7 w-16 rounded-full bg-white/75 ring-1 ring-[#F2DDE1] animate-pulse" />
+                <div className="h-7 w-16 rounded-full bg-white/75 ring-1 ring-[#E9D9C9] animate-pulse" />
               </div>
 
               <div className="space-y-2">
@@ -33,8 +33,8 @@ function MyMoimsSkeleton() {
               </div>
 
               <div className="mt-auto flex items-center justify-between gap-2">
-                <div className="h-8 w-24 rounded-full bg-white/80 ring-1 ring-[#EEDADF] animate-pulse" />
-                <div className="h-8 w-20 rounded-full bg-[#FFF0F3] ring-1 ring-[#F2B8C4]/35 animate-pulse" />
+                <div className="h-8 w-24 rounded-full bg-white/80 ring-1 ring-[#E8DBCD] animate-pulse" />
+                <div className="h-8 w-20 rounded-full bg-[#FFF3E5] ring-1 ring-[#E8C09B]/50 animate-pulse" />
               </div>
             </div>
           </div>
@@ -50,24 +50,24 @@ function MoimListSkeleton() {
       {Array.from({ length: 3 }).map((_, index) => (
         <div
           key={index}
-          className="w-full rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+          className="w-full rounded-[24px] border border-[#E9D9C9] bg-[#FFFCF8] p-5 shadow-[0_8px_24px_rgba(120,82,48,0.06)]"
         >
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="space-y-2">
-              <div className="h-5 w-32 rounded-full bg-gray-100 animate-pulse" />
-              <div className="h-4 w-16 rounded-full bg-gray-100 animate-pulse" />
+              <div className="h-5 w-32 rounded-full bg-[#F5EADF] animate-pulse" />
+              <div className="h-4 w-16 rounded-full bg-[#F5EADF] animate-pulse" />
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              <div className="h-7 w-20 rounded-md bg-gray-100 animate-pulse" />
-              <div className="h-7 w-24 rounded-md bg-gray-100 animate-pulse" />
+              <div className="h-7 w-20 rounded-full bg-[#FFF3E5] animate-pulse" />
+              <div className="h-7 w-24 rounded-full bg-[#F6EEE4] animate-pulse" />
             </div>
           </div>
 
-          <div className="mb-3 h-4 w-24 rounded-full bg-gray-100 animate-pulse" />
+          <div className="mb-3 h-4 w-24 rounded-full bg-[#F5EADF] animate-pulse" />
           <div className="space-y-2">
-            <div className="h-4 w-full rounded-full bg-gray-100 animate-pulse" />
-            <div className="h-4 w-2/3 rounded-full bg-gray-100 animate-pulse" />
+            <div className="h-4 w-full rounded-full bg-[#F5EADF] animate-pulse" />
+            <div className="h-4 w-2/3 rounded-full bg-[#F5EADF] animate-pulse" />
           </div>
         </div>
       ))}
@@ -129,11 +129,11 @@ export default function MoimExplorePage() {
 
   return (
     <div className="flex w-full flex-1">
-      <div className="relative flex min-w-0 flex-1 flex-col bg-white pb-20">
-        <header className="sticky top-0 z-10 hidden border-b border-gray-100 bg-white lg:flex">
+      <div className="relative flex min-w-0 flex-1 flex-col bg-[linear-gradient(180deg,#FFFDF9_0%,#FCF8F2_100%)] pb-20">
+        <header className="sticky top-0 z-10 hidden border-b border-[#EEE2D5] bg-[rgba(255,252,248,0.92)] backdrop-blur lg:flex">
           <div className="mx-auto flex h-[60px] w-full max-w-[844px] items-center px-5">
             {currentUser ? (
-              <h1 className="text-xl font-bold text-theme">
+              <h1 className="text-xl font-extrabold tracking-[-0.03em] text-[#4A2F20]">
                 {currentUser.organizationName}
               </h1>
             ) : (
@@ -146,7 +146,7 @@ export default function MoimExplorePage() {
           <div className="mx-auto w-full max-w-[844px] px-5 py-4">
             <div className="flex min-h-[48px] items-end pb-4 lg:hidden">
               {currentUser ? (
-                <h1 className="text-2xl font-bold text-theme">
+                <h1 className="text-[28px] font-extrabold tracking-[-0.04em] text-[#4A2F20]">
                   {currentUser.organizationName}
                 </h1>
               ) : (
@@ -167,9 +167,14 @@ export default function MoimExplorePage() {
 
             <section className="mb-6">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-theme">
-                  내가 가입한 구역
-                </h2>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">
+                    My Grace Crew
+                  </p>
+                  <h2 className="text-lg font-extrabold tracking-[-0.03em] text-[#4A2F20]">
+                    내가 가입한 구역
+                  </h2>
+                </div>
               </div>
 
               {isMyMoimsLoading ? (
@@ -179,12 +184,10 @@ export default function MoimExplorePage() {
                   가입한 구역을 불러오지 못했습니다.
                 </div>
               ) : myMoims.length === 0 ? (
-                <div className="flex min-h-[176px] flex-col items-center justify-center rounded-2xl border border-gray-100 bg-gray-50 px-5 py-12 text-center">
-                  <span className="mb-2 text-3xl">🏃</span>
-                  <p className="text-sm text-gray-500">
-                    아직 참여 중인 구역이 없어요.
-                  </p>
-                </div>
+              <div className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-2xl border border-[#EDE5DA] bg-white/70 px-5 py-10 text-center">
+                <span className="text-3xl">🤝</span>
+                <p className="text-sm text-[#9A8272]">아직 참여 중인 구역이 없어요.</p>
+              </div>
               ) : (
                 <div
                   ref={myMoimsScrollRef}
@@ -204,11 +207,18 @@ export default function MoimExplorePage() {
               )}
             </section>
 
-            <div className="-mx-5 mb-8 h-2 bg-gray-50" />
+            <div className="-mx-5 mb-8 h-2 bg-[#F4ECE3]" />
 
             <section className="space-y-4">
               <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-theme">전체 구역</h2>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">
+                    Explore
+                  </p>
+                  <h2 className="text-lg font-extrabold tracking-[-0.03em] text-[#4A2F20]">
+                    전체 구역
+                  </h2>
+                </div>
               </div>
 
               {isMoimsLoading ? (
@@ -218,7 +228,7 @@ export default function MoimExplorePage() {
                   전체 구역을 불러오지 못했습니다.
                 </div>
               ) : moims.length === 0 ? (
-                <div className="flex min-h-[160px] items-center justify-center rounded-2xl border border-gray-100 bg-white px-5 py-12 text-center text-sm text-gray-400">
+                <div className="flex min-h-[160px] items-center justify-center rounded-[24px] border border-[#E9D9C9] bg-[#FFFDF9] px-5 py-12 text-center text-sm text-[#A28E7D] shadow-[0_8px_24px_rgba(120,82,48,0.05)]">
                   표시할 구역이 없습니다.
                 </div>
               ) : (
@@ -227,42 +237,40 @@ export default function MoimExplorePage() {
                     100,
                     Math.max(36.5, 36.5 + 0.8 * (moim.score ?? 0)),
                   );
-
                   return (
                     <button
                       key={moim.id}
                       type="button"
                       onClick={() => router.push(`/moim/${moim.id}`)}
-                      className="w-full rounded-2xl border border-gray-100 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-md"
+                      className="group w-full overflow-hidden rounded-2xl border border-[#EDE5DA] bg-white text-left shadow-[0_2px_16px_rgba(160,120,80,0.07)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(160,120,80,0.13)]"
                     >
-                      <div className="mb-2 flex items-start justify-between gap-3">
-                        <h3 className="flex items-center gap-2 text-lg font-bold text-theme">
-                          {moim.isPrivate && (
-                            <span className="text-gray-400">🔒</span>
-                          )}
-                          <span className="truncate">{moim.name}</span>
-                        </h3>
-
-                        <div className="flex shrink-0 items-center gap-1.5">
-                          <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-bold text-gray-500">
-                            🔥 {temp.toFixed(1)}°C
-                          </span>
-                          <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                            👤 {moim.memberCount} / {moim.maxMember}
-                          </span>
+                      <div className="flex items-stretch">
+                        <div className="w-1 shrink-0 rounded-l-2xl bg-gradient-to-b from-[#F5A96B] to-[#D96030]" />
+                        <div className="flex-1 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="flex items-center gap-1.5 text-[17px] font-bold tracking-tight text-[#3A2418]">
+                                {moim.isPrivate && (
+                                  <span className="text-sm text-[#C8A080]">🔒</span>
+                                )}
+                                <span className="truncate">{moim.name}</span>
+                              </h3>
+                              <p className="mt-0.5 flex items-center gap-1 text-[11px] text-[#B09478]">
+                                <span>👑</span>
+                                <span>{moim.leaderName === "방장없음" ? "방장 없음" : moim.leaderName}</span>
+                                <span className="mx-0.5 opacity-40">·</span>
+                                <span>멤버 {moim.memberCount}명</span>
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-[#FFF5EC] px-3 py-1.5 text-[12px] font-bold text-[#D06530] ring-1 ring-[#F2C89A]/70">
+                              🔥 {temp.toFixed(1)}°C
+                            </span>
+                          </div>
+                          <p className="mt-2.5 line-clamp-2 text-[13px] leading-relaxed text-[#8A7060]">
+                            {moim.description || "함께 은혜를 나누는 공동체입니다."}
+                          </p>
                         </div>
                       </div>
-
-                      <div className="mb-3 flex items-center gap-1 text-xs font-medium text-gray-500">
-                        <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[10px]">
-                          👑 관리자
-                        </span>
-                        {moim.leaderName === "방장없음" ? "-" : moim.leaderName}
-                      </div>
-
-                      <p className="line-clamp-2 text-sm text-gray-600">
-                        {moim.description}
-                      </p>
                     </button>
                   );
                 })

@@ -2,7 +2,6 @@ import Logout from "@/components/Logout";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeRecordCalendar from "@/features/home/HomeRecordCalendar";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
-import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
 import { notFound, redirect } from "next/navigation";
@@ -28,17 +27,11 @@ export default async function MobileHomePageRoute({
       categoryCounts,
       weeklyCategoryCounts,
       categoryCharCounts,
-      weeklyArticleCount,
-      streakWeeks,
     } = await getHomeData(user.id, token);
 
     return (
       <div className="min-h-dvh w-full pb-[104px] flex flex-col">
-        <div className="px-5 py-5 flex items-end justify-between">
-          <h1 className="text-[22px] font-black tracking-tight text-gray-900 leading-none">
-            🏠 홈
-          </h1>
-        </div>
+        <div className="h-4" />
         <MyCategorys
           categoryCounts={categoryCounts}
           weeklyCategoryCounts={weeklyCategoryCounts}
@@ -46,12 +39,6 @@ export default async function MobileHomePageRoute({
         />
         <div className="h-6" />
         <HomeRecordCalendar userId={user.id} />
-        <div className="h-6" />
-        <MyAchievementsSummary
-          totalCount={user.articleCount}
-          streakWeeks={streakWeeks}
-          thisWeekCount={weeklyArticleCount}
-        />
         <div className="h-6" />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>

@@ -6,6 +6,7 @@ import { useState, useRef, useLayoutEffect } from "react";
 import { User } from "@/types/User";
 import { useQuery } from "@tanstack/react-query";
 import { DraftPost } from "@/types/Post";
+import { getDefaultPostTitle } from "@/lib/postDefaults";
 
 export default function TitleEditor() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -191,7 +192,7 @@ export default function TitleEditor() {
                 letterSpacing: "-0.01em",
               }}
               type="text"
-              placeholder="오늘의 운동"
+              placeholder={getDefaultPostTitle(draft.category)}
               autoFocus
               value={draft.title ?? ""}
               onChange={(e) => {
