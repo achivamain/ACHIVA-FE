@@ -31,6 +31,14 @@ export default async function MobileHomePageRoute({
 
     return (
       <div className="min-h-dvh w-full pb-[104px] flex flex-col">
+        <div className="pt-6 pb-2 px-5">
+          <h2 className="text-[24px] font-extrabold text-[#3A2418]">
+            안녕하세요, {decodeURIComponent(nickName)} 님! ✨
+          </h2>
+          <p className="text-[14px] leading-[20px] text-[#8A7565] mt-1.5">
+            오늘도 은혜가 풍성한 하루 되시기를 축복합니다!
+          </p>
+        </div>
         <div className="h-4" />
         <MyCategorys
           categoryCounts={categoryCounts}
