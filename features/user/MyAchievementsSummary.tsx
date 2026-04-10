@@ -7,11 +7,13 @@ import { calculateMemberTemperature } from "@/lib/ranking";
 export default function MyAchievementsSummary({
   totalCount = 0,
   streakWeeks = 0,
-  thisWeekCount = 0,
+  totalCharacterCount = 0,
+  totalCheeringScore = 0,
 }: {
   totalCount?: number;
   streakWeeks?: number;
-  thisWeekCount?: number;
+  totalCharacterCount?: number;
+  totalCheeringScore?: number;
 }) {
   const passionTemp = useMemo(() => {
     return Math.max(
@@ -79,8 +81,6 @@ export default function MyAchievementsSummary({
     };
   }, [passionTemp]);
 
-  const isWeekGoalCompleted = thisWeekCount < 3;
-
   return (
     <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
       <div className="flex w-full min-w-0 flex-col overflow-hidden rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
@@ -131,23 +131,40 @@ export default function MyAchievementsSummary({
           </div>
         </div>
 
-        <div className="flex flex-col gap-1 text-[12px] font-medium text-gray-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            이번 주 은혜 기록:{" "}
-            <span
-              className={`font-bold ${inter.className} ${thisWeekCount >= 3 ? "text-theme" : "text-gray-600"}`}
-            >
-              {thisWeekCount}
-            </span>{" "}
-            / 3회
-          </p>
-          <p className="text-[11px] sm:text-[12px]">
-            {isWeekGoalCompleted
-              ? "주 3회를 채워 은혜를 쌓아가요!"
-              : "🔥 놀라운 은혜입니다! 날마다 주님과 동행 중이에요!"}
-          </p>
+        <div className="mt-5 space-y-2 rounded-[18px] border border-[#F0EBE3] bg-[#FAFAF8] px-4 py-4">
+          <SummaryRow
+            label="쌓아올린 글자 수"
+            value={totalCharacterCount.toLocaleString()}
+            unit="자"
+          />
+          <SummaryRow
+            label="주고받은 응원들"
+            value={totalCheeringScore.toLocaleString()}
+            unit="점"
+          />
         </div>
       </div>
     </section>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  unit,
+}: {
+  label: string;
+  value: string;
+  unit: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 text-[13px] sm:text-[14px]">
+      <span className="shrink-0 font-semibold text-[#7E7166]">{label}</span>
+      <span className="h-px flex-1 bg-gradient-to-r from-[#E5D7C7] to-transparent" />
+      <span className={`shrink-0 text-[17px] font-black text-[#4A433D] ${inter.className}`}>
+        {value}
+        <span className="ml-1 text-[12px] font-bold text-[#8E7F73]">{unit}</span>
+      </span>
+    </div>
   );
 }
