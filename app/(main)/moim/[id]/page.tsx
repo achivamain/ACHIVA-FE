@@ -121,10 +121,12 @@ export default function MoimDetailPage() {
       if (moimDetail?.memberCount === moimDetail?.maxMember)
         throw new Error("최대 인원이 초과되어 가입할 수 없습니다.");
 
+      const payload = password ? { password } : {};
+
       const res = await fetch(`/api/moim/${id}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: password ? JSON.stringify(password) : undefined,
+        body: JSON.stringify(payload),
       });
       if (res.status === 401) throw new Error("비밀번호가 다릅니다.");
       else if (!res.ok) throw new Error("모임 가입 중 오류가 발생했습니다.");
@@ -274,16 +276,21 @@ export default function MoimDetailPage() {
           {/* 미가입 시: 가입하기 버튼 */}
           {!isJoined && (
             <button
-              onClick={() => {
-                if (moimDetail.isPrivate) {
-                  const pw = window.prompt(
-                    "비공개 모임입니다. 비밀번호를 입력하세요:",
-                  );
-                  if (pw !== null) joinMoimMutation.mutate(pw);
-                } else {
-                  if (window.confirm("이 모임에 가입하시겠습니까?"))
-                    joinMoimMutation.mutate(undefined);
-                }
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setTimeout(() => {
+                  if (moimDetail.isPrivate) {
+                    const pw = window.prompt(
+                      "비공개 모임입니다. 비밀번호를 입력하세요:",
+                    );
+                    if (pw !== null) joinMoimMutation.mutate(pw);
+                  } else {
+                    if (window.confirm("이 모임에 가입하시겠습니까?"))
+                      joinMoimMutation.mutate(undefined);
+                  }
+                }, 50);
               }}
               className="rounded-xl bg-[linear-gradient(135deg,#D88B55_0%,#C96C34_100%)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(201,108,52,0.24)] transition-transform hover:-translate-y-[1px]"
               disabled={joinMoimMutation.isPending}
@@ -378,13 +385,13 @@ export default function MoimDetailPage() {
               const passionTemp = debugTemp ?? calculatedTemp;
 
               const getStatus = (temp: number) => {
-                if (temp <= 36.5) return { label: "🌱 작은 불씨 지피기", gradient: "from-[#E2C59D] to-[#D8A76D]" };
-                if (temp < 40) return { label: "🌱 작은 불씨 지피기", gradient: "from-[#D8C3A3] to-[#E3A85A]" };
-                if (temp < 50) return { label: "✨ 온기가 도는 우리 모임", gradient: "from-[#E8C067] to-[#E09247]" };
-                if (temp < 65) return { label: "🤝 함께 뛰는 즐거움", gradient: "from-[#E49454] to-[#DA6B4A]" };
-                if (temp < 80) return { label: "⚡ 뜨거운 시너지!", gradient: "from-[#DD7453] to-[#D45158]" };
-                if (temp < 90) return { label: "🔥 멈추지 않는 열정", gradient: "from-[#D65D4F] to-[#B86A5C]" };
-                return { label: "🌋 기적의 모임!", gradient: "from-[#A66B57] via-[#D45C45] to-[#E5B256]" };
+                if (temp <= 36.5) return { label: "🌱 함께 시작하는 은혜", gradient: "from-[#E2C59D] to-[#D8A76D]" };
+                if (temp < 40) return { label: "🌱 모임 은혜의 첫걸음", gradient: "from-[#D8C3A3] to-[#E3A85A]" };
+                if (temp < 50) return { label: "✨ 모여서 커지는 은혜", gradient: "from-[#E8C067] to-[#E09247]" };
+                if (temp < 65) return { label: "✝️ 굳건한 믿음의 공동체", gradient: "from-[#E49454] to-[#DA6B4A]" };
+                if (temp < 80) return { label: "⚡ 성령이 충만한 모임", gradient: "from-[#DD7453] to-[#D45158]" };
+                if (temp < 90) return { label: "🔥 은혜와 기쁨이 넘치는 곳", gradient: "from-[#D65D4F] to-[#B86A5C]" };
+                return { label: "🌋 넘치는 은혜의 기적!", gradient: "from-[#A66B57] via-[#D45C45] to-[#E5B256]" };
               };
 
               const status = getStatus(passionTemp);
@@ -394,11 +401,11 @@ export default function MoimDetailPage() {
                 <>
                   <div className="mb-3 flex items-center justify-between">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#C09060]">이번 달 열정 온도</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#C09060]">이번 달 은혜 온도</p>
                       <p className="text-[13px] font-medium text-[#7A6858]">{status.label}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[11px] text-[#B8A898]">누적 인증 {moimDetail.score ?? 0}회</p>
+                      <p className="text-[11px] text-[#B8A898]">은혜 나눔 누적 {moimDetail.score ?? 0}회</p>
                       <p className="text-[22px] font-black tracking-tight text-[#D06530]">
                         {passionTemp.toFixed(1)}°C
                       </p>
@@ -522,10 +529,10 @@ export default function MoimDetailPage() {
           {/* ── 구분선 ── */}
           <div className="mx-5 border-t border-[#F0EAE2]" />
 
-          {/* ── 이번 달 인증 피드 ── */}
+          {/* ── 이번 달 은혜 나눔 피드 ── */}
           <div className="px-5 py-5">
             <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-[#C09060]">
-              이번 달 인증 피드
+              이번 달 은혜 나눔 피드
             </p>
 
             {isFeedLoading && (
@@ -536,7 +543,7 @@ export default function MoimDetailPage() {
               <div className="flex flex-col items-center gap-2 py-10 text-center">
                 <span className="text-3xl">🙂</span>
                 <p className="text-sm text-[#B8A898]">
-                  아직 이번 달 인증글이 없어요.
+                  아직 이번 달에 나눈 은혜가 없어요.
                   <br />
                   첫 번째 은혜를 나눠보세요!
                 </p>
