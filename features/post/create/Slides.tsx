@@ -130,7 +130,10 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
             const tone = getPostPageTone(draft.backgroundColor);
             return (
               <SwiperSlide key={page.id}>
-                <div ref={containerRef}>
+                <div
+                  ref={containerRef}
+                  style={{ height: size ? `${size}px` : undefined, overflow: "hidden" }}
+                >
                   <div
                     style={{
                       transform: `scale(${size / 430})`,
