@@ -109,13 +109,15 @@ export default function MyAchievementsSummary({
         </div>
 
         <div className="mb-3 mt-5">
-          <div className="relative h-2.5 overflow-hidden rounded-full bg-[#F3E7DA] shadow-inner">
+          <div className="relative h-2.5 overflow-hidden rounded-full bg-[#F3EDE5]">
+            {passionTemp > 37.6 && (
+              <div
+                className="absolute bottom-0 top-0 z-10 w-[2px] bg-[#E6C8A6]"
+                style={{ left: `36.5%` }}
+              />
+            )}
             <div
-              className="absolute inset-y-0 w-[2px] bg-[#D9A46B]/45"
-              style={{ left: `36.5%` }}
-            />
-            <div
-              className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r transition-all duration-1000 ease-out ${tempStatus.gradient}`}
+              className={`absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${tempStatus.gradient}`}
               style={{ width: `${Math.max(2, passionTemp)}%` }}
             />
           </div>

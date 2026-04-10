@@ -59,7 +59,7 @@ export function MyCategorys({
   return (
     <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
       <div className="flex w-full min-w-0 flex-col rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
-        <div className="mb-4 -mt-2 flex items-center justify-between">
+        <div className="mb-1 flex items-center justify-between">
           <div>
             <h3 className="text-[18px] font-bold tracking-tight text-[#4A433D]">
               오늘의 은혜 기록 쓰기
@@ -68,17 +68,9 @@ export function MyCategorys({
               카테고리를 고르면 바로 글쓰기가 시작돼요
             </p>
           </div>
-          <Link
-            href={createPostPath}
-            onClick={resetPost}
-            className="flex items-center justify-center rounded-full bg-[#D96B2B] px-4 py-2 text-[13px] font-bold text-white shadow-sm transition-colors hover:bg-[#c75d20]"
-          >
-            {totalRecords === 0
-              ? "지금 첫 은혜 쓰기"
-              : `${totalRecords + 1}번째 은혜 쓰기`}
-          </Link>
         </div>
 
+        {/* 현 구조상으로는 빌 이유가 없음 */}
         {categorysData.length === 0 ? (
           <div className="rounded-2xl bg-[#F9F6F2] px-5 py-8 text-center">
             <p className="text-sm font-semibold text-[#4A433D]">
@@ -95,9 +87,6 @@ export function MyCategorys({
               const imageSrc = categoryImages[cat.category as Category];
               const hasAnyPost = cat.count > 0;
               
-              // 뱃지 내용
-              const badgeLabel = hasAnyPost ? `🔥 ${cat.count}` : "New";
-
               return (
                 <Link
                   key={cat.category}
@@ -107,8 +96,19 @@ export function MyCategorys({
                 >
                   <div className="relative flex w-full flex-col items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-b from-[#E5C9C9] to-white p-3 shadow-sm ring-1 ring-black/5 aspect-[3/4]">
                     {/* Badge */}
-                    <div className="absolute right-1 top-1 z-20 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-[#A87373] shadow-sm ring-1 ring-white/50 backdrop-blur-sm sm:text-[12px]">
-                      {badgeLabel}
+                    <div
+                      className={`absolute right-2 top-2 z-20 flex h-6 w-[42px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-white/40 bg-white/28 text-[11px] font-bold tabular-nums backdrop-blur-md sm:h-7 sm:w-[48px] sm:text-[11px] ${
+                        hasAnyPost ? "text-[#7A5A50]" : "text-[#8D7B72]"
+                      }`}
+                    >
+                      {hasAnyPost ? (
+                        <span className="flex items-center">
+                          <span className="mr-[1px]">🔥</span>
+                          <span>{cat.count}</span>
+                        </span>
+                      ) : (
+                        "New"
+                      )}
                     </div>
 
                     {/* Image */}

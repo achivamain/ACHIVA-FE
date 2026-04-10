@@ -408,7 +408,7 @@ export default function MoimDetailPage() {
                   <div className="relative h-2.5 overflow-hidden rounded-full bg-[#F3EDE5]">
                     {passionTemp > 37.6 && (
                       <div
-                        className="absolute bottom-0 top-0 z-10 w-px bg-[#D4B48A]"
+                        className="absolute bottom-0 top-0 z-10 w-[2px] bg-[#E6C8A6]"
                         style={{ left: `36.5%` }}
                       />
                     )}
