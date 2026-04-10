@@ -20,9 +20,15 @@ export function MyCategorys({
   const pathname = usePathname();
   const resetPost = useDraftPostStore.use.resetPost();
   const setPost = useDraftPostStore.use.setPost();
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const isMobilePath = pathSegments[0] === "m";
+  const nickName = isMobilePath ? pathSegments[1] : pathSegments[0];
   const createPostPath = pathname.startsWith("/m/")
     ? "/m/post/create"
     : "/post/create";
+  const bibleReadingPath = nickName
+    ? `${isMobilePath ? "/m" : ""}/${nickName}/bible`
+    : createPostPath;
 
   const totalRecords = categoryCounts.reduce(
     (acc, curr) => acc + Number(curr.count ?? 0),
@@ -44,6 +50,10 @@ export function MyCategorys({
   });
 
   const handleCategoryClick = (cat: { category: string; count: number }) => {
+    if (cat.category === "성경 일독") {
+      return;
+    }
+
     resetPost();
     setPost({
       category: categories.find((i) => i === cat.category),
@@ -89,7 +99,11 @@ export function MyCategorys({
               return (
                 <Link
                   key={cat.category}
-                  href={createPostPath}
+                  href={
+                    cat.category === "성경 일독"
+                      ? bibleReadingPath
+                      : createPostPath
+                  }
                   onClick={() => handleCategoryClick(cat)}
                   className="group relative flex flex-col items-center cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95"
                 >
