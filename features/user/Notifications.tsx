@@ -7,7 +7,7 @@ import type { PostRes } from "@/types/Post";
 import type { NotificationsRes } from "@/types/responses";
 import ProfileImg from "@/components/ProfileImg";
 import dateFormatter from "@/lib/dateFormatter";
-import { cheeringMeta } from "../post/cheeringMeta";
+import { cheeringMeta } from "@/lib/cheering";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -154,7 +154,7 @@ export default function Notifications() {
                     style={{ backgroundColor: color, borderColor: color }}
                     className="ml-auto flex shrink-0 items-center gap-[2px] rounded-full border px-3 py-1 text-[15px] text-white sm:gap-1 sm:text-base"
                   >
-                    <p>{n.cheeringCategory}</p>
+                    <p>{cheeringMeta[n.cheeringCategory].label}</p>
                     <Icon active />
                   </div>
                 </div>
