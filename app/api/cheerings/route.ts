@@ -1,6 +1,7 @@
 // 응원 관련 프록시 api
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { type CheeringCategory } from "@/lib/cheering";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -27,7 +28,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { postId, cheeringType } = await req.json();
+  const {
+    postId,
+    cheeringType,
+  }: { postId: string; cheeringType: CheeringCategory } = await req.json();
 
   const session = await auth();
   const token = session?.access_token;

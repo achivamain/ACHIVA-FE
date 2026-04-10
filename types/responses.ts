@@ -1,4 +1,5 @@
 import type { PostRes } from "./Post";
+import type { CheeringCategory } from "@/lib/cheering";
 
 export type PostsData = {
   totalElements: number;
@@ -32,7 +33,7 @@ interface Pageable {
 export type Cheering = {
   id: number;
   content: string;
-  cheeringCategory: string;
+  cheeringCategory: CheeringCategory;
   senderId: string;
   senderName: string;
   receiverId: string;
@@ -44,7 +45,7 @@ export type Cheering = {
 };
 
 export type CheerPoint = {
-  cheeringCategory: string;
+  cheeringCategory: CheeringCategory;
   count: number;
   points: number;
 };
@@ -66,7 +67,7 @@ export type NotificationsRes = {
 export type Notification = {
   id: number;
   content: string;
-  cheeringCategory: "최고예요" | "수고했어요" | "응원해요" | "동기부여";
+  cheeringCategory: CheeringCategory;
   senderId: string;
   senderName: string;
   senderProfileImageUrl: string;
