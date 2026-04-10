@@ -39,25 +39,29 @@ export function MobileWriting() {
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const [currentPage, setCurrentPage] = useState(1);
   return (
-    <div className="flex flex-col justify-between h-full">
-      <Slides currentPage={currentPage} setCurrentPage={setCurrentPage} />
+    <div className="flex flex-col h-full">
+      {/* 내지 + 빈 페이지 추가하기 오버레이 */}
+      <div className="relative">
+        <Slides currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        <div className="absolute bottom-4 right-4 z-10">
+          <AddNewPageBtn
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+          />
+        </div>
+      </div>
+
       <div className="absolute flex justify-center top-4 left-1/2 -translate-x-1/2 z-99">
         <Bullets currentPage={currentPage} />
-      </div>
-      <div className="absolute flex justify-center top-112 right-4 z-99 mt-2.5">
-        <AddNewPageBtn
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
       </div>
 
       {currentPage !== draft.pages?.length && (
         <button
-          className="absolute 
-          top-2.5 right-5 z-99 py-1 px-3 
-          font-semibold text-white disabled:text-[#808080]
+          className="absolute
+          top-2.5 right-5 z-99 py-1 px-3
+          font-semibold text-white
           bg-theme border border-theme rounded-sm
-          disabled:bg-white  disabled:border-[#d9d9d9]"
+          disabled:opacity-40 disabled:cursor-not-allowed"
           disabled={!draft.pages?.[currentPage - 1]?.content}
           onClick={() => setCurrentPage((n) => n + 1)}
         >
@@ -67,11 +71,11 @@ export function MobileWriting() {
 
       {currentPage === draft.pages?.length && (
         <button
-          className="absolute 
-          top-2.5 right-5 z-99 py-1 px-3 
-          font-semibold text-white disabled:text-[#808080]
+          className="absolute
+          top-2.5 right-5 z-99 py-1 px-3
+          font-semibold text-white
           bg-theme border border-theme rounded-sm
-          disabled:bg-white  disabled:border-[#d9d9d9]"
+          disabled:opacity-40 disabled:cursor-not-allowed"
           disabled={!draft.pages?.every((page) => page.content)}
           onClick={handleNextStep}
         >
@@ -116,14 +120,10 @@ function AddNewPageBtn({ currentPage, setCurrentPage }: Props) {
 
 function Bullets({ currentPage }: { currentPage: number }) {
   const draft = useDraftPostStore.use.post();
-  const pagesWithSubtitle = draft.pages?.filter((p) => p.subtitle);
-  const currentSubtitleIdx =
-    (draft.pages?.slice(0, currentPage).filter((p) => p.subtitle).length ?? 0) -
-    1;
 
   return (
-    <ol className="flex justify-center gap-1 w-full mt-2 mb-6 ">
-      {pagesWithSubtitle?.map((page, idx) => {
+    <ol className="flex justify-center gap-1 w-full mt-2 mb-6">
+      {draft.pages?.map((page, idx) => {
         return (
           <li key={page.id}>
             <svg
@@ -137,9 +137,7 @@ function Bullets({ currentPage }: { currentPage: number }) {
                 cx="4.12797"
                 cy="3.96"
                 r="3.96"
-                fill={
-                  idx === currentSubtitleIdx ? "var(--color-theme)" : "#D9D9D9"
-                }
+                fill={idx === currentPage - 1 ? "var(--color-theme)" : "#D9D9D9"}
               />
             </svg>
           </li>
