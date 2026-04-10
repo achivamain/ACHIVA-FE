@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { inter } from "@/lib/fonts";
+import { calculateMemberTemperature } from "@/lib/ranking";
 
 export default function MyAchievementsSummary({
   totalCount = 0,
@@ -12,13 +13,13 @@ export default function MyAchievementsSummary({
   streakWeeks?: number;
   thisWeekCount?: number;
 }) {
-  // 열정 온도 계산 로직은 기록 수와 주간 스트릭만 반영합니다.
   const passionTemp = useMemo(() => {
-    const calculated = 36.5 + 0.4 * totalCount + 1.5 * streakWeeks;
-    return Math.max(36.5, Math.min(100, Number(calculated.toFixed(1))));
+    return Math.max(
+      36.5,
+      Math.min(100, calculateMemberTemperature(totalCount, streakWeeks)),
+    );
   }, [streakWeeks, totalCount]);
 
-  // 구간을 6단계로 세밀하게 나누고 긍정적인 문구 반영
   const tempStatus = useMemo(() => {
     if (passionTemp >= 90)
       return {
@@ -68,14 +69,14 @@ export default function MyAchievementsSummary({
         icon: "🌱",
         gradient: "from-[#F7DFC0] to-[#E7B77F]",
       };
-    // 36.5도 (기록 0회)
-      return {
-        color: "text-[#D96B2B]",
-        bg: "bg-[#FFF4EC]",
-        label: "첫 은혜를 기록해보세요",
-        icon: "🌱",
-        gradient: "from-[#FAE6CF] to-[#EBC18E]",
-      };
+
+    return {
+      color: "text-[#D96B2B]",
+      bg: "bg-[#FFF4EC]",
+      label: "첫 은혜를 기록해보세요",
+      icon: "🌱",
+      gradient: "from-[#FAE6CF] to-[#EBC18E]",
+    };
   }, [passionTemp]);
 
   const isWeekGoalCompleted = thisWeekCount < 3;
@@ -105,7 +106,6 @@ export default function MyAchievementsSummary({
               </span>
             </div>
           </div>
-
         </div>
 
         <div className="mb-3 mt-5">
@@ -113,11 +113,11 @@ export default function MyAchievementsSummary({
             {passionTemp > 37.6 && (
               <div
                 className="absolute bottom-0 top-0 z-10 w-[2px] bg-[#E6C8A6]"
-                style={{ left: `36.5%` }}
+                style={{ left: "36.5%" }}
               />
             )}
             <div
-              className={`absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${tempStatus.gradient}`}
+              className={`absolute left-0 top-0 h-full rounded-full bg-gradient-to-r transition-all duration-1000 ease-out ${tempStatus.gradient}`}
               style={{ width: `${Math.max(2, passionTemp)}%` }}
             />
           </div>

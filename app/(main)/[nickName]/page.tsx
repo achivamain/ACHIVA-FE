@@ -10,6 +10,8 @@ import { WebProfileSummary } from "@/features/home/ProfileSummary";
 import { getSummeryData } from "@/lib/getData";
 import WeeklyCalendar from "@/features/user/WeeklyCalendar";
 import { looksLikeStaticAssetPathSegment } from "@/lib/routeGuards";
+import MyAchievementsSummary from "@/features/user/MyAchievementsSummary";
+import { getMemberDetail } from "@/lib/server/getMemberDetail";
 
 export default async function Page({
   params,
@@ -75,11 +77,13 @@ export default async function Page({
     isOwner(nickName, token!),
   ]);
 
-  const [myFriends, myPendingFriends, summaryResult] = await Promise.all([
-    getMyFriends(),
-    getMyPendingFriends(),
-    isMyProfile ? getSummeryData(token!) : null, // 불필요한 api 호출 방지
-  ]);
+  const [myFriends, myPendingFriends, summaryResult, memberDetail] =
+    await Promise.all([
+      getMyFriends(),
+      getMyPendingFriends(),
+      isMyProfile ? getSummeryData(token!) : null, // 불필요한 api 호출 방지
+      getMemberDetail(user.id, token!),
+    ]);
 
   const myAllFriends = [...myFriends, ...myPendingFriends];
   const mySummaryData = summaryResult?.mySummaryData ?? {
@@ -96,6 +100,11 @@ export default async function Page({
           currentUserFriends={myAllFriends}
         />
         <WeeklyCalendar userId={user.id} />
+        <MyAchievementsSummary
+          totalCount={memberDetail.articleCount}
+          streakWeeks={memberDetail.continuousGoalWeeks}
+          thisWeekCount={memberDetail.weeklyWorkoutCount}
+        />
         {isMyProfile && (
           <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 transition-all hover:shadow-md">
             <div className="flex justify-between items-center mb-6">

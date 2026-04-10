@@ -26,3 +26,11 @@ export type User = {
   organizationName: string;
   createdAt: string;
 };
+
+export type UserDetail = User & {
+  weeklyWorkoutCount: number;
+  continuousGoalWeeks: number;
+  totalCharacterCountFrom2025: number;
+  totalSendingCheeringScore: number;
+  totalReceivingCheeringScore: number;
+};

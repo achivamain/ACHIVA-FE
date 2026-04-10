@@ -2,7 +2,6 @@ import Logout from "@/components/Logout";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeRecordCalendar from "@/features/home/HomeRecordCalendar";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
-import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
 import { notFound, redirect } from "next/navigation";
@@ -28,8 +27,6 @@ export default async function MobileHomePageRoute({
       categoryCounts,
       weeklyCategoryCounts,
       categoryCharCounts,
-      weeklyArticleCount,
-      streakWeeks,
     } = await getHomeData(user.id, token);
 
     return (
@@ -42,12 +39,6 @@ export default async function MobileHomePageRoute({
         />
         <div className="h-6" />
         <HomeRecordCalendar userId={user.id} />
-        <div className="h-6" />
-        <MyAchievementsSummary
-          totalCount={user.articleCount}
-          streakWeeks={streakWeeks}
-          thisWeekCount={weeklyArticleCount}
-        />
         <div className="h-6" />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>

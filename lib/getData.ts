@@ -237,12 +237,12 @@ export async function getHomeData(userId: string, token: string) {
     categoryCharCounts,
     currentStats,
   ] = await Promise.all([
-    getPostCategory(),
-    getWeeklyPostCategory(),
-    getSummaryData(token),
-    getCategorysCharCount(),
-    getCurrentStats(),
-  ]);
+      getPostCategory(),
+      getWeeklyPostCategory(),
+      getSummaryData(token),
+      getCategorysCharCount(),
+      getCurrentStats(),
+    ]);
 
   return {
     categoryCounts,
