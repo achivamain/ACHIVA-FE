@@ -2,7 +2,6 @@ import Banner from "@/features/event/Banner";
 import { notFound, redirect } from "next/navigation";
 import { MyCategorys } from "@/features/home/MyCategorys";
 import HomeRecordCalendar from "@/features/home/HomeRecordCalendar";
-import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
 import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
@@ -30,8 +29,6 @@ export default async function HomePage({
       categoryCounts,
       weeklyCategoryCounts,
       categoryCharCounts,
-      weeklyArticleCount,
-      streakWeeks,
     } = await getHomeData(user.id, token);
 
     return (
@@ -39,12 +36,12 @@ export default async function HomePage({
         <div className="flex-1 flex flex-col">
           <div className="flex-1 flex justify-center">
             <div className="w-full max-w-[844px]">
-              <div className="pt-15 pb-3 px-5">
-                <h2 className="text-[28px] font-extrabold text-black">
-                  안녕하세요, {decodeURIComponent(nickName)} 님! 👍
+              <div className="pt-[80px] pb-5 px-5">
+                <h2 className="text-[28px] font-extrabold text-[#3A2418]">
+                  안녕하세요, {decodeURIComponent(nickName)} 님! ✨
                 </h2>
-                <p className="text-[16px] leading-[22px] text-[#8E95A9] mt-1">
-                  오늘도 열심히 운동하는 당신을 응원합니다!
+                <p className="text-[16px] leading-[22px] text-[#8A7565] mt-2">
+                  오늘도 은혜가 풍성한 하루 되시기를 축복합니다!
                 </p>
               </div>
               <MyCategorys
@@ -54,12 +51,6 @@ export default async function HomePage({
               />
               <div className="h-8"></div>
               <HomeRecordCalendar userId={user.id} />
-              <div className="h-6"></div>
-              <MyAchievementsSummary
-                totalCount={user.articleCount}
-                streakWeeks={streakWeeks}
-                thisWeekCount={weeklyArticleCount}
-              />
               <div className="h-6"></div>
               <MyRecordArchive userId={user.id} />
               <div className="h-10"></div>

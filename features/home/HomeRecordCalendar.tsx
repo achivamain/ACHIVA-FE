@@ -9,26 +9,20 @@ import {
   isBefore,
   isSameDay,
   isSameMonth,
-  isToday,
   parseISO,
-  startOfDay,
   startOfMonth,
-  startOfWeek,
 } from "date-fns";
 import { ko } from "date-fns/locale";
 import { usePathname, useRouter } from "next/navigation";
 import {
   DayPicker,
   type DayButtonProps,
-  type WeekProps,
 } from "react-day-picker";
 import type { PostsData } from "@/types/responses";
 
 type HomeRecordCalendarProps = {
   userId: string;
 };
-
-type ViewMode = "weekly" | "monthly";
 
 const WEEK_STARTS_ON = 1 as const;
 const DAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
@@ -47,16 +41,16 @@ function getDateKey(date: Date) {
   return format(date, "yyyy-MM-dd");
 }
 
+
+
 function RecordDayButton({
   day,
   modifiers,
-  variant,
   completedDates,
   completedPostCountByDate,
   className,
   ...buttonProps
 }: DayButtonProps & {
-  variant: ViewMode;
   completedDates: Set<string>;
   completedPostCountByDate: Record<string, number>;
 }) {
@@ -64,74 +58,10 @@ function RecordDayButton({
   const dateKey = getDateKey(date);
   const dayIndex = getDayIndex(date);
   const isSelected = Boolean(modifiers.selected);
-  const isPast = startOfDay(date) < startOfDay(new Date()) && !isToday(date);
   const isWeekend = dayIndex >= 5;
   const hasCompleted = completedDates.has(dateKey);
   const completedCount = completedPostCountByDate[dateKey] ?? 0;
-  const shouldDimPast = isPast && !isSelected;
   const isDisabled = Boolean(modifiers.disabled);
-
-  const content = (
-    <>
-      <span
-        className={cn(
-          variant === "weekly" ? "text-[18px]" : "text-[13px]",
-          "font-extrabold leading-none",
-          isSelected
-            ? "text-white"
-            : isToday(date)
-              ? "text-[#5B6470]"
-              : dayIndex === 6
-                ? "text-[#EF4444]"
-                : dayIndex === 5
-                  ? "text-[#3B82F6]"
-                  : "text-[#4A433D]",
-          isWeekend && variant === "monthly" && !isSelected && "font-extrabold",
-          shouldDimPast && "opacity-55",
-          isDisabled && "opacity-35",
-        )}
-      >
-        {format(date, "d")}
-      </span>
-      <div className="mt-1 flex min-h-[16px] items-center justify-center">
-        {hasCompleted ? (
-          <span
-            className={cn(
-              "inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-              isSelected
-                ? "bg-white text-[#4A433D]"
-                : "bg-[#FFF4EC] text-[#D96B2B]",
-            )}
-          >
-            {completedCount}
-          </span>
-        ) : null}
-      </div>
-    </>
-  );
-
-  if (variant === "weekly") {
-    return (
-      <button
-        {...buttonProps}
-        type="button"
-        className={cn(
-          className,
-          "flex h-[76px] w-full flex-col items-center justify-center gap-1.5 rounded-[18px] px-1 py-3 transition-all duration-200 active:scale-95",
-          isSelected
-            ? "bg-[#6B625A] shadow-lg shadow-black/15"
-            : hasCompleted
-              ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
-              : isToday(date)
-                ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
-                : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
-          isDisabled && "cursor-default hover:bg-inherit",
-        )}
-      >
-        {content}
-      </button>
-    );
-  }
 
   return (
     <button
@@ -143,35 +73,32 @@ function RecordDayButton({
         isSelected
           ? "bg-[#6B625A] shadow-md shadow-black/15"
           : hasCompleted
-            ? "bg-[#FFF8D9] hover:bg-[#FFF3BF]"
-            : isToday(date)
-              ? "bg-[#F7F7F5] ring-2 ring-inset ring-[#C2C8D0] hover:bg-[#FAFAF8]"
-              : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
+            ? "bg-[#ECA973] hover:bg-[#E09961] shadow-sm"
+            : "bg-[#F5F3F0] hover:bg-[#EEE8E1]",
         modifiers.outside && "opacity-35",
         isDisabled && "cursor-default hover:bg-inherit",
       )}
+      title={hasCompleted ? `${completedCount}개의 기록` : undefined}
     >
-      {content}
+      <span
+        className={cn(
+          "text-[15px]",
+          "font-extrabold leading-none",
+          isSelected || hasCompleted
+            ? "text-white"
+            : dayIndex === 6
+              ? "text-[#EF4444]"
+              : dayIndex === 5
+                ? "text-[#3B82F6]"
+                : "text-[#4A433D]",
+          isWeekend && !isSelected && !hasCompleted && "font-extrabold",
+          isDisabled && "opacity-35",
+        )}
+      >
+        {format(date, "d")}
+      </span>
     </button>
   );
-}
-
-function WeeklyRow({
-  visibleWeekStart,
-  week,
-  className,
-  ...props
-}: WeekProps & {
-  visibleWeekStart: Date;
-}) {
-  const isVisibleWeek = week.days.some((calendarDay) =>
-    isSameDay(
-      startOfWeek(calendarDay.date, { weekStartsOn: WEEK_STARTS_ON }),
-      visibleWeekStart,
-    ),
-  );
-
-  return <tr {...props} className={cn(className, !isVisibleWeek && "hidden")} />;
 }
 
 export default function HomeRecordCalendar({
@@ -181,11 +108,6 @@ export default function HomeRecordCalendar({
   const pathname = usePathname();
   const today = useMemo(() => new Date(), []);
   const todayMonth = useMemo(() => startOfMonth(today), [today]);
-  const currentWeekStart = useMemo(
-    () => startOfWeek(today, { weekStartsOn: WEEK_STARTS_ON }),
-    [today],
-  );
-  const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [monthlyDisplayDate, setMonthlyDisplayDate] = useState(todayMonth);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [completedDates, setCompletedDates] = useState<Set<string>>(new Set());
@@ -196,15 +118,13 @@ export default function HomeRecordCalendar({
     Record<string, string[]>
   >({});
 
-  const weekStart = currentWeekStart;
   const currentMonth = useMemo(
     () => startOfMonth(monthlyDisplayDate),
     [monthlyDisplayDate],
   );
   const monthEnd = useMemo(() => endOfMonth(currentMonth), [currentMonth]);
   const monthEndExclusive = useMemo(() => addDays(monthEnd, 1), [monthEnd]);
-  const weekEndExclusive = useMemo(() => addDays(weekStart, 7), [weekStart]);
-  const calendarCellHeight = viewMode === "weekly" ? 76 : 58;
+  const calendarCellHeight = 58;
   const selectedDateKey = selectedDate ? getDateKey(selectedDate) : null;
   const selectedCompletedCategories = selectedDateKey
     ? (completedCategoriesByDate[selectedDateKey] ?? [])
@@ -212,18 +132,15 @@ export default function HomeRecordCalendar({
   const selectedCompletedCount = selectedDateKey
     ? (completedPostCountByDate[selectedDateKey] ?? 0)
     : 0;
-
-  const headerLabel =
-    viewMode === "monthly"
-      ? format(currentMonth, "yyyy년 M월", { locale: ko })
-      : "이번 주 은혜 기록";
+  const headerLabel = format(currentMonth, "yyyy년 M월", { locale: ko });
+  const isViewingCurrentMonth = isSameMonth(currentMonth, todayMonth);
 
   useEffect(() => {
     if (!selectedDate) return;
-    if (viewMode === "monthly" && !isSameMonth(selectedDate, currentMonth)) {
+    if (!isSameMonth(selectedDate, currentMonth)) {
       setSelectedDate(null);
     }
-  }, [currentMonth, selectedDate, viewMode]);
+  }, [currentMonth, selectedDate]);
 
   useEffect(() => {
     if (!userId) return;
@@ -235,7 +152,7 @@ export default function HomeRecordCalendar({
         const nextCompletedDates = new Set<string>();
         const nextCompletedPostCountByDate = new Map<string, number>();
         const nextCompletedCategoriesByDate = new Map<string, Set<string>>();
-        const fetchFloor = isBefore(weekStart, currentMonth) ? weekStart : currentMonth;
+        const fetchFloor = currentMonth;
         let page = 0;
 
         while (true) {
@@ -269,8 +186,7 @@ export default function HomeRecordCalendar({
             }
 
             if (
-              (isBefore(postDate, monthEndExclusive) ||
-                isBefore(postDate, weekEndExclusive)) &&
+              isBefore(postDate, monthEndExclusive) &&
               !isBefore(postDate, fetchFloor)
             ) {
               const dateKey = getDateKey(postDate);
@@ -311,7 +227,7 @@ export default function HomeRecordCalendar({
     fetchCompletedStatus();
 
     return () => controller.abort();
-  }, [currentMonth, monthEndExclusive, userId, weekEndExclusive, weekStart]);
+  }, [currentMonth, monthEndExclusive, userId]);
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) {
@@ -322,9 +238,7 @@ export default function HomeRecordCalendar({
       setSelectedDate(null);
       return;
     }
-    if (viewMode === "monthly") {
-      setMonthlyDisplayDate(startOfMonth(date));
-    }
+    setMonthlyDisplayDate(startOfMonth(date));
     setSelectedDate(date);
   };
 
@@ -353,80 +267,84 @@ export default function HomeRecordCalendar({
         <div className="flex items-start justify-between pb-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#D96B2B]">
-              {viewMode === "weekly" ? "Weekly Grace" : "Monthly Grace"}
+              Monthly Grace
             </p>
-            <h3 className="mt-0.5 text-[18px] font-bold tracking-tight text-[#4A433D]">
+            <h3 className="mt-0.5 text-[18px] font-bold text-[#4A433D]">
               {headerLabel}
             </h3>
           </div>
-
-          <div className="flex items-center rounded-full bg-[#F5F3F0] p-0.5">
-            <button
-              type="button"
-              onClick={() => setViewMode("weekly")}
-              className={cn(
-                "rounded-full px-3 py-1 text-[11px] font-bold transition-all duration-200",
-                viewMode === "weekly"
-                  ? "bg-white text-[#4A433D] shadow-sm"
-                  : "text-[#9CA3AF] hover:text-[#6B7280]",
-              )}
-            >
-              주간
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("monthly")}
-              className={cn(
-                "rounded-full px-3 py-1 text-[11px] font-bold transition-all duration-200",
-                viewMode === "monthly"
-                  ? "bg-white text-[#4A433D] shadow-sm"
-                  : "text-[#9CA3AF] hover:text-[#6B7280]",
-              )}
-            >
-              월간
-            </button>
-          </div>
         </div>
 
-        {viewMode === "monthly" && (
-          <div className="flex items-center justify-between gap-2 pb-2">
+        <div className="flex items-center justify-between gap-2 pb-2">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() =>
                 setMonthlyDisplayDate((current) => addMonths(current, -1))
               }
-              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
+              className="inline-flex h-[28px] items-center justify-center rounded-full bg-white px-3 text-[12px] font-bold leading-none text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
             >
               이전 달
             </button>
-            <button
-              type="button"
-              onClick={() =>
-                setMonthlyDisplayDate((current) =>
-                  isSameMonth(current, todayMonth)
-                    ? current
-                    : addMonths(current, 1),
-                )
-              }
-              disabled={isSameMonth(currentMonth, todayMonth)}
-              className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB] disabled:cursor-default disabled:text-[#C7CBD1] disabled:hover:bg-white"
-            >
-              다음 달
-            </button>
+            {!isViewingCurrentMonth && (
+              <button
+                type="button"
+                onClick={() => setMonthlyDisplayDate(todayMonth)}
+                aria-label="이번 달로 돌아가기"
+                title="이번 달로 돌아가기"
+                className="inline-flex h-[28px] w-[28px] items-center justify-center rounded-full bg-white text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB]"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3.333 10a6.667 6.667 0 1 0 1.953-4.714"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.333 4.444v3.333h3.334"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
-        )}
+          <button
+            type="button"
+            onClick={() =>
+              setMonthlyDisplayDate((current) =>
+                isSameMonth(current, todayMonth)
+                  ? current
+                  : addMonths(current, 1),
+              )
+            }
+            disabled={isViewingCurrentMonth}
+            className="inline-flex h-[28px] items-center justify-center rounded-full bg-white px-3 text-[12px] font-bold leading-none text-[#4A433D] shadow-sm ring-1 ring-[#E5E7EB] transition-all duration-200 hover:bg-[#F9FAFB] disabled:cursor-default disabled:text-[#C7CBD1] disabled:hover:bg-white"
+          >
+            다음 달
+          </button>
+        </div>
 
         <div className="min-w-0 overflow-hidden pb-4">
           <DayPicker
             mode="single"
             locale={ko}
             weekStartsOn={WEEK_STARTS_ON}
-            month={viewMode === "monthly" ? currentMonth : weekStart}
+            month={currentMonth}
             selected={selectedDate ?? undefined}
             onSelect={handleSelect}
             onMonthChange={setMonthlyDisplayDate}
             hideNavigation
-            showOutsideDays={viewMode === "weekly"}
             disabled={{ after: today }}
             styles={{
               root: {
@@ -476,18 +394,10 @@ export default function HomeRecordCalendar({
               DayButton: (props) => (
                 <RecordDayButton
                   {...props}
-                  variant={viewMode}
                   completedDates={completedDates}
                   completedPostCountByDate={completedPostCountByDate}
                 />
               ),
-              ...(viewMode === "weekly"
-                ? {
-                    Week: (props) => (
-                      <WeeklyRow {...props} visibleWeekStart={weekStart} />
-                    ),
-                  }
-                : {}),
             }}
           />
         </div>

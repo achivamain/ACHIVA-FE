@@ -115,10 +115,12 @@ export default function ImageUploader() {
 
             <div className="text-center">
               <p className="text-[18px] font-bold text-[#412A2A] mb-1">
-                {isMobile ? "갤러리에서 사진 선택" : "사진을 업로드하세요"}
+                {isMobile
+                  ? "표지에 넣을 사진 선택"
+                  : "표지에 넣을 사진을 업로드하세요"}
               </p>
               <p className="text-[13px] text-[#7A5040]/70 font-medium">
-                최대 5장 · 정사각형으로 편집됩니다
+                최대 5장 · 표지에 어울리게 정사각형으로 편집됩니다
               </p>
             </div>
           </div>

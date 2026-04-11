@@ -16,48 +16,40 @@ const handlingResError = (res: Response) => {
   }
 };
 
-// 유저 데이터 가져오기
-export async function getUser(nickName: string, token: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+type ApiResponse<T> = {
+  data?: T;
+};
+
+async function fetchAuthorizedData<T>(path: string, token: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}${path}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-  );
+    cache: "no-store",
+  });
+
   if (!res.ok) {
     handlingResError(res);
   }
-  const { data } = await res.json();
+
+  const { data } = (await res.json()) as ApiResponse<T>;
   if (!data) {
-    throw new Error("Invalid user data");
+    throw new Error("Invalid response data");
   }
-  return data as User;
+
+  return data;
+}
+
+// 유저 데이터 가져오기
+export async function getUser(nickName: string, token: string) {
+  return fetchAuthorizedData<User>(`/api2/members/${nickName}`, token);
 }
 
 // 자신의 데이터 가져오기
 export async function getMe(token: string) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/members/me`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-  if (!res.ok) {
-    handlingResError(res);
-  }
-  const { data } = await res.json();
-  if (!data) {
-    throw new Error("Invalid user data");
-  }
-  return data as User;
+  return fetchAuthorizedData<User>("/api/members/me", token);
 }
 
 // 백엔드 API로 실제 유저 닉네임을 조회하여 본인 확인

@@ -121,10 +121,12 @@ export default function MoimDetailPage() {
       if (moimDetail?.memberCount === moimDetail?.maxMember)
         throw new Error("최대 인원이 초과되어 가입할 수 없습니다.");
 
+      const payload = password ? { password } : {};
+
       const res = await fetch(`/api/moim/${id}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: password ? JSON.stringify(password) : undefined,
+        body: JSON.stringify(payload),
       });
       if (res.status === 401) throw new Error("비밀번호가 다릅니다.");
       else if (!res.ok) throw new Error("모임 가입 중 오류가 발생했습니다.");
@@ -218,17 +220,17 @@ export default function MoimDetailPage() {
   })();
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 pb-20 lg:pb-0">
+    <div className="flex min-h-full flex-col bg-[linear-gradient(180deg,#FFFDF8_0%,#FAF3E8_52%,#FFF9F2_100%)] pb-20 lg:pb-0">
       {/* 뒤로가기 & 헤더 */}
-      <header className="sticky top-0 bg-white z-20 px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[#EADBCB] bg-[#FFF9F2]/95 px-5 py-4 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <Link
             href="/moim"
-            className="p-1 -ml-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="-ml-1 rounded-full p-1 text-[#8A6545] transition-colors hover:bg-[#F3E4D4]"
           >
             <CloseIcon />
           </Link>
-          <h1 className="text-lg font-bold text-gray-800 line-clamp-1">
+          <h1 className="line-clamp-1 text-lg font-bold text-[#4E3422]">
             {moimDetail?.name || "로딩 중..."}
           </h1>
         </div>
@@ -253,7 +255,7 @@ export default function MoimDetailPage() {
                 alert("초대 링크가 복사되었습니다! 🎉");
               }
             }}
-            className="p-1.5 text-gray-400 hover:text-theme hover:bg-theme/5 rounded-full transition-colors"
+            className="rounded-full bg-[#F7EBDD] p-1.5 text-[#A07652] transition-colors hover:bg-[#EFD9C4] hover:text-[#8D6038]"
             title="초대 링크 공유"
           >
             <svg
@@ -274,18 +276,23 @@ export default function MoimDetailPage() {
           {/* 미가입 시: 가입하기 버튼 */}
           {!isJoined && (
             <button
-              onClick={() => {
-                if (moimDetail.isPrivate) {
-                  const pw = window.prompt(
-                    "비공개 모임입니다. 비밀번호를 입력하세요:",
-                  );
-                  if (pw !== null) joinMoimMutation.mutate(pw);
-                } else {
-                  if (window.confirm("이 모임에 가입하시겠습니까?"))
-                    joinMoimMutation.mutate(undefined);
-                }
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setTimeout(() => {
+                  if (moimDetail.isPrivate) {
+                    const pw = window.prompt(
+                      "비공개 모임입니다. 비밀번호를 입력하세요:",
+                    );
+                    if (pw !== null) joinMoimMutation.mutate(pw);
+                  } else {
+                    if (window.confirm("이 모임에 가입하시겠습니까?"))
+                      joinMoimMutation.mutate(undefined);
+                  }
+                }, 50);
               }}
-              className="text-sm font-semibold text-white bg-theme px-4 py-1.5 rounded-lg shadow-sm hover:bg-theme/90 transition-colors"
+              className="rounded-xl bg-[linear-gradient(135deg,#D88B55_0%,#C96C34_100%)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(201,108,52,0.24)] transition-transform hover:-translate-y-[1px]"
               disabled={joinMoimMutation.isPending}
             >
               ✅ 가입하기
@@ -305,7 +312,7 @@ export default function MoimDetailPage() {
                 }
                 setIsSettingModalOpen(true);
               }}
-              className="p-1.5 text-gray-400 hover:text-theme hover:bg-theme/5 rounded-full transition-colors"
+              className="rounded-full bg-[#F7EBDD] p-1.5 text-[#A07652] transition-colors hover:bg-[#EFD9C4] hover:text-[#8D6038]"
               title="모임 설정"
             >
               <svg
@@ -331,305 +338,244 @@ export default function MoimDetailPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto xl:max-w-4xl 2xl:max-w-5xl px-0 sm:px-4 py-0 sm:py-6 space-y-2 sm:space-y-6">
-        {/* 모임 기본 정보 카드 */}
-        <section className="bg-white p-6 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100 flex flex-col justify-center">
-          <div className="flex gap-2 flex-wrap mb-3">
-            {moimDetail.isOfficial && (
-              <span className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold shadow-sm">
-                OFFICIAL
+      {/* 메인 콘텐츠 */}
+      <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-4 pb-24 sm:py-6">
+
+        {/* 통합 카드 */}
+        <div className="overflow-hidden rounded-2xl border border-[#EDE5DA] bg-white shadow-[0_2px_20px_rgba(160,120,80,0.08)]">
+
+          {/* 상단 accent bar */}
+          <div className="h-1 w-full bg-gradient-to-r from-[#F5A96B] via-[#E87848] to-[#D96030]" />
+
+          {/* ── 모임 기본 정보 ── */}
+          <div className="px-5 py-5">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-widest text-[#C09060]">
+                Grace Crew
               </span>
+              {moimDetail.isOfficial && (
+                <span className="rounded-full bg-[#3C2718] px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                  Official
+                </span>
+              )}
+              {moimDetail.isPrivate && (
+                <span className="text-sm text-[#C8A080]">🔒</span>
+              )}
+            </div>
+            <h2 className="text-[22px] font-extrabold tracking-tight text-[#3A2418]">
+              {moimDetail.name}
+            </h2>
+            {moimDetail.description && (
+              <p className="mt-1.5 text-[13px] leading-relaxed text-[#9A8272]">
+                {moimDetail.description}
+              </p>
             )}
           </div>
-          <h2 className="text-2xl font-extrabold text-gray-900 mb-2 tracking-tight">
-            {moimDetail.name}
-          </h2>
-          <p className="text-gray-600 font-medium leading-relaxed">
-            {moimDetail.description}
-          </p>
-        </section>
 
-        {/* 킬러 피처: 모임 열정 온도 */}
-        <section className="bg-white p-5 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100">
-          <h3 className="text-base font-bold text-gray-900 flex items-center gap-1.5 mb-2">
-            🔥 우리 모임 열정 온도
-          </h3>
-          {(() => {
-            const calculatedTemp = Math.max(
-              36.5,
-              Math.min(100, 36.5 + 0.8 * moimDetail.score),
-            );
-            const passionTemp = debugTemp ?? calculatedTemp;
+          {/* ── 구분선 ── */}
+          <div className="mx-5 border-t border-[#F0EAE2]" />
 
-            // 모임 특화 상태 매핑
-            const getStatus = (temp: number) => {
-              if (temp === 36.5)
-                return {
-                  label: "🌱 작은 불씨 지피기",
-                  gradient: "from-amber-200 to-amber-300",
-                  bg: "bg-amber-50",
-                  text: "text-amber-600",
-                };
+          {/* ── 열정 온도 ── */}
+          <div className="px-5 py-5">
+            {(() => {
+              const calculatedTemp = Math.max(
+                36.5,
+                Math.min(100, 36.5 + 0.8 * moimDetail.score),
+              );
+              const passionTemp = debugTemp ?? calculatedTemp;
 
-              if (36.5 < temp && temp < 40)
-                return {
-                  label: "🌱 작은 불씨 지피기",
-                  gradient: "from-[#CDBA96] to-yellow-400",
-                  bg: "bg-gray-50",
-                  text: "text-gray-600",
-                };
-              if (temp < 50)
-                return {
-                  label: "✨ 온기가 도는 우리 모임",
-                  gradient: "from-yellow-300 to-orange-400",
-                  bg: "bg-orange-50",
-                  text: "text-orange-600",
-                };
-              if (temp < 65)
-                return {
-                  label: "🤝 함께 뛰는 즐거움",
-                  gradient: "from-orange-400 to-red-400",
-                  bg: "bg-red-50",
-                  text: "text-red-500",
-                };
-              if (temp < 80)
-                return {
-                  label: "⚡ 뜨거운 시너지 폭발!",
-                  gradient: "from-red-400 to-rose-500",
-                  bg: "bg-rose-50",
-                  text: "text-rose-600",
-                };
-              if (temp < 90)
-                return {
-                  label: "🔥 멈추지 않는 열정 구역",
-                  gradient: "from-rose-500 to-purple-500",
-                  bg: "bg-purple-50",
-                  text: "text-purple-600",
-                };
-              return {
-                label: "🌋 완벽한 팀워크, 기적의 모임!",
-                gradient: "from-purple-500 via-red-500 to-yellow-500",
-                bg: "bg-gradient-to-r from-purple-50 to-red-50",
-                text: "text-red-600",
+              const getStatus = (temp: number) => {
+                if (temp <= 36.5) return { label: "🌱 함께 시작하는 은혜", gradient: "from-[#E2C59D] to-[#D8A76D]" };
+                if (temp < 40) return { label: "🌱 모임 은혜의 첫걸음", gradient: "from-[#D8C3A3] to-[#E3A85A]" };
+                if (temp < 50) return { label: "✨ 모여서 커지는 은혜", gradient: "from-[#E8C067] to-[#E09247]" };
+                if (temp < 65) return { label: "✝️ 굳건한 믿음의 공동체", gradient: "from-[#E49454] to-[#DA6B4A]" };
+                if (temp < 80) return { label: "⚡ 성령이 충만한 모임", gradient: "from-[#DD7453] to-[#D45158]" };
+                if (temp < 90) return { label: "🔥 은혜와 기쁨이 넘치는 곳", gradient: "from-[#D65D4F] to-[#B86A5C]" };
+                return { label: "🌋 넘치는 은혜의 기적!", gradient: "from-[#A66B57] via-[#D45C45] to-[#E5B256]" };
               };
-            };
 
-            const statusInfo = getStatus(passionTemp);
-
-            // 온도 바 표시는 0도 ~ 100도 구간을 0~100%로 매핑
-            const percent = passionTemp;
-
-            return (
-              <div className="flex flex-col gap-2 mt-4">
-                <div className="flex items-end justify-between px-1 mb-1">
-                  <div
-                    className={`text-sm font-bold px-3 py-1.5 rounded-full ${statusInfo.bg} ${statusInfo.text} shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-white/50`}
-                  >
-                    {statusInfo.label}
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-gray-500 mr-1.5 font-medium">
-                      누적 인증 {moimDetail.score ?? 0}회
-                    </span>
-                    <span className="text-2xl font-black text-gray-900 tracking-tight">
-                      {passionTemp.toFixed(1)}°C
-                    </span>
-                  </div>
-                </div>
-
-                {/* 온도바 (Progress Bar) */}
-                <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                  {/* 기본 체온 36.5도 마커 / 너무 낮으면 progress가 막대기에 가려짐 */}
-                  {passionTemp > 37.6 && (
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-gray-300 z-10 shadow-sm"
-                      style={{ left: `36.5%` }}
-                      title="기본 체온 (36.5°C)"
-                    />
-                  )}
-                  <div
-                    className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${statusInfo.gradient}`}
-                    style={{ width: `${Math.max(2, percent)}%` }} // 최소 2%는 보여서 둥근 모서리 유지
-                  />
-                </div>
-
-                <div className="flex justify-between text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5 relative">
-                  <span>0°C</span>
-                  <span className="absolute left-[36.5%] -translate-x-1/2 text-theme font-bold">
-                    36.5°C
-                  </span>
-                  <span>100°C</span>
-                </div>
-              </div>
-            );
-          })()}
-        </section>
-
-        {/* 멤버 현황 */}
-        <section className="bg-white p-6 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100">
-          <div className="mb-5 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              📋 멤버 현황
-            </h3>
-            <span className="text-xs font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full">
-              총 {moimDetail.memberCount}
-              {!moimDetail.isOfficial && ` / ${moimDetail.maxMember}`}명
-            </span>
-          </div>
-          <div className="space-y-3">
-            {visibleMembers.map((member: any, index: number) => {
-              const rank = index + 1;
-              const isCurrentUser =
-                member.isMe || (currentUserId && member.id === currentUserId);
+              const status = getStatus(passionTemp);
+              const percent = passionTemp;
 
               return (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl relative overflow-hidden shadow-sm border border-gray-100 hover:border-theme/30 transition-colors"
-                >
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    {/* 랭킹 뱃지 */}
-                    <div className="w-6 sm:w-8 flex justify-center shrink-0">
-                      {rank === 1 ? (
-                        <span className="text-xl sm:text-2xl" title="1위">
-                          🥇
-                        </span>
-                      ) : rank === 2 ? (
-                        <span className="text-xl sm:text-2xl" title="2위">
-                          🥈
-                        </span>
-                      ) : rank === 3 ? (
-                        <span className="text-xl sm:text-2xl" title="3위">
-                          🥉
-                        </span>
-                      ) : (
-                        <span className="text-sm sm:text-base font-black italic text-gray-400">
-                          {rank}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="w-10 h-10 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center text-lg z-10 shrink-0 overflow-hidden">
-                      {member.profileImageUrl ? (
-                        <img
-                          src={member.profileImageUrl}
-                          alt="profile"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                            (
-                              e.target as HTMLImageElement
-                            ).parentElement!.innerHTML =
-                              `<span class="text-sm font-bold text-gray-500">${(member.name || "?")[0].toUpperCase()}</span>`;
-                          }}
-                        />
-                      ) : (
-                        <span className="text-sm font-bold text-gray-500">
-                          {(member.name || "?")[0].toUpperCase()}
-                        </span>
-                      )}
-                    </div>
+                <>
+                  <div className="mb-3 flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
-                        {member.role === "LEADER" && (
-                          <span title="방장">👑</span>
-                        )}
-                        {member.name}
-                        {isCurrentUser && (
-                          <span className="bg-theme text-white text-[10px] px-1.5 py-0.5 rounded-md ml-0.5">
-                            ME
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1 flex gap-1 flex-wrap items-center">
-                        이번 달{" "}
-                        <span className="text-gray-700 font-medium">
-                          {member.monthlyPosts}개
-                        </span>
-                        {member.lastActiveDaysAgo > 0 && (
-                          <span className="text-gray-400 ml-1 opacity-80">
-                            ({member.lastActiveDaysAgo}일 전)
-                          </span>
-                        )}
-                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#C09060]">이번 달 은혜 온도</p>
+                      <p className="text-[13px] font-medium text-[#7A6858]">{status.label}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[11px] text-[#B8A898]">은혜 나눔 누적 {moimDetail.score ?? 0}회</p>
+                      <p className="text-[22px] font-black tracking-tight text-[#D06530]">
+                        {passionTemp.toFixed(1)}°C
+                      </p>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="text-xs flex flex-col items-end justify-center">
-                      <span className="text-gray-400 font-medium text-[10px] sm:text-xs">
-                        이번 주 스트릭
-                      </span>
-                      <span className="text-theme font-bold text-sm flex items-center mt-0.5">
-                        🔥 {member.weeklyStreak || 0}일
-                      </span>
-                    </div>
+                  {/* progress bar */}
+                  <div className="relative h-2.5 overflow-hidden rounded-full bg-[#F3EDE5]">
+                    {passionTemp > 37.6 && (
+                      <div
+                        className="absolute bottom-0 top-0 z-10 w-[2px] bg-[#E6C8A6]"
+                        style={{ left: `36.5%` }}
+                      />
+                    )}
+                    <div
+                      className={`absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${status.gradient}`}
+                      style={{ width: `${Math.max(2, percent)}%` }}
+                    />
                   </div>
-                </div>
+                  <div className="mt-1.5 flex justify-between text-[10px] text-[#C0B4A8]">
+                    <span>0°C</span>
+                    <span className="absolute left-[calc(36.5%+1rem)] -translate-x-1/2 font-semibold text-[#C09060]">36.5°C</span>
+                    <span>100°C</span>
+                  </div>
+                </>
               );
-            })}
+            })()}
           </div>
-          {hasMoreMembers && (
-            <div className="mt-4 flex justify-center">
+
+          {/* ── 구분선 ── */}
+          <div className="mx-5 border-t border-[#F0EAE2]" />
+
+          {/* ── 멤버 현황 ── */}
+          <div className="px-5 py-5">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#C09060]">멤버</p>
+              <span className="text-[12px] text-[#B8A898]">
+                총 {moimDetail.memberCount}{!moimDetail.isOfficial && ` / ${moimDetail.maxMember}`}명
+              </span>
+            </div>
+
+            {visibleMembers.length === 0 ? (
+              <p className="py-4 text-center text-sm text-[#C0B0A0]">아직 멤버가 없어요.</p>
+            ) : (
+              <div className="divide-y divide-[#F5EFE8]">
+                {visibleMembers.map((member: any, index: number) => {
+                  const rank = index + 1;
+                  const isCurrentUser =
+                    member.isMe || (currentUserId && member.id === currentUserId);
+
+                  return (
+                    <div
+                      key={member.id}
+                      className="flex items-center gap-3 py-3"
+                    >
+                      {/* 순위 */}
+                      <span className={`w-5 shrink-0 text-center text-[12px] font-bold ${
+                        rank === 1 ? "text-[#C09060]" : "text-[#C8BEB4]"
+                      }`}>
+                        {rank}
+                      </span>
+
+                      {/* 아바타 */}
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F3EDE5]">
+                        {member.profileImageUrl ? (
+                          <img
+                            src={member.profileImageUrl}
+                            alt="profile"
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = "none";
+                              (e.target as HTMLImageElement).parentElement!.innerHTML =
+                                `<span class="text-xs font-bold text-[#A08070]">${(member.name || "?")[0].toUpperCase()}</span>`;
+                            }}
+                          />
+                        ) : (
+                          <span className="text-xs font-bold text-[#A08070]">
+                            {(member.name || "?")[0].toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 이름 */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          {member.role === "LEADER" && (
+                            <span className="text-[11px] text-[#C09060]">👑</span>
+                          )}
+                          <span className="truncate text-[13px] font-semibold text-[#3D2B1F]">
+                            {member.name}
+                          </span>
+                          {isCurrentUser && (
+                            <span className="rounded bg-[#F5E8D5] px-1.5 py-0.5 text-[10px] font-bold text-[#B07840]">
+                              나
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-[#C0AE9E]">이번 달 {member.monthlyPosts}개</p>
+                      </div>
+
+                      {/* streak */}
+                      <div className="text-right">
+                        <p className="text-[12px] font-bold text-[#D06530]">🔥 {member.weeklyStreak || 0}일</p>
+                        <p className="text-[10px] text-[#C0B4A8]">이번 주</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {hasMoreMembers && (
               <button
                 onClick={() => setVisibleMemberCount((prev) => prev + 10)}
-                className="text-sm font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full hover:bg-gray-200 transition-colors"
+                className="mt-3 w-full rounded-xl py-2 text-[13px] font-semibold text-[#B09080] transition-colors hover:bg-[#FAF5F0]"
               >
                 더 보기
               </button>
-            </div>
-          )}
-        </section>
+            )}
+          </div>
 
-        {/* 하단: 모임 전용 피드 */}
-        <section className="bg-white p-6 sm:rounded-[20px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] border-y sm:border border-gray-100 min-h-[300px]">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            📸 이번 달 모임 인증 피드
-          </h3>
+          {/* ── 구분선 ── */}
+          <div className="mx-5 border-t border-[#F0EAE2]" />
 
-          {isFeedLoading && (
-            <div className="text-center py-10 text-gray-500">
-              피드를 불러오는 중...
-            </div>
-          )}
+          {/* ── 이번 달 은혜 나눔 피드 ── */}
+          <div className="px-5 py-5">
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-wider text-[#C09060]">
+              이번 달 은혜 나눔 피드
+            </p>
 
-          {!isFeedLoading &&
-            (!feedData?.content || feedData.content.length === 0) && (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="text-4xl mb-4">😶</div>
-                <p className="text-gray-500 text-sm">
-                  아직 이번 달 인증글이 없습니다.
+            {isFeedLoading && (
+              <p className="py-8 text-center text-sm text-[#C0B0A0]">불러오는 중...</p>
+            )}
+
+            {!isFeedLoading && (!feedData?.content || feedData.content.length === 0) && (
+              <div className="flex flex-col items-center gap-2 py-10 text-center">
+                <span className="text-3xl">🙂</span>
+                <p className="text-sm text-[#B8A898]">
+                  아직 이번 달에 나눈 은혜가 없어요.
                   <br />
-                  모임원들의 첫 번째 오운완을 기다려보세요!
+                  첫 번째 은혜를 나눠보세요!
                 </p>
               </div>
             )}
 
-          <div className="divide-y divide-gray-100">
-            {feedData?.content?.map((post: PostRes) => (
-              <div key={post.id} className="py-6 first:pt-0">
-                <FeedPost post={post} />
-              </div>
-            ))}
+            <div className="divide-y divide-[#F5EFE8]">
+              {feedData?.content?.map((post: PostRes) => (
+                <div key={post.id} className="py-5 first:pt-0">
+                  <FeedPost post={post} />
+                </div>
+              ))}
+            </div>
           </div>
-        </section>
+
+        </div>
       </div>
 
       {isSettingModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl max-h-[90vh] overflow-y-auto scrollbar-hide">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">모임 설정</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(34,21,12,0.58)] px-4">
+          <div className="scrollbar-hide max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-[#ECDAC7] bg-[linear-gradient(180deg,#FFFDFB_0%,#F6EBDD_100%)] p-6 shadow-[0_24px_60px_rgba(78,48,25,0.2)]">
+            <h2 className="mb-4 text-xl font-bold text-[#4F3422]">모임 설정</h2>
 
             {isLeader && (
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">
+                  <label className="mb-1 block text-sm font-bold text-[#6B4D38]">
                     모임 이름
                   </label>
                   <input
                     type="text"
-                    className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900 ${
+                    className={`w-full rounded-xl border bg-white/85 px-4 py-3 font-medium text-[#4F3422] outline-none transition-colors focus:border-theme focus:ring-1 focus:ring-theme ${
                       isNameInvalid ? "border-red-300" : "border-gray-200"
                     }`}
                     value={editName}
@@ -643,12 +589,12 @@ export default function MoimDetailPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">
+                  <label className="mb-1 block text-sm font-bold text-[#6B4D38]">
                     모임 소개글
                   </label>
                   <textarea
                     rows={3}
-                    className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900 resize-none ${
+                    className={`w-full resize-none rounded-xl border bg-white/85 px-4 py-3 font-medium text-[#4F3422] outline-none transition-colors focus:border-theme focus:ring-1 focus:ring-theme ${
                       isDescriptionInvalid
                         ? "border-red-300"
                         : "border-gray-200"
@@ -664,29 +610,29 @@ export default function MoimDetailPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">
+                  <label className="mb-1 block text-sm font-bold text-[#6B4D38]">
                     최대 인원 제한 (명)
                   </label>
                   <input
                     type="number"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
+                    className="w-full rounded-xl border border-[#E7D8C7] bg-white/85 px-4 py-3 font-medium text-[#4F3422] outline-none transition-colors focus:border-theme focus:ring-1 focus:ring-theme"
                     value={editMaxMember}
                     onChange={(e) => setEditMaxMember(e.target.value)}
                   />
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="mt-1 text-xs text-[#A38B77]">
                     현재 모임 인원({moimDetail.memberCount}명)보다 작게 설정할
                     수 없습니다.
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-gray-100">
-                  <div className="flex items-center justify-between mb-3 mt-2">
-                    <label className="text-sm font-bold text-gray-700">
+                <div className="border-t border-[#E9DDCF] pt-2">
+                  <div className="mb-3 mt-2 flex items-center justify-between">
+                    <label className="text-sm font-bold text-[#6B4D38]">
                       비공개 모임 여부
                     </label>
                     <button
                       type="button"
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${editIsPrivate ? "bg-theme" : "bg-gray-300"}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${editIsPrivate ? "bg-theme" : "bg-[#D8C5B2]"}`}
                       onClick={() => setEditIsPrivate(!editIsPrivate)}
                     >
                       <span
@@ -697,12 +643,12 @@ export default function MoimDetailPage() {
 
                   {editIsPrivate && (
                     <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <label className="block text-sm font-bold text-gray-700 mb-1">
+                      <label className="mb-1 block text-sm font-bold text-[#6B4D38]">
                         초대 비밀번호
                       </label>
                       <input
                         type="password"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-theme focus:ring-1 focus:ring-theme transition-colors font-medium text-gray-900"
+                        className="w-full rounded-xl border border-[#E7D8C7] bg-white/85 px-4 py-3 font-medium text-[#4F3422] outline-none transition-colors focus:border-theme focus:ring-1 focus:ring-theme"
                         value={editPassword}
                         onChange={(e) => setEditPassword(e.target.value)}
                         placeholder="비밀번호를 입력하세요"
@@ -717,14 +663,14 @@ export default function MoimDetailPage() {
             )}
 
             <div
-              className={`pt-2 border-t border-gray-100 mb-6 ${!isLeader && "border-t-0"}`}
+              className={`mb-6 border-t border-[#E9DDCF] pt-2 ${!isLeader && "border-t-0"}`}
             >
-              <h3 className="text-sm font-bold text-red-500 mb-3 mt-4">
+              <h3 className="mb-3 mt-4 text-sm font-bold text-red-500">
                 위험 구역
               </h3>
               <div className="space-y-2">
                 {isLeader && manageableMembers.length > 0 && (
-                  <div className="rounded-xl bg-red-50 overflow-hidden">
+                  <div className="overflow-hidden rounded-xl bg-[#FFF1EE]">
                     <button
                       type="button"
                       onClick={() => setIsMemberManagementOpen((prev) => !prev)}
@@ -752,11 +698,11 @@ export default function MoimDetailPage() {
                     </button>
 
                     {isMemberManagementOpen && (
-                      <div className="bg-white/70 px-3 pb-3 space-y-2 max-h-56 overflow-y-auto">
+                      <div className="max-h-56 space-y-2 overflow-y-auto bg-white/70 px-3 pb-3">
                         {manageableMembers.map((m: any) => (
                           <div
                             key={m.id}
-                            className="flex items-center justify-between p-3 bg-white rounded-xl border border-red-100"
+                            className="flex items-center justify-between rounded-xl border border-red-100 bg-white p-3"
                           >
                             <div className="flex items-center gap-2">
                               {m.profileImageUrl ? (
@@ -766,11 +712,11 @@ export default function MoimDetailPage() {
                                   alt=""
                                 />
                               ) : (
-                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EBD9C7] text-xs font-bold text-[#8B6B55]">
                                   {(m.name || "?")[0].toUpperCase()}
                                 </div>
                               )}
-                              <span className="text-sm font-medium text-gray-800">
+                              <span className="text-sm font-medium text-[#5A3C28]">
                                 {m.name}
                               </span>
                             </div>
@@ -862,7 +808,7 @@ export default function MoimDetailPage() {
 
             <div className="flex gap-2">
               <button
-                className="flex-1 py-3.5 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                className="flex-1 rounded-xl bg-[#EFE0CF] py-3.5 font-bold text-[#836550] transition-colors hover:bg-[#E7D3BF]"
                 onClick={() => setIsSettingModalOpen(false)}
               >
                 닫기
