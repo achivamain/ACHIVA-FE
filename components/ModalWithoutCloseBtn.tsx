@@ -3,7 +3,6 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect } from "react";
 // import { createPortal } from "react-dom";
 
 type ModalProps = {

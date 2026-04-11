@@ -4,7 +4,10 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import Footer from "@/components/Footer";
-import FeedTabs, { type FeedTab } from "@/features/feed/FeedTabs";
+import FeedTabs, {
+  defaultFeedTab,
+  type FeedTab,
+} from "@/features/feed/FeedTabs";
 import FeedList from "@/features/feed/FeedList";
 import { TextLogo } from "@/components/Logo";
 import { LoadingIcon, SideBarHeartIcon } from "@/components/Icons";
@@ -24,7 +27,7 @@ const refreshIndicator = (
 );
 
 export default function MobileFeedPage() {
-  const [activeTab, setActiveTab] = useState<FeedTab>("전체");
+  const [activeTab, setActiveTab] = useState<FeedTab>(defaultFeedTab);
   const [isCheerOpen, setIsCheerOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -37,11 +40,11 @@ export default function MobileFeedPage() {
     <div className="w-full">
       <div className="sticky top-0 bg-white z-50">
         <div className="flex items-center justify-between px-5 py-4">
-          <TextLogo />
+          <TextLogo width={108} />
           <button
             onClick={() => setIsCheerOpen(true)}
             className="flex items-center gap-1 p-1.5 rounded-full hover:bg-[#412A2A]/5 transition-colors"
-            aria-label="응원 알림 열기"
+            aria-label="나눔 알림 열기"
           >
             <SideBarHeartIcon fill={false} />
           </button>
@@ -63,7 +66,7 @@ export default function MobileFeedPage() {
 
       <AnimatePresence>
         {isCheerOpen && (
-          <Drawer title="응원" onClose={() => setIsCheerOpen(false)}>
+          <Drawer title="나눔" onClose={() => setIsCheerOpen(false)}>
             <Notifications />
           </Drawer>
         )}

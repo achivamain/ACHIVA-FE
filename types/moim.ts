@@ -1,5 +1,3 @@
-import { Category } from "./Categories";
-
 export type MoimMemberRole = "LEADER";
 
 export type MoimMember = {
@@ -20,7 +18,6 @@ export type Moim = {
   name: string;
   description: string;
   score: number;
-  categories: Category[];
   leaderName: string;
   memberCount: number;
   maxMember: number;

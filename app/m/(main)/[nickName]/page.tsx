@@ -5,11 +5,11 @@ import Posts from "@/features/user/Posts";
 import { auth } from "@/auth";
 import Logout from "@/components/Logout";
 import { notFound } from "next/navigation";
-import { getSummeryData } from "@/lib/getData";
-import { getUser, isOwner } from "@/lib/getUser";
-import { MobileProfileSummary } from "@/features/home/ProfileSummary";
+import { getUser } from "@/lib/getUser";
 import WeeklyCalendar from "@/features/user/WeeklyCalendar";
 import { looksLikeStaticAssetPathSegment } from "@/lib/routeGuards";
+import MyAchievementsSummary from "@/features/user/MyAchievementsSummary";
+import { getMemberDetail } from "@/lib/server/getMemberDetail";
 
 export default async function Page({
   params,
@@ -71,22 +71,16 @@ export default async function Page({
       return data as FriendData[];
     }
 
-    const [user, isMyProfile] = await Promise.all([
-      getUser(nickName, token!),
-      isOwner(nickName, token!),
-    ]);
+    const user = await getUser(nickName, token!);
+    const isMyProfile =
+      decodeURIComponent(nickName) === user.nickName && currentUser?.id === user.id;
 
-    const [myFriends, myPendingFriends, summaryResult] = await Promise.all([
+    const [myFriends, myPendingFriends, memberDetail] = await Promise.all([
       getMyFriends(),
       getMyPendingFriends(),
-      isMyProfile ? getSummeryData(token!) : null, // 불필요한 api 호출 방지
+      getMemberDetail(user.id, token!),
     ]);
     const myAllFriends = [...myFriends, ...myPendingFriends];
-    const mySummaryData = summaryResult?.mySummaryData ?? {
-      letters: 0,
-      count: 0,
-      points: 0,
-    };
     return (
       <div className="flex-1 w-full flex pb-22 flex-col">
         <div className="flex-1 flex flex-col mx-auto w-full max-w-160 gap-4">
@@ -98,27 +92,17 @@ export default async function Page({
           <div className="px-5">
             <WeeklyCalendar userId={user.id} />
           </div>
-          {isMyProfile && (
-            <div className="px-5">
-              <div className="flex flex-col w-full max-w-[844px] bg-white rounded-[20px] py-5 px-4 sm:py-6 sm:px-8 shadow-sm border border-gray-100 transition-all hover:shadow-md">
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h3 className="font-bold text-[16px] sm:text-[18px] text-gray-900 tracking-tight flex items-center gap-1.5">
-                      올해의 기록 <span className="text-xl">🏆</span>
-                    </h3>
-                  </div>
-                  <div className="bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
-                    <span className="text-[12px] text-orange-600 font-medium">
-                      꾸준한 기록의 발자취!
-                    </span>
-                  </div>
-                </div>
-                <MobileProfileSummary summaryData={mySummaryData} />
-              </div>
-            </div>
-          )}
+          <MyAchievementsSummary
+            totalCount={memberDetail.articleCount}
+            streakWeeks={memberDetail.continuousGoalWeeks}
+            totalCharacterCount={memberDetail.totalCharacterCountFrom2025}
+            totalCheeringScore={
+              memberDetail.totalSendingCheeringScore +
+              memberDetail.totalReceivingCheeringScore
+            }
+          />
           <div className="flex-1 flex flex-co pb-8">
-            <Posts userId={user.id} />
+            <Posts userId={user.id} isMyProfile={isMyProfile} />
           </div>
         </div>
         <Footer />

@@ -8,19 +8,20 @@ import MobileHeader from "@/components/MobileHeader";
 import Container from "@/features/auth/Container";
 import { TextLogo } from "@/components/Logo";
 import Terms from "@/features/auth/Terms";
-import CategoryForm, { CategoryNextButton } from "@/features/auth/CategoryForm";
-import ProfileImageForm from "@/features/auth/ProfileImageForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
-import OathForm from "@/features/auth/OathForm";
+import NicknameForm from "@/features/auth/NicknameForm";
+import OrganizationForm from "@/features/auth/OrganizationForm";
 import ProgressIndicator from "@/features/auth/ProgressIndicator";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
   const handlePrevStep = useSignupStepStore.use.handlePrevStep();
+
   let containerHeight = "h-151";
   let content;
+
   switch (currentStep) {
-    case 2: // 약관
+    case 2:
       containerHeight = "h-auto";
       content = (
         <>
@@ -31,7 +32,7 @@ export default function Page() {
         </>
       );
       break;
-    case 3: // 생일
+    case 3:
       content = (
         <>
           <div className="hidden sm:block mb-10">
@@ -41,35 +42,38 @@ export default function Page() {
         </>
       );
       break;
-    case 4: // 프로필사진
+    case 4:
       content = (
         <>
           <div className="hidden sm:block mb-10">
             <TextLogo />
           </div>
-          <ProfileImageForm />
+          <NicknameForm />
         </>
       );
       break;
-    case 5: // 카테고리
+    case 5:
+      containerHeight = "h-auto";
       content = (
         <>
           <div className="hidden sm:block mb-10">
             <TextLogo />
           </div>
-          <CategoryForm />
+          <OrganizationForm />
         </>
       );
       break;
-    case 6: // 서약서
+    default:
+      containerHeight = "h-auto";
       content = (
         <>
-          <div className="hidden sm:block">
+          <div className="hidden sm:block mb-10">
             <TextLogo />
           </div>
-          <OathForm />
+          <Terms />
         </>
       );
+      break;
   }
 
   return (
@@ -78,12 +82,13 @@ export default function Page() {
         <div className="overflow-x-hidden w-full min-h-dvh flex flex-col gap-3 items-center pt-15 sm:pt-0 justify-start sm:justify-center">
           <div className="w-full fixed top-0 left-0 z-50">
             <MobileHeader
-              onClick={currentStep !== 0 ? handlePrevStep : undefined}
-              rightElement={
-                currentStep === 5 ? <CategoryNextButton /> : undefined
-              }
+              onClick={currentStep !== 2 ? handlePrevStep : undefined}
             >
-              <ProgressIndicator currentStep={currentStep} />
+              <ProgressIndicator
+                currentStep={currentStep}
+                totalSteps={4}
+                startStep={2}
+              />
             </MobileHeader>
           </div>
           <Container classes={containerHeight}>

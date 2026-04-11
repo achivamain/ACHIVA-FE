@@ -1,11 +1,7 @@
 import Logout from "@/components/Logout";
-import { Category } from "@/types/Categories";
 import { MyCategorys } from "@/features/home/MyCategorys";
-import HomeWeeklyPlanner from "@/features/home/HomeWeeklyPlanner";
-import LiveActivityTicker from "@/features/home/LiveActivityTicker";
+import HomeRecordCalendar from "@/features/home/HomeRecordCalendar";
 import MyRecordArchive from "@/features/home/MyRecordArchive";
-import MyAchievementsSummary from "@/features/home/MyAchievementsSummary";
-import AiReportWidget from "@/features/home/AiReportWidget";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
 import { notFound, redirect } from "next/navigation";
@@ -31,40 +27,26 @@ export default async function MobileHomePageRoute({
       categoryCounts,
       weeklyCategoryCounts,
       categoryCharCounts,
-      weeklyArticleCount,
-      streakWeeks,
     } = await getHomeData(user.id, token);
 
     return (
       <div className="min-h-dvh w-full pb-[104px] flex flex-col">
-        <div className="px-5 py-5 flex items-end justify-between">
-          <h1 className="text-[22px] font-black tracking-tight text-gray-900 leading-none">
-            🏠 홈
-          </h1>
+        <div className="pt-6 pb-2 px-5">
+          <h2 className="text-[24px] font-extrabold text-[#3A2418]">
+            안녕하세요, {decodeURIComponent(nickName)} 님! ✨
+          </h2>
+          <p className="text-[14px] leading-[20px] text-[#8A7565] mt-1.5">
+            오늘도 은혜가 풍성한 하루 되시기를 축복합니다!
+          </p>
         </div>
-        <LiveActivityTicker />
-        <div className="h-6" />
+        <div className="h-4" />
         <MyCategorys
-          myCategories={user.categories}
           categoryCounts={categoryCounts}
           weeklyCategoryCounts={weeklyCategoryCounts}
           categoryCharCounts={categoryCharCounts}
         />
         <div className="h-6" />
-        <HomeWeeklyPlanner
-          userId={user.id}
-          categories={user.categories as Category[]}
-          categoryCounts={categoryCounts}
-        />
-        <div className="h-6" />
-        <MyAchievementsSummary
-          userId={user.id}
-          totalCount={user.articleCount}
-          streakWeeks={streakWeeks}
-          thisWeekCount={weeklyArticleCount}
-        />
-        <div className="h-6" />
-        <AiReportWidget userId={user.id} />
+        <HomeRecordCalendar userId={user.id} />
         <div className="h-6" />
         <MyRecordArchive userId={user.id} />
         <div className="h-10"></div>

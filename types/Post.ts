@@ -34,6 +34,7 @@ export type CategoryCharCount = {
 
 export type BackgroundColor =
   | "#f9f9f9"
+  | "#F0E8E0"
   | "#000000"
   | "#412A2A"
   | "#A6736F"
@@ -51,17 +52,26 @@ export type PostRes = {
   memberNickName: string;
   memberProfileUrl: string;
   memberArticleCount?: number;
-  backgroundColor: BackgroundColor;
+  backgroundColor: BackgroundColor | null;
   authorCategorySeq: number;
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
   weeklyWorkoutCount: number;
   continuousGoalWeeks: number;
   cheerings?: Cheering[];
-  bookArticle?: {
-    bookId: string;
-    bookTitle: string;
-  }[];
+};
+
+export type ScriptureReadingPayload = {
+  scriptureId: string;
+  startChapter: number;
+  endChapter: number;
+  completedChapters: number;
+  readAt?: string;
+};
+
+export type ScriptureReadingPostRes = PostRes & {
+  category: "성경 일독";
+  scriptureReading: ScriptureReadingPayload;
 };
 
 export type Question = {

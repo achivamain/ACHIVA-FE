@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { categories, type Category } from "@/types/Categories";
 import { BackIcon } from "@/components/Icons";
 
 export default function MoimCreatePage() {
@@ -10,23 +9,13 @@ export default function MoimCreatePage() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [maxMember, setMaxMember] = useState(10);
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
 
-  const toggleCategory = (cat: Category) => {
-    if (selectedCategories.includes(cat)) {
-      setSelectedCategories((prev) => prev.filter((c) => c !== cat));
-    } else {
-      setSelectedCategories((prev) => [...prev, cat]);
-    }
-  };
-
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return alert("모임 이름을 입력해주세요.");
-    if (selectedCategories.length === 0) return alert("최소 1개의 카테고리를 선택해주세요.");
     if (isPrivate && !password) return alert("비밀번호를 입력해주세요.");
 
     try {
@@ -39,7 +28,6 @@ export default function MoimCreatePage() {
           maxMember,
           isPrivate,
           password,
-          categories: selectedCategories,
         }),
       });
 
@@ -76,7 +64,7 @@ export default function MoimCreatePage() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">모임 이름 <span className="text-red-500">*</span></label>
             <input
               type="text"
-              placeholder="예) 강남구 불꽃 러닝 크루"
+              placeholder="예) 강남구 불꽃 청년 구역"
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={30}
@@ -113,29 +101,6 @@ export default function MoimCreatePage() {
              </select>
           </div>
 
-          {/* 카테고리 선택 */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              운동 카테고리 <span className="text-red-500">*</span> <span className="text-gray-400 font-normal text-xs ml-1">(복수 선택 가능)</span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => toggleCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                    selectedCategories.includes(cat)
-                      ? "bg-theme text-white border-theme"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* 공개 여부 */}
           <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
             <div className="flex justify-between items-center mb-1">
@@ -169,9 +134,9 @@ export default function MoimCreatePage() {
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-white border-t border-gray-100 lg:left-auto lg:w-[calc(100vw-250px)] lg:max-w-[700px] xl:max-w-[900px]">
         <button
           onClick={handleCreate}
-          disabled={!name.trim() || selectedCategories.length === 0}
+          disabled={!name.trim()}
           className={`w-full py-4 rounded-xl font-bold text-lg transition-colors shadow-md ${
-            !name.trim() || selectedCategories.length === 0
+            !name.trim()
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-theme text-white hover:bg-[#322020]"
           }`}

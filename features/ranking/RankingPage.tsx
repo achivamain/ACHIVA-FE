@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import ProfileImg from "@/components/ProfileImg";
 import { categories as allCategories } from "@/types/Categories";
@@ -13,9 +12,6 @@ import {
   type CrewRankingItem,
   type OverallRankingItem,
 } from "@/lib/ranking";
-
-type RankTab = "전체" | "관심운동" | "크루";
-type InterestCategoryView = "all" | "interest";
 
 // 기록 0회인 사람/모임 보이게 할 지 설정 
 const SHOW_INACTIVE_OVERALL_RANKING = false;
@@ -84,7 +80,7 @@ function EmptyState({ label }: { label: string }) {
     <div className="flex flex-col items-center justify-center py-20 gap-2.5">
       <div className="text-4xl mb-1">🔥</div>
       <p className="text-gray-600 text-sm font-semibold">
-        아직 {label} 랭킹 데이터가 없어요
+        아직 {label} 온도 데이터가 없어요
       </p>
       <p className="text-gray-400 text-xs">당신이 첫 주인공이 되세요!</p>
     </div>
@@ -227,11 +223,6 @@ function CrewRankingRow({
             <span className="text-gray-400">/</span>
             <span className="font-semibold text-gray-600">{crew.maxMember}</span>
           </span>
-          {crew.categories.map((category) => (
-            <span key={category} className="text-gray-500">
-              #{category}
-            </span>
-          ))}
         </div>
       </div>
 
@@ -312,131 +303,50 @@ function OverallRanking() {
   );
 }
 
-function InterestRanking({
-  userCategories,
-  categoryView,
-}: {
-  userCategories: string[];
-  categoryView: InterestCategoryView;
-}) {
-  const availableCategories = useMemo(
-    () =>
-      categoryView === "all"
-        ? [...allCategories]
-        : userCategories,
-    [categoryView, userCategories],
-  );
-  const [selectedCat, setSelectedCat] = useState(availableCategories[0] ?? "");
-
-  useEffect(() => {
-    if (availableCategories.length === 0) {
-      if (selectedCat !== "") {
-        setSelectedCat("");
-      }
-      return;
-    }
-
-    if (!selectedCat || !availableCategories.includes(selectedCat)) {
-      setSelectedCat(availableCategories[0] ?? "");
-    }
-  }, [availableCategories, selectedCat]);
-
+function CategoryRanking({ category }: { category: string }) {
   const { data, isLoading, isError } = useQuery<CategoryRankingItem[]>({
-    queryKey: ["ranking", "category", selectedCat],
+    queryKey: ["ranking", "category", category],
     queryFn: async () =>
       (await fetchRankingData<CategoryRankingItem[]>(
-        `/api/ranking?category=${encodeURIComponent(selectedCat)}`,
+        `/api/ranking?category=${encodeURIComponent(category)}`,
       )) ?? [],
-    enabled: selectedCat.length > 0,
     staleTime: 60_000,
     retry: false,
   });
 
-  // 구조상 userCategories가 반드시 있어야 하긴 함
-  if (categoryView === "interest" && userCategories.length === 0) {
+  if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-2.5">
-        <div className="text-4xl mb-1">⚡</div>
-        <p className="text-gray-600 text-sm font-semibold">관심 운동을 설정해보세요</p>
-        <p className="text-gray-400 text-xs">
-          내 종목에서 어떤 기록이 쌓이고 있는지 확인할 수 있어요
-        </p>
-        <Link
-          href="/accounts/profile"
-          className="mt-2 text-xs font-bold text-[#412A2A] bg-[#412A2A]/5 px-4 py-2 rounded-full hover:bg-[#412A2A]/10 transition-colors"
-        >
-          프로필 편집하기 →
-        </Link>
+      <div className="flex flex-col mt-2 px-1">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <RankSkeleton key={index} />
+        ))}
       </div>
     );
   }
 
-  return (
-    <div className="flex flex-col mt-4">
-      <div
-        className="flex gap-2 overflow-x-auto px-4 pb-4"
-        style={{ scrollbarWidth: "none" }}
-      >
-        {availableCategories.map((category) => (
-          <button
-            key={category}
-            onClick={() => setSelectedCat(category)}
-            className={`relative flex-shrink-0 text-[12px] font-bold px-3.5 py-1.5 rounded-full transition-all duration-200 ${
-              selectedCat === category
-                ? "text-white shadow-sm"
-                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-            }`}
-          >
-            {selectedCat === category && (
-              <motion.span
-                layoutId="activeCatPill"
-                className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-red-500"
-                transition={{ type: "spring", stiffness: 450, damping: 32 }}
-              />
-            )}
-            <span className="relative">{category}</span>
-          </button>
-        ))}
-      </div>
+  if (isError || !data || data.length === 0) {
+    return <EmptyState label={category} />;
+  }
 
-      {isLoading ? (
-        <div className="px-1">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <RankSkeleton key={index} />
-          ))}
-        </div>
-      ) : isError || !data || data.length === 0 ? (
-        <EmptyState label={selectedCat} />
-      ) : (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedCat}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="px-1"
-          >
-            {data.map((user, index) => (
-              <UserRankingRow
-                key={user.memberId}
-                rank={user.rank}
-                nickName={user.nickName}
-                profileImageUrl={user.profileImageUrl}
-                metrics={[
-                  {
-                    key: "articleCount",
-                    text: `${selectedCat} 인증 ${user.articleCount}회`,
-                  },
-                ]}
-                metricLabel="인증"
-                metricValue={`${user.articleCount}회`}
-                index={index}
-              />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-      )}
+  return (
+    <div className="flex flex-col mt-2 px-1">
+      {data.map((user, index) => (
+        <UserRankingRow
+          key={user.memberId}
+          rank={user.rank}
+          nickName={user.nickName}
+          profileImageUrl={user.profileImageUrl}
+          metrics={[
+            {
+              key: "articleCount",
+              text: `${category} 인증 ${user.articleCount}회`,
+            },
+          ]}
+          metricLabel="인증"
+          metricValue={`${user.articleCount}회`}
+          index={index}
+        />
+      ))}
     </div>
   );
 }
@@ -469,7 +379,7 @@ function CrewRanking() {
   }
 
   if (isError || filteredData.length === 0) {
-    return <EmptyState label="크루" />;
+    return <EmptyState label="구역" />;
   }
 
   return (
@@ -493,19 +403,18 @@ type RankingPageProps = {
 
 export default function RankingPage({
   currentUserId: _currentUserId,
-  user,
+  user: _user,
   isMobile = false,
 }: RankingPageProps) {
-  const [activeTab, setActiveTab] = useState<RankTab>("전체");
-  const [interestCategoryView, setInterestCategoryView] =
-    useState<InterestCategoryView>("interest");
-  const userCategories = useMemo(() => user?.categories ?? [], [user]);
+  const [activeTab, setActiveTab] = useState<string>("전체");
 
   const tabDescription = useMemo(() => {
     if (activeTab === "전체") return "열정온도 기준";
-    if (activeTab === "관심운동") return "인증 수 기준";
-    return "열정온도 기준";
+    if (activeTab === "구역") return "열정온도 기준";
+    return "인증 수 기준";
   }, [activeTab]);
+
+  const tabs = useMemo(() => ["전체", ...allCategories, "구역"], []);
 
   return (
     <div className="w-full flex flex-col bg-white min-h-screen">
@@ -516,20 +425,23 @@ export default function RankingPage({
       >
         <div className="px-5 mb-4 flex items-end justify-between">
           <h1 className="text-[22px] font-black tracking-tight text-gray-900 leading-none">
-            🔥 랭킹
+            🌡️ 온도
           </h1>
           <span className="text-[11px] text-gray-300 font-medium pb-px">
             {tabDescription}
           </span>
         </div>
 
-        <div className="flex items-end justify-between px-5 gap-3">
-          <div className="flex gap-6">
-            {(["전체", "관심운동", "크루"] as RankTab[]).map((tab) => (
+        <div className="flex items-end px-5">
+          <div
+            className="flex gap-6 overflow-x-auto whitespace-nowrap hide-scrollbar"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`relative pb-3 text-sm font-bold transition-colors ${
+                className={`relative pb-3 text-sm font-bold transition-colors flex-shrink-0 ${
                   activeTab === tab ? "text-gray-900" : "text-gray-400 hover:text-gray-600"
                 }`}
               >
@@ -544,23 +456,6 @@ export default function RankingPage({
               </button>
             ))}
           </div>
-
-          {activeTab === "관심운동" && (
-            <div className="mb-1">
-              <button
-                onClick={() =>
-                  setInterestCategoryView((prev) =>
-                    prev === "all" ? "interest" : "all",
-                  )
-                }
-                className="rounded-full bg-gray-100 px-3 py-1.5 text-[11px] font-bold text-gray-600 transition-colors hover:bg-gray-200"
-              >
-                {interestCategoryView === "all"
-                  ? "관심 카테고리 보기"
-                  : "전체 카테고리 보기"}
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -572,40 +467,22 @@ export default function RankingPage({
         }`}
       >
         <AnimatePresence mode="wait">
-          {activeTab === "전체" ? (
-            <motion.div
-              key="overall"
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.2 }}
-            >
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: 0.2 }}
+            className="w-full"
+          >
+            {activeTab === "전체" ? (
               <OverallRanking />
-            </motion.div>
-          ) : activeTab === "관심운동" ? (
-            <motion.div
-              key="interest"
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <InterestRanking
-                userCategories={userCategories}
-                categoryView={interestCategoryView}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="crew"
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 8 }}
-              transition={{ duration: 0.2 }}
-            >
+            ) : activeTab === "구역" ? (
               <CrewRanking />
-            </motion.div>
-          )}
+            ) : (
+              <CategoryRanking category={activeTab} />
+            )}
+          </motion.div>
         </AnimatePresence>
       </div>
     </div>

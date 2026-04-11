@@ -7,14 +7,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Category } from "@/types/Categories";
+import { createDefaultPostPages } from "@/lib/postDefaults";
 
 export function MyCategorys({
-  myCategories,
   categoryCounts,
   weeklyCategoryCounts,
   categoryCharCounts = [],
 }: {
-  myCategories: string[];
   categoryCounts: CategoryCount[];
   weeklyCategoryCounts: CategoryCount[];
   categoryCharCounts?: CategoryCharCount[];
@@ -22,100 +21,126 @@ export function MyCategorys({
   const pathname = usePathname();
   const resetPost = useDraftPostStore.use.resetPost();
   const setPost = useDraftPostStore.use.setPost();
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const isMobilePath = pathSegments[0] === "m";
+  const nickName = isMobilePath ? pathSegments[1] : pathSegments[0];
   const createPostPath = pathname.startsWith("/m/")
     ? "/m/post/create"
     : "/post/create";
+  const bibleReadingPath = nickName
+    ? `${isMobilePath ? "/m" : ""}/${nickName}/bible`
+    : createPostPath;
 
-  const categorysData = myCategories
-    .map((cat) => {
-      const countData = categoryCounts.find((i) => i.category == cat);
-      const charCountData = categoryCharCounts.find((i) => i.category == cat);
-      const weeklyCountData = weeklyCategoryCounts.find(
-        (i) => i.category == cat,
-      );
+  const totalRecords = categoryCounts.reduce(
+    (acc, curr) => acc + Number(curr.count ?? 0),
+    0,
+  );
 
-      return {
-        category: cat,
-        count: Number(countData?.count ?? 0),
-        charCount: Number(charCountData?.characterCount ?? 0),
-        weeklyCount: Number(weeklyCountData?.count ?? 0),
-      };
-    })
-    .sort((a, b) => {
-      if (b.count !== a.count) return b.count - a.count;
-      if (b.charCount !== a.charCount) return b.charCount - a.charCount;
-      return a.category.localeCompare(b.category, "ko");
-    });
+  const categorysData = categories.map((cat) => {
+    // 기존 데이터(일반, 기도 등)는 아직 합산하지 않고, 우선 새 카테고리 3개 기준으로 분리합니다.
+    const countData = categoryCounts.find((i) => i.category === cat);
+    const charCountData = categoryCharCounts?.find((i) => i.category === cat);
+    const weeklyCountData = weeklyCategoryCounts.find(
+      (i) => i.category === cat,
+    );
+
+    return {
+      category: cat,
+      count: Number(countData?.count ?? 0),
+      charCount: Number(charCountData?.characterCount ?? 0),
+      weeklyCount: Number(weeklyCountData?.count ?? 0),
+    };
+  });
 
   const handleCategoryClick = (cat: { category: string; count: number }) => {
+    if (cat.category === "성경 일독") {
+      return;
+    }
+
+    const selectedCategory = categories.find((i) => i === cat.category);
+
     resetPost();
     setPost({
-      category: categories.find((i) => i === cat.category),
+      category: selectedCategory,
       categoryCount: cat.count,
+      title: "",
+      pages: createDefaultPostPages(selectedCategory),
     });
   };
 
   return (
     <section className="mx-5 sm:mx-auto sm:w-full sm:max-w-[640px]">
       <div className="flex w-full min-w-0 flex-col rounded-[20px] border border-gray-100 bg-white px-4 py-5 shadow-sm sm:px-5 sm:py-6">
-        <div className="mb-4 -mt-2 flex items-center justify-between">
-          <h3 className="text-[18px] font-bold tracking-tight text-[#4A433D]">
-            오늘의 운동 기록
-          </h3>
-          <Link
-            href="/categories"
-            className="flex items-center justify-center rounded-full border border-gray-200 bg-white px-4 py-1.5 text-[13px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
-          >
-            종목 설정
-          </Link>
+        <div className="mb-1 flex items-center justify-between">
+          <div>
+            <h3 className="text-[18px] font-bold tracking-tight text-[#4A433D]">
+              오늘의 은혜 기록 쓰기
+            </h3>
+            <p className="mt-1 text-[12px] font-medium text-[#9D8F83]">
+              카테고리를 고르면 바로 글쓰기가 시작돼요
+            </p>
+          </div>
         </div>
 
-        <div className="overflow-x-auto pb-1 -mx-4 sm:-mx-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <div className="flex min-w-max items-start gap-4 pr-1 px-4 sm:px-5 sm:gap-5">
+        {/* 현 구조상으로는 빌 이유가 없음 */}
+        {categorysData.length === 0 ? (
+          <div className="rounded-2xl bg-[#F9F6F2] px-5 py-8 text-center">
+            <p className="text-sm font-semibold text-[#4A433D]">
+              아직 기록된 카테고리가 없어요.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-[#8A817A]">
+              첫 기록을 남기면 여기에서 카테고리별로 바로 이어서 작성할 수
+              있어요.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-2">
             {categorysData.map((cat) => {
               const imageSrc = categoryImages[cat.category as Category];
               const hasAnyPost = cat.count > 0;
-              const isActiveThisWeek = cat.weeklyCount > 0;
-              const ringClass = hasAnyPost
-                ? "from-[#8A4314] via-[#D96B2B] to-[#F6C37B]"
-                : "from-[#8A94A3] to-[#E2E8F0]";
-              const badgeLabel = hasAnyPost ? `🔥 ${cat.count}` : "New";
 
               return (
                 <Link
                   key={cat.category}
-                  href={createPostPath}
+                  href={
+                    cat.category === "성경 일독"
+                      ? bibleReadingPath
+                      : createPostPath
+                  }
                   onClick={() => handleCategoryClick(cat)}
-                  className="group flex w-[76px] cursor-pointer flex-col items-center gap-3 sm:w-[92px]"
+                  className="group relative flex flex-col items-center cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95"
                 >
-                  <div
-                    className={`relative flex h-[76px] w-[76px] items-center justify-center rounded-full bg-gradient-to-br ${ringClass} p-[2.5px] shadow-[0_10px_24px_rgba(0,0,0,0.10)] transition-transform duration-300 group-hover:scale-105 group-active:scale-95 sm:h-[92px] sm:w-[92px]`}
-                  >
+                  <div className="relative flex w-full flex-col items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-b from-[#E5C9C9] to-white p-3 shadow-sm ring-1 ring-black/5 aspect-[3/4]">
+                    {/* Badge */}
                     <div
-                      className={`absolute bottom-0 left-1/2 z-20 -translate-x-1/2 translate-y-[24%] whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-extrabold leading-none shadow-md ring-2 ring-white sm:px-3.5 sm:py-1.5 sm:text-[15px] ${
-                        isActiveThisWeek
-                          ? "bg-[#FFF2E8] text-[#C75B12]"
-                          : "bg-[#F6F7F9] text-[#7C8696]"
+                      className={`absolute right-2 top-2 z-20 flex h-6 w-[42px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-white/40 bg-white/28 text-[11px] font-bold tabular-nums backdrop-blur-md sm:h-7 sm:w-[48px] sm:text-[11px] ${
+                        hasAnyPost ? "text-[#7A5A50]" : "text-[#8D7B72]"
                       }`}
                     >
-                      {badgeLabel}
+                      {hasAnyPost ? (
+                        <span className="flex items-center">
+                          <span className="mr-[1px]">🔥</span>
+                          <span>{cat.count}</span>
+                        </span>
+                      ) : (
+                        "New"
+                      )}
                     </div>
 
-                    <div className="relative z-10 flex h-full w-full items-center justify-center rounded-full bg-[#FCFCFA] p-2.5 shadow-inner sm:p-3">
+                    {/* Image */}
+                    <div className="relative mt-1 flex h-[55%] w-full items-center justify-center">
                       {imageSrc && (
                         <Image
                           src={imageSrc}
                           alt={cat.category}
-                          width={60}
-                          height={60}
-                          className="h-full w-full object-contain drop-shadow-sm"
+                          fill
+                          className="object-contain drop-shadow-md scale-[1.4]"
                         />
                       )}
                     </div>
-                  </div>
 
-                  <div className="flex flex-col items-center">
-                    <span className="w-full truncate text-center text-[13px] font-semibold leading-tight text-gray-800 sm:text-[14px]">
+                    {/* Label */}
+                    <span className="mt-auto w-full text-center text-[13px] font-bold leading-tight text-[#4A433D] sm:text-[15px]">
                       {cat.category}
                     </span>
                   </div>
@@ -123,7 +148,7 @@ export function MyCategorys({
               );
             })}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

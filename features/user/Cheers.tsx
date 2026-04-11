@@ -1,5 +1,5 @@
 import type { CheerPoint } from "@/types/responses";
-import { cheeringMeta } from "../post/cheeringMeta";
+import { CHEERING_CATEGORIES, cheeringMeta } from "@/lib/cheering";
 
 export default function Cheers({
   type,
@@ -9,7 +9,7 @@ export default function Cheers({
   cheers: CheerPoint[];
 }) {
   const totalPoints = cheers.reduce((acc, cheer) => cheer.points + acc, 0);
-  const types = Object.keys(cheeringMeta) as (keyof typeof cheeringMeta)[];
+  const types = CHEERING_CATEGORIES;
   return (
     <div className="w-full flex flex-col gap-15 sm:gap-10">
       <div>

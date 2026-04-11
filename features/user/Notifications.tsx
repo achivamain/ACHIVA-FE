@@ -7,7 +7,7 @@ import type { PostRes } from "@/types/Post";
 import type { NotificationsRes } from "@/types/responses";
 import ProfileImg from "@/components/ProfileImg";
 import dateFormatter from "@/lib/dateFormatter";
-import { cheeringMeta } from "../post/cheeringMeta";
+import { cheeringMeta } from "@/lib/cheering";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -88,10 +88,11 @@ export default function Notifications() {
         </div>
       )}
       {notifications.length === 0 && !isLoading && (
-        <p className="flex flex-1 items-center justify-center text-center text-sm text-[#808080]">
-          아직 받은 응원이 없어요.
-        </p>
-      )}
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 font-medium text-[15px]">
+            아직 받은 나눔이 없어요.
+          </p>
+        </div>)}
       <ul className="w-full flex flex-col pb-8">
         {notifications.map((n, idx) => {
           const Icon = cheeringMeta[n.cheeringCategory].icon;
@@ -153,7 +154,7 @@ export default function Notifications() {
                     style={{ backgroundColor: color, borderColor: color }}
                     className="ml-auto flex shrink-0 items-center gap-[2px] rounded-full border px-3 py-1 text-[15px] text-white sm:gap-1 sm:text-base"
                   >
-                    <p>{n.cheeringCategory}</p>
+                    <p>{cheeringMeta[n.cheeringCategory].label}</p>
                     <Icon active />
                   </div>
                 </div>

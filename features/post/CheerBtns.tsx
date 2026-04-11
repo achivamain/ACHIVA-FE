@@ -1,10 +1,30 @@
 "use client";
 
 import type { Cheering } from "@/types/responses";
+import {
+  CHEERING_CATEGORIES,
+  type CheeringCategory,
+  cheeringMeta,
+} from "@/lib/cheering";
 import { useSession } from "next-auth/react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAnimate } from "motion/react";
-import { cheeringMeta } from "./cheeringMeta";
+
+type CheeringButtonState = {
+  active: boolean;
+  id: number | undefined;
+  isPending: boolean;
+};
+
+const createPendingState = (
+  isPending: boolean,
+): Record<CheeringCategory, CheeringButtonState> =>
+  Object.fromEntries(
+    CHEERING_CATEGORIES.map((type) => [
+      type,
+      { active: false, id: undefined, isPending },
+    ]),
+  ) as Record<CheeringCategory, CheeringButtonState>;
 
 export default function CheerBtns({
   postId,
@@ -16,59 +36,35 @@ export default function CheerBtns({
   const [scope, animate] = useAnimate();
   const { data: session } = useSession();
   const currentUserId = session?.user?.id;
-
-  // useMemo 안쓰면 랜더링 오류 나서 넣음
-  const types = useMemo(
-    () => Object.keys(cheeringMeta) as (keyof typeof cheeringMeta)[],
-    [],
+  const [cheeringsState, setCheeringsState] = useState(() =>
+    createPendingState(true),
   );
-  const initialCheeringsState = types.reduce<
-    Record<
-      string,
-      { active: boolean; id: number | undefined; isPending: boolean }
-    >
-  >((acc, type) => {
-    acc[type] = {
-      active: false,
-      id: undefined,
-      isPending: true,
-    };
-    return acc;
-  }, {});
-
-  const [cheeringsState, setCheeringsState] = useState(initialCheeringsState);
 
   useEffect(() => {
     if (!currentUserId) {
       return;
     }
-    const newCheeringsState = types.reduce<
-      Record<
-        string,
-        { active: boolean; id: number | undefined; isPending: boolean }
-      >
-    >((acc, type) => {
+    const newCheeringsState = createPendingState(false);
+    CHEERING_CATEGORIES.forEach((type) => {
       const cheering = cheerings.find(
-        (cheering) =>
-          cheering.cheeringCategory === type &&
-          cheering.senderId === currentUserId,
+        (item) =>
+          item.cheeringCategory === type && item.senderId === currentUserId,
       );
-      acc[type] = {
+      newCheeringsState[type] = {
         active: !!cheering,
         id: cheering?.id ?? undefined,
         isPending: false,
       };
-      return acc;
-    }, {});
+    });
     setCheeringsState(newCheeringsState);
-  }, [cheerings, currentUserId, types]);
+  }, [cheerings, currentUserId]);
 
   return (
     <div
       className="flex flex-nowrap w-full gap-[2px] sm:gap-2 items-center justify-center py-1 sm:py-3.5 overflow-hidden"
       ref={scope}
     >
-      {types.map((type) => {
+      {CHEERING_CATEGORIES.map((type) => {
         const active = cheeringsState[type].active;
         const pending = cheeringsState[type].isPending;
         const Icon = cheeringMeta[type].icon;
@@ -164,7 +160,7 @@ export default function CheerBtns({
             >
               <Icon active={active} />
             </div>
-            <p className="whitespace-nowrap truncate">{type}</p>
+            <p className="whitespace-nowrap truncate">{cheeringMeta[type].label}</p>
           </button>
         );
       })}

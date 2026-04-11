@@ -3,107 +3,88 @@
 import { AnimatePresence } from "motion/react";
 import { motion } from "motion/react";
 import { useSignupStepStore } from "@/store/SignupStore";
-import Footer from "@/components/Footer";
 import Container from "@/features/auth/Container";
 import Terms from "@/features/auth/Terms";
-import CategoryForm, { CategoryNextButton } from "@/features/auth/CategoryForm";
 import ProgressIndicator from "@/features/auth/ProgressIndicator";
-import ProfileImageForm from "@/features/auth/ProfileImageForm";
 import BirthdayForm from "@/features/auth/BirthdayForm";
-import OathForm from "@/features/auth/OathForm";
+import NicknameForm from "@/features/auth/NicknameForm";
+import OrganizationForm from "@/features/auth/OrganizationForm";
 import { BackIcon } from "@/components/Icons";
 
 export default function Page() {
   const currentStep = useSignupStepStore.use.currentStep();
   const handlePrevStep = useSignupStepStore.use.handlePrevStep();
+
   let containerHeight = "h-170";
   let content;
+
   switch (currentStep) {
-    case 2: // 약관
+    case 2:
       containerHeight = "min-h-170 h-auto";
-      content = (
-        <>
-          <Terms />
-        </>
-      );
+      content = <Terms />;
       break;
-    case 3: // 생일
-      content = (
-        <>
-          <BirthdayForm />
-        </>
-      );
+    case 3:
+      content = <BirthdayForm />;
       break;
-    case 4: // 프로필사진
-      content = (
-        <>
-          <ProfileImageForm />
-        </>
-      );
+    case 4:
+      content = <NicknameForm />;
       break;
-    case 5: // 카테고리
-      content = (
-        <>
-          <CategoryForm />
-        </>
-      );
+    case 5:
+      containerHeight = "min-h-170 h-auto";
+      content = <OrganizationForm />;
       break;
-    case 6: // 서약서
-      content = (
-        <>
-          <OathForm />
-        </>
-      );
+    default:
+      containerHeight = "min-h-170 h-auto";
+      content = <Terms />;
+      break;
   }
 
   return (
-    <>
-      <div className="min-h-dvh flex items-center justify-center">
-        <div className="overflow-x-hidden w-full min-h-dvh flex flex-col gap-3 items-center pt-15 sm:pt-0 justify-start sm:justify-center">
-          <Container classes={containerHeight}>
-            {/* 상단 헤더 */}
-            <div className="w-full flex items-center justify-between mb-4 relative">
-              <button
-                onClick={currentStep !== 2 ? handlePrevStep : undefined}
-                className={`p-2 -ml-2 rounded-full transition-colors ${
-                  currentStep !== 2 ? "hover:bg-gray-100" : "invisible"
-                }`}
-              >
-                <BackIcon />
-              </button>
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <ProgressIndicator currentStep={currentStep} />
-              </div>
-              <div className="min-w-10 flex justify-end">
-                {currentStep === 5 && <CategoryNextButton />}
-              </div>
+    <div className="min-h-dvh flex items-center justify-center">
+      <div className="overflow-x-hidden w-full min-h-dvh flex flex-col gap-3 items-center pt-15 sm:pt-0 justify-start sm:justify-center">
+        <Container classes={containerHeight}>
+          <div className="w-full flex items-center justify-between mb-4 relative">
+            <button
+              onClick={currentStep !== 2 ? handlePrevStep : undefined}
+              className={`p-2 -ml-2 rounded-full transition-colors ${
+                currentStep !== 2 ? "hover:bg-gray-100" : "invisible"
+              }`}
+            >
+              <BackIcon />
+            </button>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <ProgressIndicator
+                currentStep={currentStep}
+                totalSteps={4}
+                startStep={2}
+              />
             </div>
+            <div className="min-w-10 flex justify-end" />
+          </div>
 
-            {/* 메인 컨텐츠 영역 */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={
-                  currentStep !== 0
-                    ? {
-                        opacity: 0,
-                      }
-                    : false
-                }
-                animate={{
-                  opacity: 1,
-                }}
-                exit={{
-                  opacity: 0,
-                }}
-                className="w-full flex-1 flex flex-col min-h-0 overflow-hidden"
-              >
-                {content}
-              </motion.div>
-            </AnimatePresence>
-          </Container>
-        </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={
+                currentStep !== 0
+                  ? {
+                      opacity: 0,
+                    }
+                  : false
+              }
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              className="w-full flex-1 flex flex-col min-h-0"
+            >
+              {content}
+            </motion.div>
+          </AnimatePresence>
+        </Container>
       </div>
-    </>
+    </div>
   );
 }
