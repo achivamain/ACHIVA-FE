@@ -102,7 +102,7 @@ export default async function Page({
               memberDetail.totalReceivingCheeringScore
             }
           />
-          <div className="flex-1 flex flex-co pb-8">
+          <div className="flex-1 flex flex-col pb-8">
             <Posts userId={user.id} isMyProfile={isMyProfile} />
           </div>
         </div>

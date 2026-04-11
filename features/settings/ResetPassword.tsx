@@ -6,6 +6,7 @@ import { User } from "@/types/User";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { NextStepButton } from "../post/create/Buttons";
+import { toast } from "sonner";
 
 export default function ResetPassword() {
   const { data: currentUser } = useQuery({
@@ -148,7 +149,7 @@ export default function ResetPassword() {
               });
               setIsLoading(false);
               if (res.ok) {
-                alert("비밀번호가 변경되었습니다!");
+                toast.success("비밀번호가 변경되었습니다!");
               } else {
                 setErrors((prev) => ({
                   ...prev,

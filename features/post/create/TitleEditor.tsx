@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DraftPost } from "@/types/Post";
 import { getDefaultPostTitle } from "@/lib/postDefaults";
 import { buildUserPath } from "@/lib/nickname";
+import { queueToast } from "@/lib/queuedToast";
 
 export default function TitleEditor() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -62,6 +63,10 @@ export default function TitleEditor() {
         throw new Error("게시글 작성 중 에러");
       }
       if (currentUser?.nickName) {
+        queueToast({
+          type: "success",
+          message: "게시물 작성에 성공했어요.",
+        });
         window.location.href = buildUserPath(currentUser.nickName);
       }
     } catch (err) {

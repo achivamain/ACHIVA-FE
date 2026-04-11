@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { HorizontalThreeDotsIcon } from "@/components/Icons";
 import PostCountBadge from "@/components/PostCountBadge";
 import { buildUserPath, getDisplayNickName } from "@/lib/nickname";
+import { toast } from "sonner";
 
 const ModalWithoutCloseBtn = dynamic(
   () => import("@/components/ModalWithoutCloseBtn"),
@@ -98,8 +99,9 @@ export default function FeedPost({ post }: { post: PostRes }) {
                   }),
                 });
                 if (res.ok) {
-                  alert(`신고가 접수되었습니다.
-처리에는 최대 24시간이 소요됩니다.`);
+                  toast.success("신고가 접수되었습니다.", {
+                    description: "처리에는 최대 24시간이 소요됩니다.",
+                  });
                 } else {
                   alert("신고에 실패했습니다. 다시 시도해 주세요.");
                 }

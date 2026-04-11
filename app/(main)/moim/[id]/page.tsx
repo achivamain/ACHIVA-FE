@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FeedPost from "@/features/feed/FeedPost";
 import type { PostRes } from "@/types/Post";
 import { getDisplayNickName } from "@/lib/nickname";
+import { toast } from "sonner";
 
 export default function MoimDetailPage() {
   const params = useParams();
@@ -64,7 +65,7 @@ export default function MoimDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
       setIsSettingModalOpen(false);
-      alert("모임 설정이 변경되었습니다.");
+      toast.success("모임 설정이 변경되었습니다.");
     },
     onError: () => {
       alert("설정 변경 중 오류가 발생했습니다.");
@@ -89,7 +90,7 @@ export default function MoimDetailPage() {
       return res.json();
     },
     onSuccess: () => {
-      alert("멤버를 내보냈습니다.");
+      toast.success("멤버를 내보냈습니다.");
       queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
     },
     onError: (error: Error) => {
@@ -106,7 +107,7 @@ export default function MoimDetailPage() {
       return res.json();
     },
     onSuccess: () => {
-      alert("모임에서 탈퇴했습니다.");
+      toast.success("모임에서 탈퇴했습니다.");
       queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
       queryClient.invalidateQueries({ queryKey: ["moims"] });
       queryClient.invalidateQueries({ queryKey: ["myMoims"] });
@@ -134,7 +135,7 @@ export default function MoimDetailPage() {
       return res.json();
     },
     onSuccess: () => {
-      alert("모임에 가입했습니다!");
+      toast.success("모임에 가입했습니다!");
       queryClient.invalidateQueries({ queryKey: ["moimDetail", id] });
       queryClient.invalidateQueries({ queryKey: ["myMoims"] });
     },
@@ -150,7 +151,7 @@ export default function MoimDetailPage() {
       return res.json();
     },
     onSuccess: () => {
-      alert("모임이 삭제되었습니다.");
+      toast.success("모임이 삭제되었습니다.");
       queryClient.invalidateQueries({ queryKey: ["moims"] });
       queryClient.invalidateQueries({ queryKey: ["myMoims"] });
       router.push("/moim");
@@ -253,7 +254,7 @@ export default function MoimDetailPage() {
                 }
               } else {
                 navigator.clipboard?.writeText(shareUrl);
-                alert("초대 링크가 복사되었습니다! 🎉");
+                toast.success("초대 링크가 복사되었습니다! 🎉");
               }
             }}
             className="rounded-full bg-[#F7EBDD] p-1.5 text-[#A07652] transition-colors hover:bg-[#EFD9C4] hover:text-[#8D6038]"

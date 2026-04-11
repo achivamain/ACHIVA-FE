@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BackIcon } from "@/components/Icons";
+import { toast } from "sonner";
 
 export default function MoimCreatePage() {
   const router = useRouter();
@@ -38,7 +39,7 @@ export default function MoimCreatePage() {
         return;
       }
 
-      alert("모임이 생성되었습니다!");
+      toast.success("모임이 생성되었습니다!");
       router.push("/moim");
     } catch (err) {
       console.error(err);

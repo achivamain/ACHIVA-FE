@@ -152,7 +152,7 @@ export default function Posts({
       {!showBibleReadingPanel && (
         <div
           ref={containerRef}
-          className="grid grid-cols-3 border-l border-t border-gray-800"
+          className="grid grid-cols-3 border-gray-800"
         >
           {posts.map((post) => {
             return (

@@ -5,6 +5,7 @@ import Wrapper from "@/QueryClientProvider";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import AppToaster from "@/components/AppToaster";
 
 export const metadata: Metadata = {
   title: "나는오늘운동한다 | 운동 기록 SNS",
@@ -54,6 +55,7 @@ export default function RootLayout({
         <SessionProviderWrapper>
           <Wrapper>{children}</Wrapper>
         </SessionProviderWrapper>
+        <AppToaster />
 
         <Analytics />
       </body>
