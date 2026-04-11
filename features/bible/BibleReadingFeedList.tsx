@@ -13,14 +13,14 @@ export default function BibleReadingFeedList({
   onlyMine?: boolean;
 }) {
   const { posts } = useBibleReadingFeed();
-  const visiblePosts = onlyMine ? posts.filter((post) => post.isMine) : posts;
+  const visiblePosts = onlyMine ? posts.filter((post) => post.memberId === "me") : posts;
   const latestPosts = useMemo(
     () => getLatestBiblePostsByAuthor(visiblePosts),
     [visiblePosts],
   );
   const postsByAuthor = useMemo(() => {
     return visiblePosts.reduce<Record<string, typeof visiblePosts>>((acc, post) => {
-      const key = post.authorHandle || post.authorName;
+      const key = post.memberId || post.memberNickName;
       if (!acc[key]) {
         acc[key] = [];
       }
@@ -43,7 +43,7 @@ export default function BibleReadingFeedList({
         <BibleReadingFeedCard
           key={post.id}
           post={post}
-          authorPosts={postsByAuthor[post.authorHandle || post.authorName] ?? [post]}
+          authorPosts={postsByAuthor[post.memberId || post.memberNickName] ?? [post]}
         />
       ))}
     </div>

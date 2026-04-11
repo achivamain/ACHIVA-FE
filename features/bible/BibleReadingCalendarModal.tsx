@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   addMonths,
+  eachDayOfInterval,
   endOfMonth,
   endOfWeek,
   format,
@@ -13,10 +14,14 @@ import {
   startOfMonth,
   startOfWeek,
   subMonths,
-  eachDayOfInterval,
 } from "date-fns";
 import { ko } from "date-fns/locale";
-import type { BibleReadingFeedPost } from "@/features/bible/feedStore";
+import {
+  getScriptureRangeLabel,
+  getScriptureReflection,
+  type BibleReadingFeedPost,
+} from "@/features/bible/feedStore";
+import { getScriptureMeta } from "@/features/bible/mockData";
 
 type BibleReadingCalendarModalProps = {
   authorName: string;
@@ -30,12 +35,11 @@ function getDateKey(date: Date) {
 
 function getPostSignature(post: BibleReadingFeedPost) {
   return [
-    post.bookName,
-    post.rangeStart,
-    post.rangeEnd,
-    post.completed,
-    post.total,
-    post.reflection.trim(),
+    post.scriptureReading.scriptureId,
+    post.scriptureReading.startChapter,
+    post.scriptureReading.endChapter,
+    post.scriptureReading.completedChapters,
+    getScriptureReflection(post).trim(),
   ].join("|");
 }
 
@@ -129,7 +133,7 @@ export default function BibleReadingCalendarModal({
                 {authorName}님의 성경일독
               </p>
               <h3 className="mt-1 text-[20px] font-black text-[#4A433D]">
-                월별 기록 보기
+                달력 기록 보기
               </h3>
             </div>
             <button
@@ -221,24 +225,29 @@ export default function BibleReadingCalendarModal({
 
             {selectedPosts.length > 0 ? (
               <div className="mt-4 flex flex-col gap-3">
-                {selectedPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="rounded-[18px] border border-gray-100 bg-[#FAFAF8] px-4 py-3"
-                  >
-                    <p className="text-[14px] font-bold text-[#4A433D]">
-                      {post.bookName} {post.rangeLabel}
-                    </p>
-                    <p className="mt-1 text-[12px] text-[#8A817A]">
-                      누적 {post.completed} / {post.total}장
-                    </p>
-                    {post.reflection ? (
-                      <p className="mt-2 text-[13px] leading-6 text-[#6E655D]">
-                        {post.reflection}
+                {selectedPosts.map((post) => {
+                  const scripture = getScriptureMeta(post.scriptureReading.scriptureId);
+
+                  return (
+                    <div
+                      key={post.id}
+                      className="rounded-[18px] border border-gray-100 bg-[#FAFAF8] px-4 py-3"
+                    >
+                      <p className="text-[14px] font-bold text-[#4A433D]">
+                        {getScriptureRangeLabel(post)}
                       </p>
-                    ) : null}
-                  </div>
-                ))}
+                      <p className="mt-1 text-[12px] text-[#8A817A]">
+                        누적 {post.scriptureReading.completedChapters} /{" "}
+                        {scripture?.totalChapters ?? post.scriptureReading.completedChapters}장
+                      </p>
+                      {getScriptureReflection(post) ? (
+                        <p className="mt-2 text-[13px] leading-6 text-[#6E655D]">
+                          {getScriptureReflection(post)}
+                        </p>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="mt-4 rounded-[18px] border border-dashed border-gray-200 bg-[#FAFAF8] px-4 py-4 text-[13px] leading-6 text-[#8A817A]">

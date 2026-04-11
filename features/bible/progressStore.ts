@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   bibleBooks,
-  initialReadingRangesByBookId,
-  type BibleBook,
+  initialReadingRangesByScriptureId,
+  type ScriptureMeta,
   type ReadingRange,
 } from "@/features/bible/mockData";
 
@@ -43,11 +43,13 @@ function getCompletionCount(totalChapters: number, filledChapters: Set<number>) 
   return count;
 }
 
-function buildInitialBibleProgress(books: BibleBook[]): BibleProgressState {
+function buildInitialBibleProgress(books: ScriptureMeta[]): BibleProgressState {
   const seedDate = "2026-04-10T10:00:00.000+09:00";
   const completedByBookId = Object.fromEntries(
     books.map((book) => {
-      const filled = getFilledChapterSet(initialReadingRangesByBookId[book.id] ?? []);
+      const filled = getFilledChapterSet(
+        initialReadingRangesByScriptureId[book.id] ?? [],
+      );
       return [book.id, getCompletionCount(book.totalChapters, filled)];
     }),
   ) as Record<string, number>;

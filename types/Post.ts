@@ -61,6 +61,19 @@ export type PostRes = {
   cheerings?: Cheering[];
 };
 
+export type ScriptureReadingPayload = {
+  scriptureId: string;
+  startChapter: number;
+  endChapter: number;
+  completedChapters: number;
+  readAt?: string;
+};
+
+export type ScriptureReadingPostRes = PostRes & {
+  category: "성경 일독";
+  scriptureReading: ScriptureReadingPayload;
+};
+
 export type Question = {
   question: string;
   content: string;

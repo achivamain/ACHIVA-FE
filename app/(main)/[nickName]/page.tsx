@@ -71,6 +71,8 @@ export default async function Page({
   }
 
   const user = await getUser(nickName, token!);
+  const isMyProfile =
+    decodeURIComponent(nickName) === user.nickName && currentUser?.id === user.id;
 
   const [myFriends, myPendingFriends, memberDetail] = await Promise.all([
     getMyFriends(),

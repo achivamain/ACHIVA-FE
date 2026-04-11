@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   bibleBooks,
   featuredBookIds,
-  type BibleBook,
+  type ScriptureMeta,
   type Testament,
 } from "@/features/bible/mockData";
 import { useBibleProgress } from "@/features/bible/progressStore";
@@ -25,7 +25,7 @@ function BookButton({
   isFeatured,
   onSelect,
 }: {
-  book: BibleBook;
+  book: ScriptureMeta;
   isFeatured: boolean;
   onSelect: () => void;
 }) {
@@ -112,7 +112,7 @@ export default function BibleReadingFlow({
 
   const [currentStep, setCurrentStep] = useState<"select" | "record">("select");
   const [activeTestament, setActiveTestament] = useState<Testament>("new");
-  const [selectedBookId, setSelectedBookId] = useState("john");
+  const [selectedBookId, setSelectedBookId] = useState("요한복음");
   const [shareNote, setShareNote] = useState("");
   const [latestRangeByBookId, setLatestRangeByBookId] = useState<
     Record<string, { start: number; end: number }>
@@ -162,7 +162,7 @@ export default function BibleReadingFlow({
     });
   };
 
-  const handleSelectBook = (book: BibleBook) => {
+  const handleSelectBook = (book: ScriptureMeta) => {
     startTransition(() => {
       setSelectedBookId(book.id);
       setCurrentStep("record");
@@ -193,11 +193,10 @@ export default function BibleReadingFlow({
 
     createPost({
       authorName: nickName,
-      bookName: selectedBook.name,
-      rangeStart: latestRange.start,
-      rangeEnd: latestRange.end,
-      completed: completedCount,
-      total: selectedBook.totalChapters,
+      scriptureId: selectedBook.id,
+      startChapter: latestRange.start,
+      endChapter: latestRange.end,
+      completedChapters: completedCount,
       reflection: shareNote,
     });
     setShareNote("");

@@ -1,170 +1,216 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { CHEERING_CATEGORIES } from "@/lib/cheering";
+import type { Cheering } from "@/types/responses";
+import type { ScriptureReadingPostRes } from "@/types/Post";
+import { getScriptureMeta, type ScriptureId } from "@/features/bible/mockData";
 
-export type BibleFeedComment = {
-  id: string;
-  author: string;
-  text: string;
-};
+export type BibleReadingFeedPost = ScriptureReadingPostRes;
 
-export type BibleReadingFeedPost = {
-  id: string;
-  authorName: string;
-  authorHandle: string;
-  authorProfileUrl?: string;
-  bookName: string;
-  rangeStart: number;
-  rangeEnd: number;
-  rangeLabel: string;
-  completed: number;
-  total: number;
-  progressPercent: number;
-  reflection: string;
-  createdAt: string;
-  likes: number;
-  cheers: number;
-  comments: BibleFeedComment[];
-  likedByMe: boolean;
-  cheeredByMe: boolean;
-  isMine: boolean;
-};
-
-const STORAGE_KEY = "bible-reading-feed-v1";
+const STORAGE_KEY = "bible-reading-feed-v2";
 const UPDATE_EVENT = "bible-reading-feed-updated";
 
+function buildScriptureQuestions(scriptureId: ScriptureId, startChapter: number, endChapter: number, reflection: string) {
+  return [
+    {
+      question: "오늘의 성경 말씀",
+      content: `${scriptureId} ${startChapter}장 - ${endChapter}장`,
+    },
+    {
+      question: "말씀 속 느낀 점",
+      content: reflection.trim(),
+    },
+  ];
+}
+
+function buildCheering(
+  id: number,
+  cheeringCategory: Cheering["cheeringCategory"],
+  senderId: string,
+  senderName: string,
+  receiverId: string,
+  receiverName: string,
+  articleId: string,
+): Cheering {
+  return {
+    id,
+    content: cheeringCategory,
+    cheeringCategory,
+    senderId,
+    senderName,
+    receiverId,
+    receiverName,
+    articleId,
+    isRead: false,
+    createdAt: "2026-04-10T10:00:00.000+09:00",
+    updatedAt: "2026-04-10T10:00:00.000+09:00",
+  };
+}
+
+function buildSeedPost(input: {
+  id: string;
+  memberId: string;
+  memberNickName: string;
+  memberProfileUrl?: string;
+  scriptureId: ScriptureId;
+  startChapter: number;
+  endChapter: number;
+  completedChapters: number;
+  reflection: string;
+  createdAt: string;
+  cheerings?: Cheering[];
+}) {
+  const now = input.createdAt;
+
+  return {
+    id: input.id,
+    photoUrls: [],
+    title: "오늘의 성경 말씀",
+    category: "성경 일독" as const,
+    question: buildScriptureQuestions(
+      input.scriptureId,
+      input.startChapter,
+      input.endChapter,
+      input.reflection,
+    ),
+    memberId: input.memberId,
+    memberNickName: input.memberNickName,
+    memberProfileUrl: input.memberProfileUrl ?? "",
+    memberArticleCount: 0,
+    backgroundColor: "#F0E8E0" as const,
+    authorCategorySeq: 0,
+    createdAt: now,
+    updatedAt: now,
+    weeklyWorkoutCount: 0,
+    continuousGoalWeeks: 0,
+    cheerings: input.cheerings ?? [],
+    scriptureReading: {
+      scriptureId: input.scriptureId,
+      startChapter: input.startChapter,
+      endChapter: input.endChapter,
+      completedChapters: input.completedChapters,
+      readAt: input.createdAt.slice(0, 10),
+    },
+  } satisfies BibleReadingFeedPost;
+}
+
 const seedPosts: BibleReadingFeedPost[] = [
-  {
-    id: "seed-john-1",
-    authorName: "다은",
-    authorHandle: "@daeun",
-    bookName: "요한복음",
-    rangeStart: 4,
-    rangeEnd: 5,
-    rangeLabel: "4장 - 5장",
-    completed: 5,
-    total: 21,
-    progressPercent: 24,
-    reflection: "짧게 읽었지만 오늘은 말씀 한 구절이 오래 남았어요.",
+  buildSeedPost({
+    id: "scripture-john-1",
+    memberId: "member-daeun",
+    memberNickName: "다은",
+    scriptureId: "요한복음",
+    startChapter: 4,
+    endChapter: 5,
+    completedChapters: 5,
+    reflection: "짧게 읽었지만 오늘은 한 구절이 오래 남았어요.",
     createdAt: "2026-04-10T08:20:00.000+09:00",
-    likes: 14,
-    cheers: 6,
-    comments: [
-      { id: "c1", author: "현우", text: "오늘도 꾸준함이 정말 좋네요." },
+    cheerings: [
+      buildCheering(
+        1,
+        CHEERING_CATEGORIES[0],
+        "member-suhyeon",
+        "수현",
+        "member-daeun",
+        "다은",
+        "scripture-john-1",
+      ),
     ],
-    likedByMe: false,
-    cheeredByMe: false,
-    isMine: false,
-  },
-  {
-    id: "seed-john-0",
-    authorName: "다은",
-    authorHandle: "@daeun",
-    bookName: "요한복음",
-    rangeStart: 2,
-    rangeEnd: 3,
-    rangeLabel: "2장 - 3장",
-    completed: 3,
-    total: 21,
-    progressPercent: 14,
-    reflection: "짧게 읽고 조용히 묵상했어요.",
+  }),
+  buildSeedPost({
+    id: "scripture-john-0",
+    memberId: "member-daeun",
+    memberNickName: "다은",
+    scriptureId: "요한복음",
+    startChapter: 2,
+    endChapter: 3,
+    completedChapters: 3,
+    reflection: "조용히 묵상하며 읽은 저녁이었어요.",
     createdAt: "2026-04-08T07:15:00.000+09:00",
-    likes: 8,
-    cheers: 3,
-    comments: [],
-    likedByMe: false,
-    cheeredByMe: false,
-    isMine: false,
-  },
-  {
-    id: "seed-matthew-1",
-    authorName: "소연",
-    authorHandle: "@soyeon",
-    bookName: "마태복음",
-    rangeStart: 10,
-    rangeEnd: 12,
-    rangeLabel: "10장 - 12장",
-    completed: 12,
-    total: 28,
-    progressPercent: 43,
-    reflection: "읽은 범위가 길진 않았는데 마음이 차분해졌어요.",
+  }),
+  buildSeedPost({
+    id: "scripture-matthew-1",
+    memberId: "member-soyeon",
+    memberNickName: "소연",
+    scriptureId: "마태복음",
+    startChapter: 10,
+    endChapter: 12,
+    completedChapters: 12,
+    reflection: "읽은 범위는 길지 않았지만 마음이 차분해졌어요.",
     createdAt: "2026-04-09T21:10:00.000+09:00",
-    likes: 9,
-    cheers: 4,
-    comments: [],
-    likedByMe: false,
-    cheeredByMe: false,
-    isMine: false,
-  },
-  {
-    id: "seed-matthew-0",
-    authorName: "소연",
-    authorHandle: "@soyeon",
-    bookName: "마태복음",
-    rangeStart: 7,
-    rangeEnd: 9,
-    rangeLabel: "7장 - 9장",
-    completed: 9,
-    total: 28,
-    progressPercent: 32,
-    reflection: "말씀을 천천히 읽으니 더 오래 남았어요.",
-    createdAt: "2026-04-06T22:00:00.000+09:00",
-    likes: 7,
-    cheers: 2,
-    comments: [],
-    likedByMe: false,
-    cheeredByMe: false,
-    isMine: false,
-  },
-  {
-    id: "seed-genesis-1",
-    authorName: "민지",
-    authorHandle: "@minji",
-    bookName: "창세기",
-    rangeStart: 21,
-    rangeEnd: 23,
-    rangeLabel: "21장 - 23장",
-    completed: 23,
-    total: 50,
-    progressPercent: 46,
-    reflection: "오늘 읽은 범위가 생각보다 깊게 남아서 기록해 둡니다.",
-    createdAt: "2026-04-09T07:40:00.000+09:00",
-    likes: 11,
-    cheers: 7,
-    comments: [
-      { id: "c2", author: "준서", text: "따뜻한 나눔 감사합니다." },
+    cheerings: [
+      buildCheering(
+        2,
+        CHEERING_CATEGORIES[1],
+        "member-yuna",
+        "유나",
+        "member-soyeon",
+        "소연",
+        "scripture-matthew-1",
+      ),
     ],
-    likedByMe: false,
-    cheeredByMe: false,
-    isMine: false,
-  },
-  {
-    id: "seed-genesis-0",
-    authorName: "민지",
-    authorHandle: "@minji",
-    bookName: "창세기",
-    rangeStart: 18,
-    rangeEnd: 20,
-    rangeLabel: "18장 - 20장",
-    completed: 20,
-    total: 50,
-    progressPercent: 40,
-    reflection: "한 장 한 장 읽을수록 흐름이 더 보이는 것 같아요.",
+  }),
+  buildSeedPost({
+    id: "scripture-matthew-0",
+    memberId: "member-soyeon",
+    memberNickName: "소연",
+    scriptureId: "마태복음",
+    startChapter: 7,
+    endChapter: 9,
+    completedChapters: 9,
+    reflection: "천천히 읽으니 더 오래 남는 말씀이 있었어요.",
+    createdAt: "2026-04-06T22:00:00.000+09:00",
+  }),
+  buildSeedPost({
+    id: "scripture-genesis-1",
+    memberId: "member-minji",
+    memberNickName: "민지",
+    scriptureId: "창세기",
+    startChapter: 21,
+    endChapter: 23,
+    completedChapters: 23,
+    reflection: "오늘 읽은 범위가 깊게 남아서 기록해 두고 싶었어요.",
+    createdAt: "2026-04-09T07:40:00.000+09:00",
+    cheerings: [
+      buildCheering(
+        3,
+        CHEERING_CATEGORIES[2],
+        "member-jihun",
+        "지훈",
+        "member-minji",
+        "민지",
+        "scripture-genesis-1",
+      ),
+    ],
+  }),
+  buildSeedPost({
+    id: "scripture-genesis-0",
+    memberId: "member-minji",
+    memberNickName: "민지",
+    scriptureId: "창세기",
+    startChapter: 18,
+    endChapter: 20,
+    completedChapters: 20,
+    reflection: "한 장씩 읽을수록 흐름이 조금씩 더 보이는 것 같아요.",
     createdAt: "2026-04-04T06:50:00.000+09:00",
-    likes: 6,
-    cheers: 4,
-    comments: [],
-    likedByMe: false,
-    cheeredByMe: false,
-    isMine: false,
-  },
+  }),
 ];
+
+export function getScriptureReflection(post: BibleReadingFeedPost) {
+  return post.question.find((item) => item.question === "말씀 속 느낀 점")?.content ?? "";
+}
+
+export function getScriptureRangeLabel(post: BibleReadingFeedPost) {
+  const { scriptureId, startChapter, endChapter } = post.scriptureReading;
+  return `${scriptureId} ${startChapter}장 - ${endChapter}장`;
+}
 
 export function getLatestBiblePostsByAuthor(posts: BibleReadingFeedPost[]) {
   const seen = new Set<string>();
 
   return posts.filter((post) => {
-    const key = post.authorHandle || post.authorName;
+    const key = post.memberId || post.memberNickName;
     if (seen.has(key)) {
       return false;
     }
@@ -227,32 +273,44 @@ export function useBibleReadingFeed() {
 
   const createPost = (input: {
     authorName: string;
-    bookName: string;
-    rangeStart: number;
-    rangeEnd: number;
-    completed: number;
-    total: number;
+    scriptureId: ScriptureId;
+    startChapter: number;
+    endChapter: number;
+    completedChapters: number;
     reflection: string;
   }) => {
+    const scripture = getScriptureMeta(input.scriptureId);
+    const now = new Date().toISOString();
+
     const nextPost: BibleReadingFeedPost = {
-      id: `post-${Date.now()}`,
-      authorName: input.authorName,
-      authorHandle: `@${input.authorName}`,
-      bookName: input.bookName,
-      rangeStart: input.rangeStart,
-      rangeEnd: input.rangeEnd,
-      rangeLabel: `${input.rangeStart}장 - ${input.rangeEnd}장`,
-      completed: input.completed,
-      total: input.total,
-      progressPercent: Math.round((input.completed / input.total) * 100),
-      reflection: input.reflection.trim(),
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      cheers: 0,
-      comments: [],
-      likedByMe: false,
-      cheeredByMe: false,
-      isMine: true,
+      id: `scripture-post-${Date.now()}`,
+      photoUrls: [],
+      title: "오늘의 성경 말씀",
+      category: "성경 일독",
+      question: buildScriptureQuestions(
+        scripture?.name ?? input.scriptureId,
+        input.startChapter,
+        input.endChapter,
+        input.reflection,
+      ),
+      memberId: "me",
+      memberNickName: input.authorName,
+      memberProfileUrl: "",
+      memberArticleCount: 0,
+      backgroundColor: "#F0E8E0",
+      authorCategorySeq: 0,
+      createdAt: now,
+      updatedAt: now,
+      weeklyWorkoutCount: 0,
+      continuousGoalWeeks: 0,
+      cheerings: [],
+      scriptureReading: {
+        scriptureId: input.scriptureId,
+        startChapter: input.startChapter,
+        endChapter: input.endChapter,
+        completedChapters: input.completedChapters,
+        readAt: now.slice(0, 10),
+      },
     };
 
     const nextPosts = [nextPost, ...sortedPosts];
@@ -260,55 +318,8 @@ export function useBibleReadingFeed() {
     writePosts(nextPosts);
   };
 
-  const updatePost = (
-    postId: string,
-    updater: (post: BibleReadingFeedPost) => BibleReadingFeedPost,
-  ) => {
-    const nextPosts = sortedPosts.map((post) =>
-      post.id === postId ? updater(post) : post,
-    );
-    setPosts(nextPosts);
-    writePosts(nextPosts);
-  };
-
-  const toggleLike = (postId: string) => {
-    updatePost(postId, (post) => ({
-      ...post,
-      likedByMe: !post.likedByMe,
-      likes: post.likedByMe ? Math.max(0, post.likes - 1) : post.likes + 1,
-    }));
-  };
-
-  const toggleCheer = (postId: string) => {
-    updatePost(postId, (post) => ({
-      ...post,
-      cheeredByMe: !post.cheeredByMe,
-      cheers: post.cheeredByMe ? Math.max(0, post.cheers - 1) : post.cheers + 1,
-    }));
-  };
-
-  const addComment = (postId: string, author: string, text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-
-    updatePost(postId, (post) => ({
-      ...post,
-      comments: [
-        ...post.comments,
-        {
-          id: `comment-${Date.now()}`,
-          author,
-          text: trimmed,
-        },
-      ],
-    }));
-  };
-
   return {
     posts: sortedPosts,
     createPost,
-    toggleLike,
-    toggleCheer,
-    addComment,
   };
 }

@@ -90,7 +90,7 @@ export default function FeedList({ activeTab }: FeedListProps) {
   );
   const biblePostsByAuthor = useMemo(() => {
     return biblePosts.reduce<Record<string, typeof biblePosts>>((acc, post) => {
-      const key = post.authorHandle || post.authorName;
+      const key = post.memberId || post.memberNickName;
       if (!acc[key]) {
         acc[key] = [];
       }
@@ -146,7 +146,7 @@ export default function FeedList({ activeTab }: FeedListProps) {
                 key={item.data.id}
                 post={item.data}
                 authorPosts={
-                  biblePostsByAuthor[item.data.authorHandle || item.data.authorName] ?? [
+                  biblePostsByAuthor[item.data.memberId || item.data.memberNickName] ?? [
                     item.data,
                   ]
                 }
