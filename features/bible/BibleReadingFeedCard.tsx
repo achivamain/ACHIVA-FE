@@ -8,9 +8,9 @@ import BibleReadingCalendarModal from "@/features/bible/BibleReadingCalendarModa
 import {
   getScriptureRangeLabel,
   getScriptureReflection,
-  type BibleReadingFeedPost,
-} from "@/features/bible/feedStore";
+} from "@/features/bible/selectors";
 import { getScriptureMeta } from "@/features/bible/mockData";
+import type { ScriptureReadingFeedPost } from "@/features/bible/types";
 
 function MiniProgressDots({
   completed,
@@ -44,18 +44,19 @@ function MiniProgressDots({
 
 export default function BibleReadingFeedCard({
   post,
-  authorPosts,
 }: {
-  post: BibleReadingFeedPost;
-  authorPosts: BibleReadingFeedPost[];
+  post: ScriptureReadingFeedPost;
 }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const scripture = getScriptureMeta(post.scriptureReading.scriptureId);
   const reflection = getScriptureReflection(post);
-  const totalChapters = scripture?.totalChapters ?? post.scriptureReading.completedChapters;
+  const totalChapters =
+    scripture?.totalChapters ?? post.scriptureReading.completedChapters;
   const progressPercent = useMemo(() => {
     if (totalChapters <= 0) return 0;
-    return Math.round((post.scriptureReading.completedChapters / totalChapters) * 100);
+    return Math.round(
+      (post.scriptureReading.completedChapters / totalChapters) * 100,
+    );
   }, [post.scriptureReading.completedChapters, totalChapters]);
 
   return (
@@ -85,17 +86,21 @@ export default function BibleReadingFeedCard({
             {getScriptureRangeLabel(post)}
           </h3>
           {reflection ? (
-            <p className="mt-3 text-[14px] leading-6 text-[#6E655D]">{reflection}</p>
+            <p className="mt-3 text-[14px] leading-6 text-[#6E655D]">
+              {reflection}
+            </p>
           ) : null}
         </div>
 
         <div className="mt-3 rounded-[20px] border border-gray-100 bg-white px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[14px] font-bold text-[#4A433D]">
-              {post.scriptureReading.scriptureId} {post.scriptureReading.completedChapters} /{" "}
-              {totalChapters}장
+              {post.scriptureReading.scriptureId}{" "}
+              {post.scriptureReading.completedChapters} / {totalChapters}장
             </p>
-            <p className="text-[15px] font-black text-[#D96B2B]">{progressPercent}%</p>
+            <p className="text-[15px] font-black text-[#D96B2B]">
+              {progressPercent}%
+            </p>
           </div>
           <div className="mt-3 h-2 rounded-full bg-[#ECE7E1]">
             <div
@@ -130,7 +135,7 @@ export default function BibleReadingFeedCard({
       {isCalendarOpen ? (
         <BibleReadingCalendarModal
           authorName={post.memberNickName}
-          posts={authorPosts}
+          memberId={post.memberId}
           onClose={() => setIsCalendarOpen(false)}
         />
       ) : null}

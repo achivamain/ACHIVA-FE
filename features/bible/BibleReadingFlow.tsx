@@ -1,6 +1,7 @@
 "use client";
 
-import { startTransition, useState } from "react";
+import { startTransition, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { BackIcon } from "@/components/Icons";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -9,8 +10,8 @@ import {
   type ScriptureMeta,
   type Testament,
 } from "@/features/bible/mockData";
-import { useBibleProgress } from "@/features/bible/progressStore";
-import { useBibleReadingFeed } from "@/features/bible/feedStore";
+import { createScriptureReadingArticle } from "@/features/bible/api";
+import { useScriptureProgress } from "@/features/bible/hooks/useScriptureProgress";
 
 type BibleReadingFlowProps = {
   nickName: string;
@@ -61,23 +62,26 @@ function BookButton({
 
 function ChapterDot({
   chapter,
-  checked,
+  state,
   onClick,
+  disabled,
 }: {
   chapter: number;
-  checked: boolean;
+  state: "completed" | "selected" | "default";
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      title={`${chapter}장${checked ? " 읽음" : " 미완료"}`}
+      disabled={disabled}
+      title={`${chapter}장`}
       className={cn(
-        "h-5 w-5 rounded-full border transition-all duration-200 hover:scale-110 active:scale-95",
-        checked
-          ? "border-[#D96B2B] bg-[#FFF4EC] shadow-sm"
-          : "border-[#E5DDD4] bg-white",
+        "h-5 w-5 rounded-full border transition-all duration-200 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:hover:scale-100",
+        state === "completed" && "border-[#D96B2B] bg-[#D96B2B] shadow-sm",
+        state === "selected" && "border-[#D96B2B] bg-[#FFF4EC] shadow-sm",
+        state === "default" && "border-[#E5DDD4] bg-white",
       )}
     />
   );
@@ -103,21 +107,28 @@ export default function BibleReadingFlow({
 }: BibleReadingFlowProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const safeBibleBooks = Array.isArray(bibleBooks) ? bibleBooks : [];
   const safeFeaturedBookIds = Array.isArray(featuredBookIds)
     ? featuredBookIds
     : [];
-  const { progress, updateBookProgress } = useBibleProgress();
-  const { createPost } = useBibleReadingFeed();
+  const {
+    progress,
+    updateScriptureProgress,
+    isLoading: isProgressLoading,
+    isSaving: isProgressSaving,
+  } = useScriptureProgress();
 
   const [currentStep, setCurrentStep] = useState<"select" | "record">("select");
   const [activeTestament, setActiveTestament] = useState<Testament>("new");
   const [selectedBookId, setSelectedBookId] = useState("요한복음");
-  const [shareNote, setShareNote] = useState("");
-  const [latestRangeByBookId, setLatestRangeByBookId] = useState<
-    Record<string, { start: number; end: number }>
+  const [shareContent, setShareContent] = useState("");
+  const [draftEndChapterByScriptureId, setDraftEndChapterByScriptureId] = useState<
+    Record<string, number | null>
   >({});
   const [shareSuccessMessage, setShareSuccessMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedBook =
     safeBibleBooks.find((book) => book.id === selectedBookId) ??
@@ -131,7 +142,7 @@ export default function BibleReadingFlow({
             성경 목록을 불러오지 못했습니다.
           </p>
           <p className="mt-2 text-[13px] leading-6 text-[#8A817A]">
-            mock 데이터가 비어 있어 화면을 구성할 수 없습니다.
+            잠시 후 다시 시도해 주세요.
           </p>
         </div>
       </div>
@@ -140,21 +151,38 @@ export default function BibleReadingFlow({
 
   const completedCount = Math.min(
     selectedBook.totalChapters,
-    Math.max(0, progress.completedByBookId[selectedBook.id] ?? 0),
+    Math.max(0, progress.completedByScriptureId[selectedBook.id] ?? 0),
   );
   const nextUnreadChapter = Math.min(
     selectedBook.totalChapters,
     completedCount + 1,
   );
-  const latestRange =
-    latestRangeByBookId[selectedBook.id] ??
-    (completedCount > 0
-      ? { start: Math.max(1, completedCount), end: completedCount }
-      : null);
+  const selectedEndChapter = draftEndChapterByScriptureId[selectedBook.id] ?? null;
+  const selectedRange =
+    selectedEndChapter && selectedEndChapter >= nextUnreadChapter
+      ? { start: nextUnreadChapter, end: selectedEndChapter }
+      : null;
+  const progressPercent = Math.round(
+    (completedCount / selectedBook.totalChapters) * 100,
+  );
+  const isCompleted = completedCount === selectedBook.totalChapters;
+  const isMobilePath = pathname.startsWith("/m/");
 
   const booksInTab = safeBibleBooks.filter(
     (book) => book.testament === activeTestament,
   );
+
+  const rangePreviewText = useMemo(() => {
+    if (isCompleted) {
+      return `${selectedBook.name} 기록을 모두 완료했습니다.`;
+    }
+
+    if (!selectedRange) {
+      return `다음 기록은 ${selectedBook.name} ${nextUnreadChapter}장부터 시작합니다.`;
+    }
+
+    return `${selectedBook.name} ${selectedRange.start}장 - ${selectedRange.end}장`;
+  }, [isCompleted, nextUnreadChapter, selectedBook.name, selectedRange]);
 
   const handleSelectTestament = (testament: Testament) => {
     startTransition(() => {
@@ -167,49 +195,60 @@ export default function BibleReadingFlow({
       setSelectedBookId(book.id);
       setCurrentStep("record");
       setShareSuccessMessage("");
+      setSubmitError("");
     });
   };
 
-  const handleClickChapter = (chapter: number) => {
-    const rangeStart =
-      chapter >= completedCount ? Math.min(completedCount + 1, chapter) : 1;
-    const rangeEnd = chapter;
+  const handleSelectEndChapter = (chapter: number) => {
+    if (chapter <= completedCount || isCompleted) return;
 
     startTransition(() => {
-      updateBookProgress(selectedBook.id, chapter);
-      setShareSuccessMessage("");
-      setLatestRangeByBookId((current) => ({
+      setDraftEndChapterByScriptureId((current) => ({
         ...current,
-        [selectedBook.id]: {
-          start: Math.min(rangeStart, rangeEnd),
-          end: Math.max(rangeStart, rangeEnd),
-        },
+        [selectedBook.id]: chapter,
       }));
+      setShareSuccessMessage("");
+      setSubmitError("");
     });
   };
 
-  const handleShareToFeed = () => {
-    if (!latestRange || completedCount === 0) return;
+  const handleShareToFeed = async () => {
+    if (!selectedRange || !shareContent.trim() || isSubmitting) return;
 
-    createPost({
-      authorName: nickName,
-      scriptureId: selectedBook.id,
-      startChapter: latestRange.start,
-      endChapter: latestRange.end,
-      completedChapters: completedCount,
-      reflection: shareNote,
-    });
-    setShareNote("");
-    setShareSuccessMessage(
-      `${selectedBook.name} ${latestRange.start}장-${latestRange.end}장 기록이 피드에 공유되었어요.`,
-    );
+    try {
+      setIsSubmitting(true);
+      setSubmitError("");
+
+      await createScriptureReadingArticle({
+        scriptureId: selectedBook.id,
+        startChapter: selectedRange.start,
+        endChapter: selectedRange.end,
+        completedChapters: selectedRange.end,
+        content: shareContent.trim(),
+      });
+
+      await updateScriptureProgress(selectedBook.id, selectedRange.end);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["feed", "성경 일독"] }),
+        queryClient.invalidateQueries({ queryKey: ["feed", "오늘 은혜"] }),
+        queryClient.invalidateQueries({ queryKey: ["posts"] }),
+      ]);
+
+      setShareContent("");
+      setDraftEndChapterByScriptureId((current) => ({
+        ...current,
+        [selectedBook.id]: null,
+      }));
+      setShareSuccessMessage(
+        `${selectedBook.name} ${selectedRange.start}장부터 ${selectedRange.end}장까지 기록을 남겼어요.`,
+      );
+    } catch (error) {
+      console.error(error);
+      setSubmitError("기록 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  const progressPercent = Math.round(
-    (completedCount / selectedBook.totalChapters) * 100,
-  );
-  const isCompleted = completedCount === selectedBook.totalChapters;
-  const isMobilePath = pathname.startsWith("/m/");
 
   const handleBack = () => {
     if (currentStep === "record") {
@@ -246,12 +285,9 @@ export default function BibleReadingFlow({
             </h1>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
+              <SummaryCard label="선택한 성경" value={selectedBook.name} />
               <SummaryCard
-                label="선택한 성경"
-                value={selectedBook.name}
-              />
-              <SummaryCard
-                label="현재 진행률"
+                label="현재 진행도"
                 value={`${completedCount}/${selectedBook.totalChapters}`}
               />
             </div>
@@ -323,12 +359,12 @@ export default function BibleReadingFlow({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-[20px] font-black text-[#4A433D]">
-                    {selectedBook.name} 장 진행 기록
+                    {selectedBook.name} 기록 작성
                   </h2>
                 </div>
                 <div className="rounded-[18px] bg-[#FFF4EC] px-3 py-2 text-right">
                   <p className="text-[14px] font-bold text-[#4A433D]">
-                    {isCompleted ? "완독" : `${nextUnreadChapter}장`}
+                    {isCompleted ? "완독" : `${nextUnreadChapter}장부터`}
                   </p>
                 </div>
               </div>
@@ -337,10 +373,10 @@ export default function BibleReadingFlow({
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[12px] font-medium text-[#8A817A]">
-                      전체 장 수
+                      저장된 누적 진도
                     </p>
                     <p className="mt-1 text-[18px] font-bold text-[#4A433D]">
-                      {selectedBook.totalChapters}장 중 {completedCount}장 읽음
+                      {selectedBook.totalChapters}장 중 {completedCount}장 완료
                     </p>
                   </div>
                   <div className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-[#D96B2B] ring-1 ring-[#F3D5C0]">
@@ -356,26 +392,44 @@ export default function BibleReadingFlow({
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-10 gap-2 rounded-[18px] border border-gray-100 bg-white p-4">
-                {Array.from({ length: selectedBook.totalChapters }, (_, index) => {
-                  const chapter = index + 1;
+              {isProgressLoading ? (
+                <div className="mt-4 rounded-[18px] border border-dashed border-gray-200 bg-[#FAFAF8] px-4 py-4 text-[13px] leading-6 text-[#8A817A]">
+                  저장된 진도를 불러오는 중입니다.
+                </div>
+              ) : (
+                <div className="mt-4 grid grid-cols-10 gap-2 rounded-[18px] border border-gray-100 bg-white p-4">
+                  {Array.from({ length: selectedBook.totalChapters }, (_, index) => {
+                    const chapter = index + 1;
+                    const isCompletedChapter = chapter <= completedCount;
+                    const isSelectedChapter =
+                      !!selectedRange &&
+                      chapter >= selectedRange.start &&
+                      chapter <= selectedRange.end;
 
-                  return (
-                    <ChapterDot
-                      key={chapter}
-                      chapter={chapter}
-                      checked={chapter <= completedCount}
-                      onClick={() => handleClickChapter(chapter)}
-                    />
-                  );
-                })}
-              </div>
+                    return (
+                      <ChapterDot
+                        key={chapter}
+                        chapter={chapter}
+                        state={
+                          isCompletedChapter
+                            ? "completed"
+                            : isSelectedChapter
+                              ? "selected"
+                              : "default"
+                        }
+                        disabled={chapter <= completedCount}
+                        onClick={() => handleSelectEndChapter(chapter)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
 
               <div className="mt-4 rounded-[18px] border border-gray-100 bg-[#FAFAF8] p-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-[16px] border border-gray-100 bg-white px-3 py-3">
                     <p className="text-[11px] font-medium text-[#8A817A]">
-                      마지막으로 표시한 장
+                      마지막 완료 장
                     </p>
                     <p className="mt-2 text-[22px] font-black text-[#4A433D]">
                       {completedCount}장
@@ -383,7 +437,7 @@ export default function BibleReadingFlow({
                   </div>
                   <div className="rounded-[16px] border border-gray-100 bg-white px-3 py-3">
                     <p className="text-[11px] font-medium text-[#8A817A]">
-                      다음 읽을 장
+                      다음 시작 장
                     </p>
                     <p className="mt-2 text-[22px] font-black text-[#4A433D]">
                       {isCompleted ? "-" : `${nextUnreadChapter}장`}
@@ -395,37 +449,58 @@ export default function BibleReadingFlow({
               <div className="mt-4 rounded-[18px] border border-gray-100 bg-[#FAFAF8] p-4">
                 <div className="rounded-[16px] border border-gray-100 bg-white px-4 py-3">
                   <p className="text-[12px] font-medium text-[#8A817A]">
-                    오늘 읽은 범위
+                    이번 기록 범위
                   </p>
                   <p className="mt-1 text-[18px] font-bold text-[#4A433D]">
-                    {latestRange
-                      ? `${selectedBook.name} ${latestRange.start}장 - ${latestRange.end}장`
-                      : "아직 기록이 없습니다"}
+                    {rangePreviewText}
                   </p>
-                  <p className="mt-1 text-[13px] text-[#8A817A]">
-                    누적 {completedCount} / {selectedBook.totalChapters}장
-                  </p>
+                  {!isCompleted ? (
+                    <p className="mt-1 text-[13px] text-[#8A817A]">
+                      이전 완료 다음 장부터 끝 장만 선택할 수 있습니다.
+                    </p>
+                  ) : null}
                 </div>
 
                 <textarea
-                  value={shareNote}
-                  onChange={(event) => setShareNote(event.target.value)}
-                  placeholder="한 줄 소감을 남겨보세요"
+                  value={shareContent}
+                  onChange={(event) => setShareContent(event.target.value)}
+                  placeholder="오늘 읽은 말씀을 통해 느낀 점을 적어보세요."
                   className="mt-3 min-h-[92px] w-full rounded-[16px] border border-gray-100 bg-white px-4 py-3 text-[14px] leading-6 outline-none"
                 />
 
                 <button
                   type="button"
                   onClick={handleShareToFeed}
-                  disabled={!latestRange || completedCount === 0}
+                  disabled={
+                    !selectedRange ||
+                    !shareContent.trim() ||
+                    isCompleted ||
+                    isSubmitting ||
+                    isProgressSaving
+                  }
                   className={`mt-3 w-full rounded-[20px] border px-4 py-3 text-[14px] font-bold ${
-                    !latestRange || completedCount === 0
+                    !selectedRange ||
+                    !shareContent.trim() ||
+                    isCompleted ||
+                    isSubmitting ||
+                    isProgressSaving
                       ? "border-gray-100 bg-[#F5F3F0] text-[#A08D7A]"
                       : "border-[#D96B2B] bg-[#FFF4EC] text-[#D96B2B] shadow-sm"
                   }`}
                 >
-                  피드에 공유하기
+                  {isSubmitting ? "기록 저장 중..." : "피드에 공유하기"}
                 </button>
+
+                {submitError ? (
+                  <div className="mt-3 rounded-[16px] border border-[#F3D5C0] bg-[#FFF8F3] px-4 py-3">
+                    <p className="text-[13px] font-semibold text-[#D96B2B]">
+                      저장 실패
+                    </p>
+                    <p className="mt-1 text-[13px] leading-6 text-[#8A817A]">
+                      {submitError}
+                    </p>
+                  </div>
+                ) : null}
 
                 {shareSuccessMessage ? (
                   <div className="mt-3 rounded-[16px] border border-[#F3D5C0] bg-[#FFF8F3] px-4 py-3">
@@ -438,12 +513,10 @@ export default function BibleReadingFlow({
                     <div className="mt-3 flex gap-2">
                       <button
                         type="button"
-                        onClick={() =>
-                          router.push(`${isMobilePath ? "/m" : ""}/feed`)
-                        }
+                        onClick={() => router.push(`${isMobilePath ? "/m" : ""}/feed`)}
                         className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-[#4A433D] ring-1 ring-gray-100"
                       >
-                        전체 피드 보기
+                        피드 보기
                       </button>
                       <button
                         type="button"
@@ -454,7 +527,7 @@ export default function BibleReadingFlow({
                         }
                         className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-[#4A433D] ring-1 ring-gray-100"
                       >
-                        내 피드 보기
+                        내 프로필 보기
                       </button>
                     </div>
                   </div>

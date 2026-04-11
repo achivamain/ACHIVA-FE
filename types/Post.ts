@@ -52,7 +52,7 @@ export type PostRes = {
   memberNickName: string;
   memberProfileUrl: string;
   memberArticleCount?: number;
-  backgroundColor: BackgroundColor;
+  backgroundColor: BackgroundColor | null;
   authorCategorySeq: number;
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string

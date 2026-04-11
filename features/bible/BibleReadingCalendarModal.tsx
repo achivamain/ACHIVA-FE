@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   addMonths,
   eachDayOfInterval,
@@ -16,16 +17,13 @@ import {
   subMonths,
 } from "date-fns";
 import { ko } from "date-fns/locale";
-import {
-  getScriptureRangeLabel,
-  getScriptureReflection,
-  type BibleReadingFeedPost,
-} from "@/features/bible/feedStore";
+import { fetchScriptureReadingCalendar } from "@/features/bible/api";
 import { getScriptureMeta } from "@/features/bible/mockData";
+import type { ScriptureReadingCalendarItem } from "@/features/bible/types";
 
 type BibleReadingCalendarModalProps = {
   authorName: string;
-  posts: BibleReadingFeedPost[];
+  memberId: string;
   onClose: () => void;
 };
 
@@ -33,13 +31,14 @@ function getDateKey(date: Date) {
   return format(date, "yyyy-MM-dd");
 }
 
-function getPostSignature(post: BibleReadingFeedPost) {
+function getRecordSignature(item: ScriptureReadingCalendarItem) {
   return [
-    post.scriptureReading.scriptureId,
-    post.scriptureReading.startChapter,
-    post.scriptureReading.endChapter,
-    post.scriptureReading.completedChapters,
-    getScriptureReflection(post).trim(),
+    item.articleId,
+    item.scriptureReading.scriptureId,
+    item.scriptureReading.startChapter,
+    item.scriptureReading.endChapter,
+    item.scriptureReading.completedChapters,
+    item.content.trim(),
   ].join("|");
 }
 
@@ -49,19 +48,18 @@ function cn(...values: Array<string | false | null | undefined>) {
 
 export default function BibleReadingCalendarModal({
   authorName,
-  posts,
+  memberId,
   onClose,
 }: BibleReadingCalendarModalProps) {
-  const sortedPosts = useMemo(
-    () => [...posts].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [posts],
-  );
-  const initialDate = useMemo(
-    () => (sortedPosts[0] ? parseISO(sortedPosts[0].createdAt) : new Date()),
-    [sortedPosts],
-  );
-  const [displayMonth, setDisplayMonth] = useState(startOfMonth(initialDate));
-  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [displayMonth, setDisplayMonth] = useState(startOfMonth(new Date()));
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const yearMonth = format(displayMonth, "yyyy-MM");
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["scripture-reading-calendar", memberId, yearMonth],
+    queryFn: () => fetchScriptureReadingCalendar(memberId, yearMonth),
+    enabled: !!memberId,
+    staleTime: 30 * 1000,
+  });
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
@@ -71,20 +69,40 @@ export default function BibleReadingCalendarModal({
     };
   }, []);
 
-  const postsByDate = useMemo(() => {
-    return sortedPosts.reduce<Record<string, BibleReadingFeedPost[]>>((acc, post) => {
-      const key = getDateKey(parseISO(post.createdAt));
-      const nextPosts = acc[key] ?? [];
-      const signature = getPostSignature(post);
+  useEffect(() => {
+    if (data.length === 0) {
+      setSelectedDate(startOfMonth(displayMonth));
+      return;
+    }
 
-      if (nextPosts.some((current) => getPostSignature(current) === signature)) {
+    const sorted = [...data].sort((a, b) => {
+      const readAtA = a.scriptureReading.readAt ?? a.createdAt;
+      const readAtB = b.scriptureReading.readAt ?? b.createdAt;
+      if (readAtA !== readAtB) {
+        return readAtB.localeCompare(readAtA);
+      }
+      return b.createdAt.localeCompare(a.createdAt);
+    });
+
+    const firstDate = sorted[0].scriptureReading.readAt ?? sorted[0].createdAt;
+    setSelectedDate(parseISO(firstDate));
+  }, [data, displayMonth]);
+
+  const recordsByDate = useMemo(() => {
+    return data.reduce<Record<string, ScriptureReadingCalendarItem[]>>((acc, item) => {
+      const rawDate = item.scriptureReading.readAt ?? item.createdAt;
+      const key = getDateKey(parseISO(rawDate));
+      const nextItems = acc[key] ?? [];
+      const signature = getRecordSignature(item);
+
+      if (nextItems.some((current) => getRecordSignature(current) === signature)) {
         return acc;
       }
 
-      acc[key] = [...nextPosts, post];
+      acc[key] = [...nextItems, item].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       return acc;
     }, {});
-  }, [sortedPosts]);
+  }, [data]);
 
   const monthDays = useMemo(() => {
     const monthStart = startOfMonth(displayMonth);
@@ -98,24 +116,26 @@ export default function BibleReadingCalendarModal({
   }, [displayMonth]);
 
   const markedDateKeys = useMemo(
-    () => new Set(Object.keys(postsByDate)),
-    [postsByDate],
+    () => new Set(Object.keys(recordsByDate)),
+    [recordsByDate],
   );
   const selectedDateKey = getDateKey(selectedDate);
-  const selectedPosts = postsByDate[selectedDateKey] ?? [];
+  const selectedRecords = recordsByDate[selectedDateKey] ?? [];
 
   useEffect(() => {
     if (isSameMonth(selectedDate, displayMonth)) return;
 
     const monthKeyPrefix = format(displayMonth, "yyyy-MM");
-    const firstMarkedInMonth = sortedPosts.find((post) =>
-      post.createdAt.startsWith(monthKeyPrefix),
+    const firstMarkedInMonth = data.find((item) =>
+      (item.scriptureReading.readAt ?? item.createdAt).startsWith(monthKeyPrefix),
     );
 
     setSelectedDate(
-      firstMarkedInMonth ? parseISO(firstMarkedInMonth.createdAt) : startOfMonth(displayMonth),
+      firstMarkedInMonth
+        ? parseISO(firstMarkedInMonth.scriptureReading.readAt ?? firstMarkedInMonth.createdAt)
+        : startOfMonth(displayMonth),
     );
-  }, [displayMonth, selectedDate, sortedPosts]);
+  }, [data, displayMonth, selectedDate]);
 
   return (
     <div
@@ -208,7 +228,7 @@ export default function BibleReadingCalendarModal({
                     <span className="mt-1 flex min-h-[14px] items-center justify-center">
                       {hasRecord ? (
                         <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#FFF4EC] px-1.5 text-[10px] font-bold text-[#D96B2B]">
-                          {postsByDate[dateKey]?.length ?? 0}
+                          {recordsByDate[dateKey]?.length ?? 0}
                         </span>
                       ) : null}
                     </span>
@@ -223,26 +243,30 @@ export default function BibleReadingCalendarModal({
               {format(selectedDate, "M월 d일 EEEE", { locale: ko })}
             </h4>
 
-            {selectedPosts.length > 0 ? (
+            {isLoading ? (
+              <div className="mt-4 rounded-[18px] border border-dashed border-gray-200 bg-[#FAFAF8] px-4 py-4 text-[13px] leading-6 text-[#8A817A]">
+                기록을 불러오는 중입니다.
+              </div>
+            ) : selectedRecords.length > 0 ? (
               <div className="mt-4 flex flex-col gap-3">
-                {selectedPosts.map((post) => {
-                  const scripture = getScriptureMeta(post.scriptureReading.scriptureId);
-
+                {selectedRecords.map((record) => {
+                  const scripture = getScriptureMeta(record.scriptureReading.scriptureId);
                   return (
                     <div
-                      key={post.id}
+                      key={record.articleId}
                       className="rounded-[18px] border border-gray-100 bg-[#FAFAF8] px-4 py-3"
                     >
                       <p className="text-[14px] font-bold text-[#4A433D]">
-                        {getScriptureRangeLabel(post)}
+                        {record.scriptureReading.scriptureId} {record.scriptureReading.startChapter}장 -{" "}
+                        {record.scriptureReading.endChapter}장
                       </p>
                       <p className="mt-1 text-[12px] text-[#8A817A]">
-                        누적 {post.scriptureReading.completedChapters} /{" "}
-                        {scripture?.totalChapters ?? post.scriptureReading.completedChapters}장
+                        누적 {record.scriptureReading.completedChapters} /{" "}
+                        {scripture?.totalChapters ?? record.scriptureReading.completedChapters}장
                       </p>
-                      {getScriptureReflection(post) ? (
+                      {record.content ? (
                         <p className="mt-2 text-[13px] leading-6 text-[#6E655D]">
-                          {getScriptureReflection(post)}
+                          {record.content}
                         </p>
                       ) : null}
                     </div>

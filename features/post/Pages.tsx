@@ -148,7 +148,7 @@ export function ContentPage({
 }: {
   size: number;
   page: Question;
-  backgroundColor: string;
+  backgroundColor: string | null;
 }) {
   const tone = getPostPageTone(backgroundColor);
 

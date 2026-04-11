@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useBibleProgress } from "@/features/bible/progressStore";
+import { useScriptureProgress } from "@/features/bible/hooks/useScriptureProgress";
 
 function MiniDots({
   completed,
@@ -34,14 +34,14 @@ function MiniDots({
 }
 
 export default function BibleProgressFeedCard() {
-  const { activeBooks } = useBibleProgress();
+  const { activeScriptures } = useScriptureProgress();
   const [page, setPage] = useState(0);
   const pageSize = 4;
-  const totalPages = Math.max(1, Math.ceil(activeBooks.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(activeScriptures.length / pageSize));
   const visibleBooks = useMemo(() => {
     const start = page * pageSize;
-    return activeBooks.slice(start, start + pageSize);
-  }, [activeBooks, page]);
+    return activeScriptures.slice(start, start + pageSize);
+  }, [activeScriptures, page]);
 
   useEffect(() => {
     if (page > totalPages - 1) {
@@ -63,7 +63,7 @@ export default function BibleProgressFeedCard() {
         </span>
       </div>
 
-      {activeBooks.length === 0 ? (
+      {activeScriptures.length === 0 ? (
         <div className="mt-4 rounded-[18px] border border-dashed border-gray-200 bg-[#FAFAF8] px-4 py-4 text-[13px] leading-6 text-[#8A817A]">
           아직 읽기 기록이 없습니다.
         </div>
