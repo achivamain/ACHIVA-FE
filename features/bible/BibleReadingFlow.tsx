@@ -61,30 +61,6 @@ function SectionHeader({
   );
 }
 
-function SummaryCard({
-  label,
-  value,
-  tone = "default",
-}: {
-  label: string;
-  value: string;
-  tone?: "default" | "accent";
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-[20px] border px-4 py-4",
-        tone === "accent"
-          ? "border-[#EBC6A8] bg-[#FFF8F1]"
-          : "border-[#ECE6E0] bg-[#FBF9F6]",
-      )}
-    >
-      <p className="text-[12px] font-medium text-[#8B7D72]">{label}</p>
-      <p className="mt-2 text-[24px] font-black text-[#332B25]">{value}</p>
-    </div>
-  );
-}
-
 function TestamentTab({
   label,
   active,
@@ -113,17 +89,24 @@ function TestamentTab({
 function ScriptureCard({
   scripture,
   completedCount,
+  isCompleted,
   onSelect,
 }: {
   scripture: ScriptureMeta;
   completedCount: number;
+  isCompleted: boolean;
   onSelect: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onSelect}
-      className="flex min-h-[104px] flex-col items-start justify-between rounded-[22px] border border-[#EAE4DD] bg-white px-4 py-4 text-left shadow-[0_4px_14px_rgba(74,67,61,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#D8CDC2] hover:shadow-[0_8px_20px_rgba(74,67,61,0.08)]"
+      className={cn(
+        "flex min-h-[104px] flex-col items-start justify-between rounded-[22px] border px-4 py-4 text-left shadow-[0_4px_14px_rgba(74,67,61,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(74,67,61,0.08)]",
+        isCompleted
+          ? "border-[#E8C8D8] bg-[#FAEEF4] hover:border-[#E3B7CB]"
+          : "border-[#EAE4DD] bg-white hover:border-[#D8CDC2]",
+      )}
     >
       <div className="w-full">
         <p className="text-[18px] font-bold text-[#332B25]">{scripture.name}</p>
@@ -143,24 +126,6 @@ function ProgressBar({ percent }: { percent: number }) {
         style={{ width: `${percent}%` }}
       />
     </div>
-  );
-}
-
-function ActionChip({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-full border border-[#E6E0D9] bg-white px-4 py-2 text-[13px] leading-none font-semibold text-[#332B25]"
-    >
-      {children}
-    </button>
   );
 }
 
@@ -249,7 +214,6 @@ export default function BibleReadingFlow({
   const [draftEndChapterByScriptureId, setDraftEndChapterByScriptureId] = useState<
     Record<string, number | null>
   >({});
-  const [shareSuccessMessage, setShareSuccessMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -292,21 +256,73 @@ export default function BibleReadingFlow({
   const isCompleted = completedCount === selectedBook.totalChapters;
   const isMobilePath = pathname.startsWith("/m/");
 
-  const scripturesInTab = safeBibleBooks.filter(
-    (book) => book.testament === activeTestament,
-  );
+  const scriptureSectionsInTab = useMemo(() => {
+    const getCompletedCount = (book: ScriptureMeta) =>
+      Math.min(
+        book.totalChapters,
+        Math.max(0, progress.completedByScriptureId[book.id] ?? 0),
+      );
+
+    const getReadingStatusPriority = (book: ScriptureMeta) => {
+      const completed = getCompletedCount(book);
+
+      if (completed > 0 && completed < book.totalChapters) {
+        return 0;
+      }
+
+      if (completed === 0) {
+        return 1;
+      }
+
+      return 2;
+    };
+
+    const books = safeBibleBooks
+      .filter((book) => book.testament === activeTestament)
+      .sort((a, b) => {
+        const priorityDiff =
+          getReadingStatusPriority(a) - getReadingStatusPriority(b);
+
+        if (priorityDiff !== 0) {
+          return priorityDiff;
+        }
+
+        return a.displayOrder - b.displayOrder;
+      });
+
+    const sections = [
+      {
+        key: "reading",
+        label: "읽고 있는 성경",
+        books: books.filter((book) => {
+          const completed = getCompletedCount(book);
+          return completed > 0 && completed < book.totalChapters;
+        }),
+      },
+      {
+        key: "unread",
+        label: "아직 안 읽은 성경",
+        books: books.filter((book) => getCompletedCount(book) === 0),
+      },
+      {
+        key: "completed",
+        label: "읽기 완료한 성경",
+        books: books.filter(
+          (book) => getCompletedCount(book) === book.totalChapters,
+        ),
+      },
+    ];
+
+    return sections.filter((section) => section.books.length > 0);
+  }, [activeTestament, progress.completedByScriptureId, safeBibleBooks]);
 
   const rangePreviewText = useMemo(() => {
-    if (isCompleted) {
-      return `${selectedBook.name} 기록이 이미 완료되어 있어요.`;
-    }
-
     if (!selectedRange) {
       return `이번 기록은 ${selectedBook.name} ${nextUnreadChapter}장부터 시작해요. 끝 장을 선택해 주세요.`;
     }
 
     return `${selectedBook.name} ${selectedRange.start}장부터 ${selectedRange.end}장까지 기록합니다.`;
-  }, [isCompleted, nextUnreadChapter, selectedBook.name, selectedRange]);
+  }, [nextUnreadChapter, selectedBook.name, selectedRange]);
 
   const handleSelectTestament = (testament: Testament) => {
     startTransition(() => {
@@ -318,7 +334,6 @@ export default function BibleReadingFlow({
     startTransition(() => {
       setSelectedBookId(book.id);
       setCurrentStep("record");
-      setShareSuccessMessage("");
       setSubmitError("");
     });
   };
@@ -331,7 +346,6 @@ export default function BibleReadingFlow({
         ...current,
         [selectedBook.id]: chapter,
       }));
-      setShareSuccessMessage("");
       setSubmitError("");
     });
   };
@@ -363,8 +377,11 @@ export default function BibleReadingFlow({
         ...current,
         [selectedBook.id]: null,
       }));
-      setShareSuccessMessage(
+      window.alert(
         `${selectedBook.name} ${selectedRange.start}장부터 ${selectedRange.end}장까지 기록했어요.`,
+      );
+      router.push(
+        `${isMobilePath ? "/m" : ""}/${encodeURIComponent(nickName)}/home`,
       );
     } catch (error) {
       console.error(error);
@@ -386,7 +403,7 @@ export default function BibleReadingFlow({
   };
 
   return (
-    <div className="flex w-full justify-center bg-[#F7F5F2] px-4 pb-24 pt-5 sm:px-6 sm:pb-16">
+    <div className="flex min-h-dvh w-full justify-center bg-[#F7F5F2] px-4 pb-24 pt-5 sm:px-6 sm:pb-16">
       <div className="w-full max-w-[680px]">
         <div className="mb-4 flex items-center justify-between">
           <button
@@ -421,17 +438,35 @@ export default function BibleReadingFlow({
               }
             />
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {scripturesInTab.map((book) => (
-                <ScriptureCard
-                  key={book.id}
-                  scripture={book}
-                  completedCount={Math.min(
-                    book.totalChapters,
-                    Math.max(0, progress.completedByScriptureId[book.id] ?? 0),
-                  )}
-                  onSelect={() => handleSelectBook(book)}
-                />
+            <div className="mt-4">
+              {scriptureSectionsInTab.map((section, index) => (
+                <div
+                  key={section.key}
+                  className={cn(index > 0 && "mt-5 border-t border-[#EEE7DF] pt-5")}
+                >
+                  <p className="mb-3 text-[13px] font-semibold tracking-[0.08em] text-[#8B7D72]">
+                    {section.label}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {section.books.map((book) => (
+                      <ScriptureCard
+                        key={book.id}
+                        scripture={book}
+                        completedCount={Math.min(
+                          book.totalChapters,
+                          Math.max(0, progress.completedByScriptureId[book.id] ?? 0),
+                        )}
+                        isCompleted={
+                          Math.min(
+                            book.totalChapters,
+                            Math.max(0, progress.completedByScriptureId[book.id] ?? 0),
+                          ) === book.totalChapters
+                        }
+                        onSelect={() => handleSelectBook(book)}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </SectionCard>
@@ -441,14 +476,8 @@ export default function BibleReadingFlow({
           <div className="flex flex-col gap-4">
             <SectionCard>
               <SectionHeader
-              title={`${selectedBook.name} 기록 작성`}
-              description="끝 장을 선택하면 이번에 남길 범위가 자동으로 정해집니다."
-              action={
-                <ActionChip onClick={() => setCurrentStep("select")}>
-                  책 다시 선택
-                </ActionChip>
-              }
-            />
+                title={`${selectedBook.name} 기록 작성`}
+              />
 
               <div
                 className={cn(
@@ -483,26 +512,10 @@ export default function BibleReadingFlow({
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <SummaryCard label="마지막 완료 장" value={`${completedCount}장`} />
-                <SummaryCard
-                  label="다음 시작 장"
-                  value={isCompleted ? "완료" : `${nextUnreadChapter}장`}
-                  tone={isCompleted ? "accent" : "default"}
-                />
-              </div>
-            </SectionCard>
-
-            <SectionCard>
-              <SectionHeader
-                title="이번 기록 범위"
-                description={rangePreviewText}
-              />
-
               {!isCompleted ? (
                 <div className="mt-4 rounded-[18px] border border-[#ECE6E0] bg-[#FBF9F6] px-4 py-3 text-[13px] leading-6 text-[#7A6F65]">
-                  완료한 다음 장부터만 기록할 수 있어요. 예를 들어 5장까지 완료했다면
-                  이번 기록은 6장부터 시작합니다.
+                  이번 기록은 {selectedBook.name} {nextUnreadChapter}장부터 시작해요.<br/>
+                  끝 장을 선택하면 {nextUnreadChapter}장부터 선택한 장까지 기록됩니다.
                 </div>
               ) : (
                 <div className="mt-4 rounded-[18px] border border-[#E8C8D8] bg-[#FAEEF4] px-4 py-3 text-[13px] leading-6 text-[#7A6F65]">
@@ -550,58 +563,52 @@ export default function BibleReadingFlow({
                   )}
                 </div>
               )}
-            </SectionCard>
 
-            <SectionCard>
-              <SectionHeader
-                title="묵상 기록"
-                description="이번에 읽은 말씀을 통해 남기고 싶은 내용을 적어 주세요."
-              />
+              {!isCompleted ? (
+                <>
+                  <div className="mt-4 rounded-[20px] border border-[#ECE6E0] bg-[#FBF9F6] p-4">
+                    <p className="text-[12px] font-medium text-[#8B7D72]">
+                      현재 선택된 범위
+                    </p>
+                    <p className="mt-1 text-[18px] font-bold text-[#332B25]">
+                      {rangePreviewText}
+                    </p>
+                  </div>
 
-              <div className="mt-4 rounded-[20px] border border-[#ECE6E0] bg-[#FBF9F6] p-4">
-                <p className="text-[12px] font-medium text-[#8B7D72]">
-                  현재 선택된 범위
-                </p>
-                <p className="mt-1 text-[18px] font-bold text-[#332B25]">
-                  {rangePreviewText}
-                </p>
-              </div>
+                  <textarea
+                    value={shareContent}
+                    onChange={(event) => setShareContent(event.target.value)}
+                    placeholder="오늘 읽은 말씀에서 남기고 싶은 생각을 적어 주세요."
+                    className="mt-4 min-h-[132px] w-full rounded-[20px] border border-[#E6E0D9] bg-white px-4 py-4 text-[14px] leading-7 text-[#332B25] outline-none transition-colors placeholder:text-[#9A8E84] focus:border-[#D8C3B0]"
+                  />
 
-              <textarea
-                value={shareContent}
-                onChange={(event) => setShareContent(event.target.value)}
-                placeholder="오늘 읽은 말씀에서 남기고 싶은 생각을 적어 주세요."
-                className="mt-4 min-h-[132px] w-full rounded-[20px] border border-[#E6E0D9] bg-white px-4 py-4 text-[14px] leading-7 text-[#332B25] outline-none transition-colors placeholder:text-[#9A8E84] focus:border-[#D8C3B0]"
-              />
-
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <p className="text-[12px] leading-5 text-[#8B7D72]">
-                  기록을 남기면 진도가 그 시점 기준으로 저장됩니다.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleShareToFeed}
-                  disabled={
-                    !selectedRange ||
-                    !shareContent.trim() ||
-                    isCompleted ||
-                    isSubmitting ||
-                    isProgressSaving
-                  }
-                  className={cn(
-                    "shrink-0 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors",
-                    !selectedRange ||
-                      !shareContent.trim() ||
-                      isCompleted ||
-                      isSubmitting ||
-                      isProgressSaving
-                      ? "bg-[#EAE4DD] text-[#9B8F84]"
-                      : "bg-[#D96B2B] text-white shadow-[0_8px_16px_rgba(217,107,43,0.18)] hover:bg-[#C85D25]",
-                  )}
-                >
-                  {isSubmitting ? "저장 중..." : "기록 남기기"}
-                </button>
-              </div>
+                  <div className="mt-2 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={handleShareToFeed}
+                      disabled={
+                        !selectedRange ||
+                        !shareContent.trim() ||
+                        isCompleted ||
+                        isSubmitting ||
+                        isProgressSaving
+                      }
+                      className={cn(
+                        "shrink-0 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors",
+                        !selectedRange ||
+                          !shareContent.trim() ||
+                          isCompleted ||
+                          isSubmitting ||
+                          isProgressSaving
+                          ? "bg-[#EAE4DD] text-[#9B8F84]"
+                          : "bg-[#D96B2B] text-white shadow-[0_8px_16px_rgba(217,107,43,0.18)] hover:bg-[#C85D25]",
+                      )}
+                    >
+                      {isSubmitting ? "저장 중..." : "기록 남기기"}
+                    </button>
+                  </div>
+                </>
+              ) : null}
 
               {submitError ? (
                 <div className="mt-4">
@@ -609,36 +616,6 @@ export default function BibleReadingFlow({
                     tone="error"
                     title="저장에 실패했어요"
                     description={submitError}
-                  />
-                </div>
-              ) : null}
-
-              {shareSuccessMessage ? (
-                <div className="mt-4">
-                  <Notice
-                    tone="success"
-                    title="기록을 남겼어요"
-                    description={shareSuccessMessage}
-                    action={
-                      <>
-                        <ActionChip
-                          onClick={() =>
-                            router.push(`${isMobilePath ? "/m" : ""}/feed`)
-                          }
-                        >
-                          피드 보기
-                        </ActionChip>
-                        <ActionChip
-                          onClick={() =>
-                            router.push(
-                              `${isMobilePath ? "/m" : ""}/${encodeURIComponent(nickName)}`,
-                            )
-                          }
-                        >
-                          프로필 보기
-                        </ActionChip>
-                      </>
-                    }
                   />
                 </div>
               ) : null}

@@ -16,6 +16,7 @@ export type ReadingRange = {
   label: string;
 };
 
+// 성경 책 관련 데이터
 export const scriptures: ScriptureMeta[] = [
   { id: "창세기", name: "창세기", testament: "old", totalChapters: 50, displayOrder: 1 },
   { id: "출애굽기", name: "출애굽기", testament: "old", totalChapters: 40, displayOrder: 2 },

@@ -69,6 +69,7 @@ export default function Sidebar() {
     /^\/[^/]+\/supports\/detail$/.test(pathname) || // /[nickName]/supports/detail
     /^\/[^/]+\/goals\/edit$/.test(pathname) || // /[nickName]/goals/edit
     /^\/[^/]+\/goals\/archive$/.test(pathname) || // /[nickName]/goals/archive
+    pathname.endsWith("/bible") ||
     pathname === "/post/create" ||
     pathname.startsWith("/settings") ||
     pathname === "/accounts/edit" ||
