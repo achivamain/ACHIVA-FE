@@ -17,7 +17,7 @@ export default function BibleReadingFeedList({
   }
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col divide-y-4 divide- divide-[#ECECEC]">
       {posts.map((post) => (
         <BibleReadingFeedCard key={post.id} post={post} />
       ))}

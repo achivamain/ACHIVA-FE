@@ -9,8 +9,11 @@ import {
   type ScriptureMeta,
   type Testament,
 } from "@/features/bible/mockData";
-import { createScriptureReadingArticle } from "@/features/bible/api";
+import { createScriptureReadingArticle } from "@/app/api/bible";
 import { useScriptureProgress } from "@/features/bible/hooks/useScriptureProgress";
+import {
+  formatScriptureRangeLabel,
+} from "@/features/bible/selectors";
 
 type BibleReadingFlowProps = {
   nickName: string;
@@ -318,10 +321,14 @@ export default function BibleReadingFlow({
 
   const rangePreviewText = useMemo(() => {
     if (!selectedRange) {
-      return `이번 기록은 ${selectedBook.name} ${nextUnreadChapter}장부터 시작해요. 끝 장을 선택해 주세요.`;
+      return `이번 기록은 ${selectedBook.name} ${nextUnreadChapter}장부터 시작해요. 끝을 선택해 주세요.`;
     }
 
-    return `${selectedBook.name} ${selectedRange.start}장부터 ${selectedRange.end}장까지 기록합니다.`;
+    return `${formatScriptureRangeLabel(
+      selectedBook.name,
+      selectedRange.start,
+      selectedRange.end,
+    )}`;
   }, [nextUnreadChapter, selectedBook.name, selectedRange]);
 
   const handleSelectTestament = (testament: Testament) => {
@@ -378,7 +385,11 @@ export default function BibleReadingFlow({
         [selectedBook.id]: null,
       }));
       window.alert(
-        `${selectedBook.name} ${selectedRange.start}장부터 ${selectedRange.end}장까지 기록했어요.`,
+        `${formatScriptureRangeLabel(
+          selectedBook.name,
+          selectedRange.start,
+          selectedRange.end,
+        )} 기록했어요.`,
       );
       router.push(
         `${isMobilePath ? "/m" : ""}/${encodeURIComponent(nickName)}/home`,
@@ -515,15 +526,12 @@ export default function BibleReadingFlow({
               {!isCompleted ? (
                 <div className="mt-4 rounded-[18px] border border-[#ECE6E0] bg-[#FBF9F6] px-4 py-3 text-[13px] leading-6 text-[#7A6F65]">
                   이번 기록은 {selectedBook.name} {nextUnreadChapter}장부터 시작해요.<br/>
-                  끝 장을 선택하면 {nextUnreadChapter}장부터 선택한 장까지 기록됩니다.
+                  작성할 범위의 끝을 선택해주세요.
                 </div>
               ) : (
                 <div className="mt-4 rounded-[18px] border border-[#E8C8D8] bg-[#FAEEF4] px-4 py-3 text-[13px] leading-6 text-[#7A6F65]">
                   <p className="font-semibold text-[#B24C7B]">
                     이 성경은 기록이 모두 완료되었어요.
-                  </p>
-                  <p className="mt-1">
-                    완료한 상태는 유지되며, 새 기록을 남기려면 다른 성경을 선택하면 됩니다.
                   </p>
                 </div>
               )}
@@ -578,7 +586,7 @@ export default function BibleReadingFlow({
                   <textarea
                     value={shareContent}
                     onChange={(event) => setShareContent(event.target.value)}
-                    placeholder="오늘 읽은 말씀에서 남기고 싶은 생각을 적어 주세요."
+                    placeholder="남기고 싶은 생각을 적어 주세요."
                     className="mt-4 min-h-[132px] w-full rounded-[20px] border border-[#E6E0D9] bg-white px-4 py-4 text-[14px] leading-7 text-[#332B25] outline-none transition-colors placeholder:text-[#9A8E84] focus:border-[#D8C3B0]"
                   />
 

@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchScriptureProgress,
   saveScriptureProgress,
-} from "@/features/bible/api";
+} from "@/app/api/bible";
 import {
   getActiveScriptureProgress,
   toScriptureProgressState,

@@ -26,9 +26,25 @@ export function getScriptureReflection(post: ScriptureReadingFeedPost) {
   return post.question[0]?.content?.trim() ?? "";
 }
 
+export function formatChapterRangeLabel(startChapter: number, endChapter: number) {
+  if (startChapter === endChapter) {
+    return `${startChapter}장`;
+  }
+
+  return `${startChapter}장 - ${endChapter}장`;
+}
+
+export function formatScriptureRangeLabel(
+  scriptureId: string,
+  startChapter: number,
+  endChapter: number,
+) {
+  return `${scriptureId} ${formatChapterRangeLabel(startChapter, endChapter)}`;
+}
+
 export function getScriptureRangeLabel(post: ScriptureReadingFeedPost) {
   const { scriptureId, startChapter, endChapter } = post.scriptureReading;
-  return `${scriptureId} ${startChapter}장 - ${endChapter}장`;
+  return formatScriptureRangeLabel(scriptureId, startChapter, endChapter);
 }
 
 export function toScriptureProgressState(
