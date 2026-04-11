@@ -150,14 +150,17 @@ export default function Posts({
         </div>
       )}
       {!showBibleReadingPanel && (
-        <div ref={containerRef} className="grid grid-cols-3 border-l border-t border-gray-800">
+        <div
+          ref={containerRef}
+          className="grid grid-cols-3 border-l border-t border-gray-800"
+        >
           {posts.map((post) => {
             return (
-              <div className="border-l border-t border-gray-800">
-                <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
+              <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
+                <div className="border-l border-t border-gray-800">
                   <TitlePage size={size} post={post} />
-                </Link>
-              </div>
+                </div>
+              </Link>
             );
           })}
         </div>
