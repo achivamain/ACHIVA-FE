@@ -52,13 +52,26 @@ export type PostRes = {
   memberNickName: string;
   memberProfileUrl: string;
   memberArticleCount?: number;
-  backgroundColor: BackgroundColor;
+  backgroundColor: BackgroundColor | null;
   authorCategorySeq: number;
   createdAt: string; // ISO 8601 datetime string
   updatedAt: string; // ISO 8601 datetime string
   weeklyWorkoutCount: number;
   continuousGoalWeeks: number;
   cheerings?: Cheering[];
+};
+
+export type ScriptureReadingPayload = {
+  scriptureId: string;
+  startChapter: number;
+  endChapter: number;
+  completedChapters: number;
+  readAt?: string;
+};
+
+export type ScriptureReadingPostRes = PostRes & {
+  category: "성경 일독";
+  scriptureReading: ScriptureReadingPayload;
 };
 
 export type Question = {

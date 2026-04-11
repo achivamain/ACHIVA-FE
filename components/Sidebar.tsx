@@ -58,7 +58,11 @@ export default function Sidebar() {
   const pathname = decodeURIComponent(usePathname());
 
   let initialSelectedItem;
-  if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
+  if (
+    pathname.endsWith("/home") ||
+    pathname.endsWith("/categories") ||
+    pathname.endsWith("/bible")
+  ) {
     initialSelectedItem = "홈";
   } else if (pathname.startsWith("/moim")) {
     initialSelectedItem = "모임";

@@ -43,7 +43,11 @@ export default function Sidebar() {
   const pathname = decodeURIComponent(usePathname());
 
   let initialSelectedItem;
-  if (pathname.endsWith("/home") || pathname.endsWith("/categories")) {
+  if (
+    pathname.endsWith("/home") ||
+    pathname.endsWith("/categories") ||
+    pathname.endsWith("/bible")
+  ) {
     initialSelectedItem = "홈";
   } else if (pathname.startsWith("/moim") || pathname.startsWith("/m/moim")) {
     initialSelectedItem = "모임";
@@ -65,6 +69,7 @@ export default function Sidebar() {
     /^\/[^/]+\/supports\/detail$/.test(pathname) || // /[nickName]/supports/detail
     /^\/[^/]+\/goals\/edit$/.test(pathname) || // /[nickName]/goals/edit
     /^\/[^/]+\/goals\/archive$/.test(pathname) || // /[nickName]/goals/archive
+    pathname.endsWith("/bible") ||
     pathname === "/post/create" ||
     pathname.startsWith("/settings") ||
     pathname === "/accounts/edit" ||

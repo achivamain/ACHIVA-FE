@@ -1,12 +1,14 @@
 "use client";
 
-// 피드 페이지 리스트 전체적인 관리
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { LoadingIcon } from "@/components/Icons";
+import type { PostRes, ScriptureReadingPostRes } from "@/types/Post";
 import type { PostsData } from "@/types/responses";
 import type { FeedTab } from "./FeedTabs";
 import FeedPost from "./FeedPost";
+import BibleReadingFeedList from "@/features/bible/BibleReadingFeedList";
+import { isScriptureReadingPost } from "@/features/bible/selectors";
 
 type FeedListProps = {
   activeTab: FeedTab;
@@ -30,9 +32,8 @@ export default function FeedList({ activeTab }: FeedListProps) {
     const json = await response.json();
     const postsData = json.data ?? json;
 
-    // 게시글에 cheerings 정보 추가
     const contentWithCheerings = await Promise.all(
-      (postsData.content ?? []).map(async (post: any) => {
+      (postsData.content ?? []).map(async (post: PostRes) => {
         const cheeringsRes = await fetch(`/api/cheerings?postId=${post.id}`);
         const cheeringsJson = await cheeringsRes.json();
         return { ...post, cheerings: cheeringsJson.data?.content ?? [] };
@@ -57,7 +58,6 @@ export default function FeedList({ activeTab }: FeedListProps) {
       },
     });
 
-  // 무한 스크롤 센티넬
   const loaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,6 +75,10 @@ export default function FeedList({ activeTab }: FeedListProps) {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const posts = data?.pages.flatMap((p) => p.content) ?? [];
+  const scripturePosts = useMemo(
+    () => posts.filter(isScriptureReadingPost) as ScriptureReadingPostRes[],
+    [posts],
+  );
 
   return (
     <div className="flex flex-col gap-7">
@@ -90,9 +94,12 @@ export default function FeedList({ activeTab }: FeedListProps) {
         </div>
       )}
 
-      {posts.map((post) => {
-        return <FeedPost key={post.id} post={post} />;
-      })}
+      {!isLoading &&
+        (activeTab === "성경 일독" ? (
+          <BibleReadingFeedList posts={scripturePosts} />
+        ) : (
+          posts.map((post) => <FeedPost key={post.id} post={post} />)
+        ))}
 
       <div ref={loaderRef}></div>
 

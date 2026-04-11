@@ -2,14 +2,20 @@ import type { CSSProperties } from "react";
 
 export const DEFAULT_POST_PAGE_BACKGROUND = "#F0E8E0" as const;
 
-export function isWarmPaperTheme(backgroundColor?: string) {
-  return backgroundColor === DEFAULT_POST_PAGE_BACKGROUND;
+function getEffectivePostBackground(backgroundColor?: string | null) {
+  return backgroundColor ?? DEFAULT_POST_PAGE_BACKGROUND;
+}
+
+export function isWarmPaperTheme(backgroundColor?: string | null) {
+  return getEffectivePostBackground(backgroundColor) === DEFAULT_POST_PAGE_BACKGROUND;
 }
 
 export function getPostPageSurface(
-  backgroundColor?: string,
+  backgroundColor?: string | null,
 ): CSSProperties {
-  if (isWarmPaperTheme(backgroundColor)) {
+  const effectiveBackground = getEffectivePostBackground(backgroundColor);
+
+  if (isWarmPaperTheme(effectiveBackground)) {
     return {
       backgroundColor: DEFAULT_POST_PAGE_BACKGROUND,
       backgroundImage:
@@ -18,12 +24,14 @@ export function getPostPageSurface(
   }
 
   return {
-    backgroundColor,
+    backgroundColor: effectiveBackground,
   };
 }
 
-export function getPostPageTone(backgroundColor?: string) {
-  if (isWarmPaperTheme(backgroundColor)) {
+export function getPostPageTone(backgroundColor?: string | null) {
+  const effectiveBackground = getEffectivePostBackground(backgroundColor);
+
+  if (isWarmPaperTheme(effectiveBackground)) {
     return {
       shellTextClassName: "text-[#4A312B]",
       subtitleClassName: "text-[#4A312B]",
@@ -33,7 +41,7 @@ export function getPostPageTone(backgroundColor?: string) {
     };
   }
 
-  if (backgroundColor === "#f9f9f9") {
+  if (effectiveBackground === "#f9f9f9") {
     return {
       shellTextClassName: "text-black",
       subtitleClassName: "text-black",
