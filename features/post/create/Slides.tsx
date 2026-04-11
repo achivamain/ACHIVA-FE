@@ -8,6 +8,14 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { useDraftPostStore } from "@/store/CreatePostStore";
 import { getPostPageSurface, getPostPageTone } from "@/lib/postPageTheme";
+import {
+  CONTENT_CARD_BODY_CLASS,
+  CONTENT_CARD_BODY_WRAP_CLASS,
+  CONTENT_CARD_DIVIDER_CLASS,
+  CONTENT_CARD_SHELL_CLASS,
+  CONTENT_CARD_TITLE_CLASS,
+  CONTENT_CARD_TITLE_WRAP_CLASS,
+} from "@/features/post/contentCardLayout";
 
 type Props = {
   currentPage: number;
@@ -17,7 +25,7 @@ type Props = {
 export default function Slides({ currentPage, setCurrentPage }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
-  const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 456;
+  const size = containerWidth ? Math.min(containerWidth, 456) : 456;
 
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
@@ -140,18 +148,18 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                       transformOrigin: "top left",
                       ...getPostPageSurface(draft.backgroundColor),
                     }}
-                    className={`relative overflow-hidden aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${tone.shellTextClassName}`}
+                    className={`${CONTENT_CARD_SHELL_CLASS} ${tone.shellTextClassName}`}
                   >
                     <div
-                      className="absolute left-[20px] right-[20px] top-[78px] h-px"
+                      className={CONTENT_CARD_DIVIDER_CLASS}
                       style={{ background: tone.accentLineColor }}
                     />
                     <div
                       className="absolute w-[160px] h-[160px] rounded-full blur-[42px] -top-[48px] -left-[20px]"
                       style={{ background: tone.ornamentColor }}
                     />
-                    <div className="relative z-10">
-                      {page.subtitle !== undefined && (
+                    {page.subtitle !== undefined && (
+                      <div className={CONTENT_CARD_TITLE_WRAP_CLASS}>
                         <input
                           maxLength={14}
                           onChange={(e) => {
@@ -164,13 +172,15 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                             }));
                           }}
                           value={page.subtitle}
-                          className={`w-full font-semibold text-[32px] mb-[24px] leading-[50px] bg-transparent ${tone.subtitleClassName}`}
+                          className={`${CONTENT_CARD_TITLE_CLASS} outline-none ${tone.subtitleClassName}`}
                         />
-                      )}
+                      </div>
+                    )}
 
+                    <div className={CONTENT_CARD_BODY_WRAP_CLASS}>
                       <textarea
                         style={{ maxHeight: maxHeight }}
-                        className={`w-full text-[16px] font-[inherit] ${tone.contentClassName} bg-transparent resize-none outline-none overflow-hidden placeholder:text-current placeholder:opacity-55`}
+                        className={`${CONTENT_CARD_BODY_CLASS} ${tone.contentClassName} resize-none outline-none overflow-hidden placeholder:text-current placeholder:opacity-55`}
                         value={page.content ?? ""}
                         onChange={(e) => {
                           if (e.target.scrollHeight <= maxHeight) {
