@@ -162,7 +162,7 @@ export default function EditProfile() {
 
       <div tabIndex={-1}></div>
       <div className="w-full flex flex-col gap-3">
-        <InputSection label="닉네임">
+        <InputSection label="이름">
           <div
             className={`absolute right-5 top-4 cursor-pointer ${
               isEditing.nickName ? "hidden" : ""
