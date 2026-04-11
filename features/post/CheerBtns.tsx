@@ -67,7 +67,6 @@ export default function CheerBtns({
       {CHEERING_CATEGORIES.map((type) => {
         const active = cheeringsState[type].active;
         const pending = cheeringsState[type].isPending;
-        const Icon = cheeringMeta[type].icon;
         const color = cheeringMeta[type].color;
         return (
           <button
@@ -155,11 +154,6 @@ export default function CheerBtns({
                 : "border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300"
             } cursor-pointer`}
           >
-            <div
-              className={`transition-transform duration-300 shrink-0 ${active ? "scale-110" : "group-hover:scale-110 grayscale opacity-70"}`}
-            >
-              <Icon active={active} />
-            </div>
             <p className="whitespace-nowrap truncate">{cheeringMeta[type].label}</p>
           </button>
         );

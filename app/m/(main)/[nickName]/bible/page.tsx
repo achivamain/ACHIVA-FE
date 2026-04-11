@@ -3,6 +3,11 @@ import BibleReadingFlow from "@/features/bible/BibleReadingFlow";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getMe } from "@/lib/getUser";
 import { notFound, redirect } from "next/navigation";
+import {
+  buildMobileUserPath,
+  isSameNickName,
+  normalizeNickName,
+} from "@/lib/nickname";
 
 export default async function MobileBiblePage({
   params,
@@ -16,9 +21,9 @@ export default async function MobileBiblePage({
   const user = await getMe(token).catch(() => null);
   if (!user) notFound();
 
-  if (user.nickName !== decodeURIComponent(nickName)) {
-    redirect(`/m/${nickName}/bible`);
+  if (!isSameNickName(user.nickName, nickName)) {
+    redirect(buildMobileUserPath(nickName, "/bible"));
   }
 
-  return <BibleReadingFlow nickName={decodeURIComponent(nickName)} />;
+  return <BibleReadingFlow nickName={normalizeNickName(nickName)} />;
 }

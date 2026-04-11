@@ -2,6 +2,7 @@
 
 import { User } from "@/types/User";
 import { notFound, redirect } from "next/navigation";
+import { encodeNickNameValue, isSameNickName } from "@/lib/nickname";
 
 const handlingResError = (res: Response) => {
   switch (res.status) {
@@ -44,7 +45,10 @@ async function fetchAuthorizedData<T>(path: string, token: string) {
 
 // 유저 데이터 가져오기
 export async function getUser(nickName: string, token: string) {
-  return fetchAuthorizedData<User>(`/api2/members/${nickName}`, token);
+  return fetchAuthorizedData<User>(
+    `/api2/members/${encodeNickNameValue(nickName)}`,
+    token,
+  );
 }
 
 // 자신의 데이터 가져오기
@@ -55,7 +59,7 @@ export async function getMe(token: string) {
 // 백엔드 API로 실제 유저 닉네임을 조회하여 본인 확인
 export async function isOwner(nickName: string, token: string) {
   const me = await getMe(token);
-  const isOwner = me.nickName === decodeURIComponent(nickName);
+  const isOwner = isSameNickName(me.nickName, nickName);
 
   return isOwner;
 }

@@ -3,6 +3,7 @@ import BibleReadingFlow from "@/features/bible/BibleReadingFlow";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getMe, isOwner } from "@/lib/getUser";
 import { notFound, redirect } from "next/navigation";
+import { buildUserPath, normalizeNickName } from "@/lib/nickname";
 
 export default async function BiblePage({
   params,
@@ -17,8 +18,8 @@ export default async function BiblePage({
   if (!user) notFound();
 
   if (!(await isOwner(nickName, token))) {
-    redirect(`/${nickName}`);
+    redirect(buildUserPath(nickName));
   }
 
-  return <BibleReadingFlow nickName={decodeURIComponent(nickName)} />;
+  return <BibleReadingFlow nickName={normalizeNickName(nickName)} />;
 }

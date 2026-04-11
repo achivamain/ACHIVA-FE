@@ -11,6 +11,7 @@ import {
 } from "@/features/bible/selectors";
 import { getScriptureMeta } from "@/features/bible/mockData";
 import type { ScriptureReadingFeedPost } from "@/features/bible/types";
+import { buildUserPath, getDisplayNickName } from "@/lib/nickname";
 
 export default function BibleReadingFeedCard({
   post,
@@ -33,13 +34,15 @@ export default function BibleReadingFeedCard({
     <article className="w-full bg-white px-5 py-3 sm:px-0">
       <div className="flex items-center gap-2.5 py-2.5 sm:px-0">
         <Link
-          href={`/${encodeURIComponent(post.memberNickName)}`}
+          href={buildUserPath(post.memberNickName)}
           className="flex items-center gap-2.5"
         >
           <div className="relative flex-shrink-0">
             <ProfileImg size={38} url={post.memberProfileUrl} />
           </div>
-          <p className="font-medium text-[#111111]">{post.memberNickName}</p>
+          <p className="font-medium text-[#111111]">
+            {getDisplayNickName(post.memberNickName)}
+          </p>
         </Link>
         <p className="font-light text-black/50">
           {new Date(post.createdAt).toLocaleDateString("ko-KR")}
@@ -90,7 +93,7 @@ export default function BibleReadingFeedCard({
 
       {isCalendarOpen ? (
         <BibleReadingCalendarModal
-          authorName={post.memberNickName}
+          authorName={getDisplayNickName(post.memberNickName)}
           memberId={post.memberId}
           onClose={() => setIsCalendarOpen(false)}
         />

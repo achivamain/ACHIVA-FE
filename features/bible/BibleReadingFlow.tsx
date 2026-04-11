@@ -14,6 +14,8 @@ import { useScriptureProgress } from "@/features/bible/hooks/useScriptureProgres
 import {
   formatScriptureRangeLabel,
 } from "@/features/bible/selectors";
+import { buildMobileUserPath, buildUserPath } from "@/lib/nickname";
+import { queueToast } from "@/lib/queuedToast";
 
 type BibleReadingFlowProps = {
   nickName: string;
@@ -384,15 +386,14 @@ export default function BibleReadingFlow({
         ...current,
         [selectedBook.id]: null,
       }));
-      window.alert(
-        `${formatScriptureRangeLabel(
-          selectedBook.name,
-          selectedRange.start,
-          selectedRange.end,
-        )} 기록했어요.`,
-      );
+      queueToast({
+        type: "success",
+        message: "게시물 작성에 성공했어요.",
+      });
       router.push(
-        `${isMobilePath ? "/m" : ""}/${encodeURIComponent(nickName)}/home`,
+        isMobilePath
+          ? buildMobileUserPath(nickName, "/home")
+          : buildUserPath(nickName, "/home"),
       );
     } catch (error) {
       console.error(error);
@@ -409,7 +410,9 @@ export default function BibleReadingFlow({
     }
 
     router.push(
-      `${isMobilePath ? "/m" : ""}/${encodeURIComponent(nickName)}/home`,
+      isMobilePath
+        ? buildMobileUserPath(nickName, "/home")
+        : buildUserPath(nickName, "/home"),
     );
   };
 

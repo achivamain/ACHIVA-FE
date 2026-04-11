@@ -12,6 +12,7 @@ import {
   type CrewRankingItem,
   type OverallRankingItem,
 } from "@/lib/ranking";
+import { getDisplayNickName } from "@/lib/nickname";
 
 // 기록 0회인 사람/모임 보이게 할 지 설정 
 const SHOW_INACTIVE_OVERALL_RANKING = false;
@@ -274,7 +275,7 @@ function OverallRanking() {
         <UserRankingRow
           key={`${user.nickName}-${user.rank}`}
           rank={index + 1}
-          nickName={user.nickName}
+          nickName={getDisplayNickName(user.nickName)}
           profileImageUrl={user.profileImageUrl}
           metrics={[
             {
@@ -334,7 +335,7 @@ function CategoryRanking({ category }: { category: string }) {
         <UserRankingRow
           key={user.memberId}
           rank={user.rank}
-          nickName={user.nickName}
+          nickName={getDisplayNickName(user.nickName)}
           profileImageUrl={user.profileImageUrl}
           metrics={[
             {

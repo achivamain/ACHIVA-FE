@@ -5,6 +5,7 @@
 import Loading from "@/components/Loading";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { buildUserPath } from "@/lib/nickname";
 
 export default function Page() {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function Page() {
             return;
           }
 
-          router.replace(`/${encodeURIComponent(nickName)}/home`);
+          router.replace(buildUserPath(nickName, "/home"));
           return;
         }
 

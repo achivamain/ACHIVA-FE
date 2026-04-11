@@ -3,10 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import type { User } from "@/types/User";
 import ProfileImg from "@/components/ProfileImg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserSchema } from "../auth/schima";
 import ImageUploader from "./ImageUploader";
 import { LoadingIcon, PencilIcon } from "@/components/Icons";
+import { buildUserPath, getDisplayNickName } from "@/lib/nickname";
 
 export default function EditProfile() {
   const queryClient = useQueryClient();
@@ -30,9 +31,9 @@ export default function EditProfile() {
   });
 
   const [profileImageUrl, setProfileImageUrl] = useState(user?.profileImageUrl);
-  const [nickName, setNickName] = useState(user?.nickName);
-  const [isNickNameOk, setIsNickNameOk] = useState(true);
-  const [isNickNameCheckLoading, setIsNickNameCheckLoding] = useState(false);
+  const [nickName, setNickName] = useState(
+    user?.nickName ? getDisplayNickName(user.nickName) : undefined,
+  );
   const [nickNameError, setNickNameError] = useState("");
   const [isEditing, setIsEditing] = useState({
     nickName: false,
@@ -40,6 +41,19 @@ export default function EditProfile() {
   });
 
   const [bio, setBio] = useState(user?.description);
+  const originalDisplayNickName = user?.nickName
+    ? getDisplayNickName(user.nickName)
+    : "";
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    setProfileImageUrl((current) => current ?? user.profileImageUrl);
+    setNickName((current) => current ?? getDisplayNickName(user.nickName));
+    setBio((current) => current ?? user.description);
+  }, [user]);
 
   function useUpdateProfile() {
     return useMutation({
@@ -72,12 +86,37 @@ export default function EditProfile() {
         if (!res.ok) {
           throw new Error("프로필 수정 중 에러");
         }
+
+        return res.json().catch(() => null);
       },
 
-      onSuccess: () => {
+      onSuccess: async (response) => {
         // "user" 키를 invalidate해서 refetch 유도
-        queryClient.invalidateQueries({ queryKey: ["user"] });
-        window.location.href = `/${nickName}`;
+        await queryClient.invalidateQueries({ queryKey: ["user"] });
+
+        const savedNickName =
+          response?.data?.nickName ??
+          (await queryClient.fetchQuery({
+            queryKey: ["user"],
+            queryFn: async () => {
+              const res = await fetch(`/api/members/me`, {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
+
+              if (!res.ok) {
+                throw new Error("server error");
+              }
+
+              return (await res.json()).data as User;
+            },
+          })).nickName;
+
+        if (savedNickName) {
+          window.location.href = buildUserPath(savedNickName);
+        }
       },
 
       onError: (err) => {
@@ -89,36 +128,6 @@ export default function EditProfile() {
     });
   }
   const { mutate, isPending } = useUpdateProfile();
-
-  async function handleCheckNickName() {
-    if (!nickName) return;
-    setIsNickNameCheckLoding(true);
-    try {
-      const response = await fetch(
-        `/api/auth/checkNickname?nickname=${nickName}`,
-      );
-      if (response.ok) {
-        const { data } = await response.json();
-        const isAvailable = data.available;
-        if (isAvailable) {
-          setIsNickNameOk(true);
-        } else {
-          setNickNameError("이미 사용 중인 닉네임입니다.");
-        }
-      } else if (response.status === 409) {
-        setNickNameError("이미 사용 중인 닉네임입니다.");
-      } else {
-        throw new Error("닉네임 중복 체크 중 서버 에러");
-      }
-    } catch (err) {
-      console.error(err);
-      alert(
-        "네트워크 혹은 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-      );
-    } finally {
-      setIsNickNameCheckLoding(false);
-    }
-  }
 
   function handleNickNameBlur() {
     const schema = UserSchema.pick({ nickName: true });
@@ -137,7 +146,13 @@ export default function EditProfile() {
       className="w-sm flex flex-col items-center gap-6"
       onSubmit={async (e) => {
         e.preventDefault();
-        mutate({ user, nickName, profileImageUrl, bio });
+        const trimmedNickName = nickName?.trim();
+        const nextNickName =
+          trimmedNickName === originalDisplayNickName
+            ? user?.nickName
+            : trimmedNickName;
+
+        mutate({ user, nickName: nextNickName, profileImageUrl, bio });
       }}
     >
       <div className="relative w-auto h-auto">
@@ -147,7 +162,7 @@ export default function EditProfile() {
 
       <div tabIndex={-1}></div>
       <div className="w-full flex flex-col gap-3">
-        <InputSection label="닉네임">
+        <InputSection label="이름">
           <div
             className={`absolute right-5 top-4 cursor-pointer ${
               isEditing.nickName ? "hidden" : ""
@@ -158,21 +173,17 @@ export default function EditProfile() {
           <input
             className="py-2 px-4 w-full h-12"
             type="text"
-            value={nickName}
+            value={nickName ?? ""}
             onClick={() =>
               setIsEditing((prev) => ({ ...prev, nickName: true }))
             }
             onChange={(e) => {
               setNickNameError("");
-              setIsNickNameOk(false);
               setNickName(e.target.value);
             }}
             onBlur={() => {
               setIsEditing((prev) => ({ ...prev, nickName: false }));
               handleNickNameBlur();
-              if (nickName !== user?.nickName && !nickNameError) {
-                handleCheckNickName();
-              }
             }}
           />
         </InputSection>
@@ -206,8 +217,7 @@ export default function EditProfile() {
           isEditing.nickName ||
           isEditing.bio ||
           !!nickNameError ||
-          !isNickNameOk ||
-          isNickNameCheckLoading
+          isPending
         }
       >
         {isPending ? <LoadingIcon /> : "제출"}

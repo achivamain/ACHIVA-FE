@@ -3,18 +3,20 @@ import { auth } from "@/auth";
 import { revalidateTag } from "next/cache";
 import type { User } from "@/types/User";
 import type { FriendData } from "@/types/Friends";
+import { encodeNickNameValue } from "@/lib/nickname";
 
 // 친구 목록 가져오기
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const nickName = searchParams.get("nickName");
+  const encodedNickName = nickName ? encodeNickNameValue(nickName) : "";
 
   const session = await auth();
   const token = session?.access_token;
 
   async function getFriends() {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/friendships/${nickName}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/friendships/${encodedNickName}`,
       {
         method: "GET",
         headers: {
@@ -28,7 +30,7 @@ export async function GET(req: NextRequest) {
 
   async function getUser() {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${nickName}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/api2/members/${encodedNickName}`,
       {
         method: "GET",
         headers: {

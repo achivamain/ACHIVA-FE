@@ -13,6 +13,8 @@ import CheerBtns from "../post/CheerBtns";
 import { useQuery } from "@tanstack/react-query";
 import { HorizontalThreeDotsIcon } from "@/components/Icons";
 import PostCountBadge from "@/components/PostCountBadge";
+import { buildUserPath, getDisplayNickName } from "@/lib/nickname";
+import { toast } from "sonner";
 
 const ModalWithoutCloseBtn = dynamic(
   () => import("@/components/ModalWithoutCloseBtn"),
@@ -50,7 +52,7 @@ export default function FeedPost({ post }: { post: PostRes }) {
       <div className="w-full">
         <div className="flex gap-2.5 items-center py-2.5 px-5 sm:px-0">
           <Link
-            href={`/${post.memberNickName}`}
+            href={buildUserPath(post.memberNickName)}
             className="flex gap-2.5 items-center"
           >
             <div className="relative flex-shrink-0">
@@ -59,7 +61,9 @@ export default function FeedPost({ post }: { post: PostRes }) {
                 <PostCountBadge articleCount={post.memberArticleCount} />
               </div>
             </div>
-            <p className="font-medium">{post.memberNickName}</p>
+            <p className="font-medium">
+              {getDisplayNickName(post.memberNickName)}
+            </p>
           </Link>
           {post.createdAt && (
             <p className="font-light text-black/50">
@@ -95,8 +99,9 @@ export default function FeedPost({ post }: { post: PostRes }) {
                   }),
                 });
                 if (res.ok) {
-                  alert(`신고가 접수되었습니다.
-처리에는 최대 24시간이 소요됩니다.`);
+                  toast.success("신고가 접수되었습니다.", {
+                    description: "처리에는 최대 24시간이 소요됩니다.",
+                  });
                 } else {
                   alert("신고에 실패했습니다. 다시 시도해 주세요.");
                 }
@@ -115,7 +120,9 @@ export default function FeedPost({ post }: { post: PostRes }) {
                   headers: { "Content-Type": "application/json" },
                 });
                 if (res.ok) {
-                  window.location.href = `/${currentUser?.nickName}`;
+                  if (currentUser?.nickName) {
+                    window.location.href = buildUserPath(currentUser.nickName);
+                  }
                 } else {
                   alert("게시물 삭제에 실패했습니다. 다시 시도해 주세요.");
                 }

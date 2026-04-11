@@ -6,6 +6,7 @@ import GoalCard from "@/features/user/goals/GoalCard";
 import { GoalEditIcon, GoalArchiveIcon } from "@/components/Icons";
 import { useActiveGoals, categorizeGoals } from "@/hooks/useGoals";
 import { TextLogo } from "@/components/Logo";
+import { buildUserPath } from "@/lib/nickname";
 
 interface MobileGoalPageProps {
   nickName: string;
@@ -17,11 +18,11 @@ const MobileGoalPage: React.FC<MobileGoalPageProps> = ({ nickName }) => {
   const { vision, missions, mindsets } = categorizeGoals(goals);
 
   const handleEditClick = () => {
-    router.push(`/${nickName}/goals/edit`);
+    router.push(buildUserPath(nickName, "/goals/edit"));
   };
 
   const handleArchiveClick = () => {
-    router.push(`/${nickName}/goals/archive`);
+    router.push(buildUserPath(nickName, "/goals/archive"));
   };
 
   if (isLoading) {

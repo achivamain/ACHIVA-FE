@@ -4,6 +4,7 @@ import GoalPage from "@/features/user/goals/GoalPage";
 import Banner from "@/features/event/Banner";
 import { isOwner } from "@/lib/getUser";
 import { getAuthSession } from "@/lib/getAuthSession";
+import { buildUserPath } from "@/lib/nickname";
 
 export default async function GoalsPage({
   params,
@@ -17,7 +18,7 @@ export default async function GoalsPage({
 
   // 본인만 접근 가능
   if (!(await isOwner(nickName, token))) {
-    redirect(`/${nickName}`);
+    redirect(buildUserPath(nickName));
   }
 
   return (

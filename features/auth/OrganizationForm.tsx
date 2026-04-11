@@ -5,11 +5,12 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CloseIcon, LoadingIcon, SearchIcon } from "@/components/Icons";
 import { NextStepButton } from "./Buttons";
-import { useSignupInfoStore } from "@/store/SignupStore";
+import { useSignupInfoStore, useSignupStepStore } from "@/store/SignupStore";
 import type {
   Organization,
   OrganizationListResponse,
 } from "@/types/organization";
+import { buildUserPath } from "@/lib/nickname";
 
 type SignupRequestBody = {
   nickName: string;
@@ -17,6 +18,12 @@ type SignupRequestBody = {
   organizationId: number;
   profileImageUrl?: string;
   organizationPassword?: string;
+};
+
+type SignupResponse = {
+  data?: {
+    nickName?: string;
+  };
 };
 
 type OrganizationDescriptionItem = {
@@ -104,6 +111,8 @@ function OrganizationDescription({
 export default function OrganizationForm() {
   const user = useSignupInfoStore.use.user();
   const setUser = useSignupInfoStore.use.setUser();
+  const resetUser = useSignupInfoStore.use.resetUser();
+  const resetStep = useSignupStepStore.use.resetStep();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>(
@@ -208,8 +217,20 @@ export default function OrganizationForm() {
           errorBody.message || errorBody.error || "회원가입 중 오류가 발생했습니다.",
         );
       }
+
+      return (await res.json().catch(() => null)) as SignupResponse | null;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const registeredNickName = response?.data?.nickName;
+
+      resetUser();
+      resetStep();
+
+      if (registeredNickName) {
+        window.location.href = buildUserPath(registeredNickName, "/home");
+        return;
+      }
+
       window.location.href = "/";
     },
     onError: (error) => {

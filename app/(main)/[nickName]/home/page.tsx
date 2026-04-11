@@ -7,6 +7,7 @@ import Logout from "@/components/Logout";
 import { getHomeData } from "@/lib/getData";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { getMe, isOwner } from "@/lib/getUser";
+import { buildUserPath, getDisplayNickName } from "@/lib/nickname";
 
 export default async function HomePage({
   params,
@@ -21,7 +22,7 @@ export default async function HomePage({
   if (!user) notFound();
 
   if (!(await isOwner(nickName, token))) {
-    redirect(`/${nickName}`);
+    redirect(buildUserPath(nickName));
   }
 
   try {
@@ -38,7 +39,7 @@ export default async function HomePage({
             <div className="w-full max-w-[844px]">
               <div className="pt-[80px] pb-5 px-5">
                 <h2 className="text-[28px] font-extrabold text-[#3A2418]">
-                  안녕하세요, {decodeURIComponent(nickName)} 님! ✨
+                  안녕하세요, {getDisplayNickName(nickName)} 님! ✨
                 </h2>
                 <p className="text-[16px] leading-[22px] text-[#8A7565] mt-2">
                   오늘도 은혜가 풍성한 하루 되시기를 축복합니다!

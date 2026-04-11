@@ -10,6 +10,7 @@ import dateFormatter from "@/lib/dateFormatter";
 import { cheeringMeta } from "@/lib/cheering";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { buildUserPath, getDisplayNickName } from "@/lib/nickname";
 
 // 포스트 캐시
 const postCache = new Map<string, PostRes | undefined>();
@@ -137,13 +138,16 @@ export default function Notifications() {
                   hasTitle ? "" : "border-t border-t-black/15"
                 }`}
               >
-                <Link href={`/${n.senderName}`}>
+                <Link href={buildUserPath(n.senderName)}>
                   <ProfileImg url={n.senderProfileImageUrl} size={50} />
                 </Link>
                 <div className="flex flex-1 items-center gap-2.5">
                   <div className="min-w-0">
-                    <Link href={`/${n.senderName}`} className="font-semibold">
-                      {n.senderName}
+                    <Link
+                      href={buildUserPath(n.senderName)}
+                      className="font-semibold"
+                    >
+                      {getDisplayNickName(n.senderName)}
                     </Link>
                     <p className="font-light text-black/50">
                       {dateFormatter(n.createdAt)}

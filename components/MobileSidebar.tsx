@@ -12,6 +12,7 @@ import {
 } from "./Icons";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { buildUserPath } from "@/lib/nickname";
 
 export default function Sidebar() {
   // 닉네임이 로그인된 중간에 바뀔 수 있기 때문에
@@ -84,7 +85,7 @@ export default function Sidebar() {
   const navItems = [
     {
       label: "홈",
-      href: `/${user?.nickName}/home`,
+      href: user ? buildUserPath(user.nickName, "/home") : "/",
       Icon: HomeIcon,
     },
     {
@@ -104,7 +105,7 @@ export default function Sidebar() {
     },
     {
       label: "MY",
-      href: `/${user?.nickName}`,
+      href: user ? buildUserPath(user.nickName) : "/",
       Icon: MyPageIcon,
     },
   ];
