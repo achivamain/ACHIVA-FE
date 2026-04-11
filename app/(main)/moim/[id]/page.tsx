@@ -9,6 +9,7 @@ import type { Moim } from "@/types/moim";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import FeedPost from "@/features/feed/FeedPost";
 import type { PostRes } from "@/types/Post";
+import { getDisplayNickName } from "@/lib/nickname";
 
 export default function MoimDetailPage() {
   const params = useParams();
@@ -454,6 +455,7 @@ export default function MoimDetailPage() {
                   const rank = index + 1;
                   const isCurrentUser =
                     member.isMe || (currentUserId && member.id === currentUserId);
+                  const displayMemberName = getDisplayNickName(member.name || "");
 
                   return (
                     <div
@@ -494,7 +496,7 @@ export default function MoimDetailPage() {
                             <span className="text-[11px] text-[#C09060]">👑</span>
                           )}
                           <span className="truncate text-[13px] font-semibold text-[#3D2B1F]">
-                            {member.name}
+                            {displayMemberName}
                           </span>
                           {isCurrentUser && (
                             <span className="rounded bg-[#F5E8D5] px-1.5 py-0.5 text-[10px] font-bold text-[#B07840]">
@@ -700,6 +702,10 @@ export default function MoimDetailPage() {
                     {isMemberManagementOpen && (
                       <div className="max-h-56 space-y-2 overflow-y-auto bg-white/70 px-3 pb-3">
                         {manageableMembers.map((m: any) => (
+                          (() => {
+                            const displayMemberName = getDisplayNickName(m.name || "");
+
+                            return (
                           <div
                             key={m.id}
                             className="flex items-center justify-between rounded-xl border border-red-100 bg-white p-3"
@@ -717,14 +723,14 @@ export default function MoimDetailPage() {
                                 </div>
                               )}
                               <span className="text-sm font-medium text-[#5A3C28]">
-                                {m.name}
+                                {displayMemberName}
                               </span>
                             </div>
                             <button
                               onClick={() => {
                                 if (
                                   window.confirm(
-                                    `${m.name}님을 이 모임에서 내보내시겠습니까?`,
+                                    `${displayMemberName}님을 이 모임에서 내보내시겠습니까?`,
                                   )
                                 )
                                   kickMemberMutation.mutate(m.id);
@@ -735,6 +741,8 @@ export default function MoimDetailPage() {
                               내보내기
                             </button>
                           </div>
+                            );
+                          })()
                         ))}
                       </div>
                     )}
