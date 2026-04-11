@@ -10,12 +10,14 @@ type ModalProps = {
   title?: React.ReactNode;
   children: React.ReactNode;
   onClose?: (() => void) | undefined;
+  className?: string;
 };
 
 export default function Modal({
   title = null,
   children,
   onClose = undefined,
+  className = "",
 }: ModalProps) {
   useEffect(() => {
     // 현재 스크롤바 너비 계산
@@ -49,7 +51,7 @@ export default function Modal({
           damping: 15,
           mass: 0.8,
         }}
-        className="relative rounded-lg bg-white p-8 flex flex-col max-h-[90dvh]"
+        className={`relative rounded-lg bg-white p-8 flex flex-col max-h-[90dvh] ${className}`}
       >
         <div className="flex items-center justify-center relative w-full">
           <div className="font-bold text-xl w-full">{title}</div>

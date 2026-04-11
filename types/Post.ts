@@ -34,6 +34,7 @@ export type CategoryCharCount = {
 
 export type BackgroundColor =
   | "#f9f9f9"
+  | "#F7F7F5"
   | "#F0E8E0"
   | "#000000"
   | "#412A2A"

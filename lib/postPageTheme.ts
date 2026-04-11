@@ -1,13 +1,18 @@
 import type { CSSProperties } from "react";
 
 export const DEFAULT_POST_PAGE_BACKGROUND = "#F0E8E0" as const;
+export const TODAY_GRACE_POST_PAGE_BACKGROUND = "#F7F7F5" as const;
 
 function getEffectivePostBackground(backgroundColor?: string | null) {
-  return backgroundColor ?? DEFAULT_POST_PAGE_BACKGROUND;
+  return backgroundColor ?? TODAY_GRACE_POST_PAGE_BACKGROUND;
 }
 
 export function isWarmPaperTheme(backgroundColor?: string | null) {
-  return getEffectivePostBackground(backgroundColor) === DEFAULT_POST_PAGE_BACKGROUND;
+  const effectiveBackground = getEffectivePostBackground(backgroundColor);
+  return (
+    effectiveBackground === DEFAULT_POST_PAGE_BACKGROUND ||
+    effectiveBackground === TODAY_GRACE_POST_PAGE_BACKGROUND
+  );
 }
 
 export function getPostPageSurface(
@@ -16,6 +21,14 @@ export function getPostPageSurface(
   const effectiveBackground = getEffectivePostBackground(backgroundColor);
 
   if (isWarmPaperTheme(effectiveBackground)) {
+    if (effectiveBackground === TODAY_GRACE_POST_PAGE_BACKGROUND) {
+      return {
+        backgroundColor: TODAY_GRACE_POST_PAGE_BACKGROUND,
+        backgroundImage:
+          "radial-gradient(circle at 18% 18%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 34%), radial-gradient(circle at 82% 84%, rgba(212,212,206,0.18) 0%, rgba(212,212,206,0) 28%), linear-gradient(160deg, #FCFCFB 0%, #F7F7F5 58%, #EFEFEA 100%)",
+      };
+    }
+
     return {
       backgroundColor: DEFAULT_POST_PAGE_BACKGROUND,
       backgroundImage:
@@ -30,6 +43,16 @@ export function getPostPageSurface(
 
 export function getPostPageTone(backgroundColor?: string | null) {
   const effectiveBackground = getEffectivePostBackground(backgroundColor);
+
+  if (effectiveBackground === TODAY_GRACE_POST_PAGE_BACKGROUND) {
+    return {
+      shellTextClassName: "text-[#4A312B]",
+      subtitleClassName: "text-[#4A312B]",
+      contentClassName: "text-[#6A625D]",
+      accentLineColor: "rgba(120, 112, 104, 0.14)",
+      ornamentColor: "rgba(214, 214, 209, 0.24)",
+    };
+  }
 
   if (isWarmPaperTheme(effectiveBackground)) {
     return {

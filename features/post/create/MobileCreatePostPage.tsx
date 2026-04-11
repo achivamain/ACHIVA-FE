@@ -13,6 +13,7 @@ import MobileHeader from "@/components/MobileHeader";
 import { usePrepareDraftPostStats } from "./usePrepareDraftPostStats";
 
 export default function MobileCreatePostPage() {
+  const createPageBackgroundClassName = "bg-[#F7F7F5]";
   const router = useRouter();
   const currentStep = useCreatePostStepStore.use.currentStep();
   const handlePrevStep = useCreatePostStepStore.use.handlePrevStep();
@@ -61,16 +62,22 @@ export default function MobileCreatePostPage() {
       content = null;
   }
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className={`flex-1 flex flex-col h-full ${createPageBackgroundClassName}`}>
       {currentStep > 0 ? (
         <div className="flex-shrink-0">
-          <MobileHeader onClick={handlePrevStep}>
+          <MobileHeader
+            className={createPageBackgroundClassName}
+            onClick={handlePrevStep}
+          >
             {headerTitle ?? null}
           </MobileHeader>
         </div>
       ) : (
         <div className="flex-shrink-0">
-          <MobileHeader onClick={router.back}>
+          <MobileHeader
+            className={createPageBackgroundClassName}
+            onClick={router.back}
+          >
             {headerTitle ?? null}
           </MobileHeader>
         </div>

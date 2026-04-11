@@ -7,7 +7,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Category } from "@/types/Categories";
-import { createDefaultPostPages } from "@/lib/postDefaults";
+import {
+  createDefaultPostPages,
+  getDefaultPostBackground,
+} from "@/lib/postDefaults";
 import { buildMobileUserPath, buildUserPath } from "@/lib/nickname";
 
 export function MyCategorys({
@@ -66,6 +69,7 @@ export function MyCategorys({
     setPost({
       category: selectedCategory,
       categoryCount: cat.count,
+      backgroundColor: getDefaultPostBackground(selectedCategory),
       title: "",
       pages: createDefaultPostPages(selectedCategory),
     });

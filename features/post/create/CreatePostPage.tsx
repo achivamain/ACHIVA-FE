@@ -17,6 +17,7 @@ export default function CreatePostPage(/*{
 }: {
   categoryCounts: CategoryCount[];
 }*/) {
+  const createPageBackgroundClassName = "bg-[#F7F7F5]";
   const router = useRouter();
   const currentStep = useCreatePostStepStore.use.currentStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
@@ -61,6 +62,7 @@ export default function CreatePostPage(/*{
   return (
     <>
       <Modal
+        className={createPageBackgroundClassName}
         onClose={() => setIsCloseModalOpen(true)}
         title={
           typeof title === "string" ? (

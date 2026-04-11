@@ -10,17 +10,21 @@ type Props = {
   children: React.ReactNode;
   onClick?: () => void | undefined;
   rightElement?: React.ReactNode;
+  className?: string;
 };
 
 export default function MobileHeader({
   children,
   onClick = undefined,
   rightElement,
+  className = "",
 }: Props) {
   const router = useRouter();
 
   return (
-    <div className="relative bg-white w-full h-14 mb-5 flex items-center justify-center border-b border-b-[#cccccc] z-50">
+    <div
+      className={`relative bg-white w-full h-14 mb-5 flex items-center justify-center border-b border-b-[#cccccc] z-50 ${className}`}
+    >
       <div
         className="absolute top left-4 scale-80 hover:cursor-pointer"
         onClick={onClick ?? router.back}
