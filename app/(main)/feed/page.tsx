@@ -44,11 +44,13 @@ export default function FeedPage() {
               <span />
               <button
                 onClick={() => setIsCheerOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#412A2A]/20 hover:bg-[#412A2A]/5 transition-colors"
+                className="flex items-center gap-1.5 rounded-full border border-[#412A2A]/20 px-3 py-1.5 transition-colors hover:bg-[#412A2A]/5"
                 aria-label="나눔 알림 열기"
               >
                 <SideBarHeartIcon fill={false} />
-                <span className="text-sm font-medium text-theme hidden sm:inline">나눔</span>
+                <span className="hidden text-sm font-medium text-theme sm:inline">
+                  나눔
+                </span>
               </button>
             </div>
             <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />

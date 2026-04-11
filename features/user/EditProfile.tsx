@@ -103,12 +103,12 @@ export default function EditProfile() {
         if (isAvailable) {
           setIsNickNameOk(true);
         } else {
-          setNickNameError("이미 사용 중인 닉네임입니다.");
+          setNickNameError("이미 사용 중인 이름입니다.");
         }
       } else if (response.status === 409) {
-        setNickNameError("이미 사용 중인 닉네임입니다.");
+        setNickNameError("이미 사용 중인 이름입니다.");
       } else {
-        throw new Error("닉네임 중복 체크 중 서버 에러");
+        throw new Error("이름 중복 체크 중 서버 에러");
       }
     } catch (err) {
       console.error(err);
@@ -147,7 +147,7 @@ export default function EditProfile() {
 
       <div tabIndex={-1}></div>
       <div className="w-full flex flex-col gap-3">
-        <InputSection label="닉네임">
+        <InputSection label="이름">
           <div
             className={`absolute right-5 top-4 cursor-pointer ${
               isEditing.nickName ? "hidden" : ""

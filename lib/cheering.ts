@@ -23,16 +23,16 @@ export const cheeringMeta: Record<CheeringCategory, CheeringMeta> = {
   최고예요: {
     icon: ThumbUpCheerIcon,
     color: "#A6736F",
-    label: "최고예요 👍",
+    label: "👍 최고예요",
   },
   감사해요: {
     icon: HeartCheerIcon,
     color: "#4B5373",
-    label: "감사해요 🙏",
+    label: "🙌 감사해요",
   },
   기도해요: {
     icon: FireCheerIcon,
     color: "#525D49",
-    label: "기도해요 🙌",
+    label: "🙏 기도해요",
   },
 };

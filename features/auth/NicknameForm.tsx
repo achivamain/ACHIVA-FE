@@ -42,7 +42,7 @@ export default function NicknameForm() {
         const { data } = await response.json();
 
         if (!data.available) {
-          setError("이미 사용 중인 닉네임입니다.");
+          setError("이미 사용 중인 이름입니다.");
           return;
         }
 
@@ -52,11 +52,11 @@ export default function NicknameForm() {
       }
 
       if (response.status === 409) {
-        setError("이미 사용 중인 닉네임입니다.");
+        setError("이미 사용 중인 이름입니다.");
         return;
       }
 
-      throw new Error("닉네임 확인 중 오류가 발생했습니다.");
+      throw new Error("이름 확인 중 오류가 발생했습니다.");
     } catch (err) {
       console.error(err);
       alert("문제가 발생했습니다. 다시 시도해 주세요.");
@@ -69,10 +69,10 @@ export default function NicknameForm() {
     <div className="w-full h-full flex flex-col">
       <div className="w-full text-left">
         <p className="font-semibold text-2xl leading-[29px] text-black">
-          사용할 닉네임을 입력해 주세요
+          이름을 입력해주세요
         </p>
         <p className="font-light text-[15px] leading-[20px] text-[#808080] mt-2.5 break-keep">
-          닉네임은 설정에서 나중에 변경할 수 있어요.
+          이름은 설정에서 나중에 변경할 수 있어요.
         </p>
       </div>
 
@@ -86,7 +86,7 @@ export default function NicknameForm() {
               htmlFor="signup-nickname"
               className="text-sm font-medium text-[#7B6D6D]"
             >
-              닉네임
+              이름
             </label>
             <input
               id="signup-nickname"
@@ -94,7 +94,7 @@ export default function NicknameForm() {
               value={nickName}
               maxLength={15}
               autoComplete="nickname"
-              placeholder="닉네임을 입력해 주세요"
+              placeholder="이름을 입력해 주세요"
               onChange={(e) => {
                 setNickName(e.target.value);
                 setError("");
@@ -117,7 +117,7 @@ export default function NicknameForm() {
               isChecking ? "text-[#7B6D6D]" : "text-theme-red"
             }`}
           >
-            {isChecking ? "닉네임을 확인하고 있어요..." : error}
+            {isChecking ? "이름을 확인하고 있어요..." : error}
           </div>
           <NextStepButton
             type="submit"
