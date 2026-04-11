@@ -14,6 +14,7 @@ import { useScriptureProgress } from "@/features/bible/hooks/useScriptureProgres
 import {
   formatScriptureRangeLabel,
 } from "@/features/bible/selectors";
+import { buildMobileUserPath, buildUserPath } from "@/lib/nickname";
 
 type BibleReadingFlowProps = {
   nickName: string;
@@ -392,7 +393,9 @@ export default function BibleReadingFlow({
         )} 기록했어요.`,
       );
       router.push(
-        `${isMobilePath ? "/m" : ""}/${encodeURIComponent(nickName)}/home`,
+        isMobilePath
+          ? buildMobileUserPath(nickName, "/home")
+          : buildUserPath(nickName, "/home"),
       );
     } catch (error) {
       console.error(error);
@@ -409,7 +412,9 @@ export default function BibleReadingFlow({
     }
 
     router.push(
-      `${isMobilePath ? "/m" : ""}/${encodeURIComponent(nickName)}/home`,
+      isMobilePath
+        ? buildMobileUserPath(nickName, "/home")
+        : buildUserPath(nickName, "/home"),
     );
   };
 

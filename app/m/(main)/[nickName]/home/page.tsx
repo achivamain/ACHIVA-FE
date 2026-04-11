@@ -6,6 +6,11 @@ import { getAuthSession } from "@/lib/getAuthSession";
 import { getHomeData } from "@/lib/getData";
 import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/getUser";
+import {
+  buildUserPath,
+  getDisplayNickName,
+  isSameNickName,
+} from "@/lib/nickname";
 
 export default async function MobileHomePageRoute({
   params,
@@ -18,8 +23,8 @@ export default async function MobileHomePageRoute({
   const { nickName } = await params;
   const user = await getMe(token).catch(() => null);
   if (!user) notFound();
-  if (user.nickName !== decodeURIComponent(nickName)) {
-    redirect(`/${nickName}`);
+  if (!isSameNickName(user.nickName, nickName)) {
+    redirect(buildUserPath(nickName));
   }
 
   try {
@@ -33,7 +38,7 @@ export default async function MobileHomePageRoute({
       <div className="min-h-dvh w-full pb-[104px] flex flex-col">
         <div className="pt-6 pb-2 px-5">
           <h2 className="text-[24px] font-extrabold text-[#3A2418]">
-            안녕하세요, {decodeURIComponent(nickName)} 님! ✨
+            안녕하세요, {getDisplayNickName(nickName)} 님! ✨
           </h2>
           <p className="text-[14px] leading-[20px] text-[#8A7565] mt-1.5">
             오늘도 은혜가 풍성한 하루 되시기를 축복합니다!

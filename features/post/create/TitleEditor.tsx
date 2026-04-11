@@ -7,6 +7,7 @@ import { User } from "@/types/User";
 import { useQuery } from "@tanstack/react-query";
 import { DraftPost } from "@/types/Post";
 import { getDefaultPostTitle } from "@/lib/postDefaults";
+import { buildUserPath } from "@/lib/nickname";
 
 export default function TitleEditor() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -60,7 +61,9 @@ export default function TitleEditor() {
         console.log(res);
         throw new Error("게시글 작성 중 에러");
       }
-      window.location.href = `/${currentUser?.nickName}`;
+      if (currentUser?.nickName) {
+        window.location.href = buildUserPath(currentUser.nickName);
+      }
     } catch (err) {
       console.log(err);
       alert(

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Category } from "@/types/Categories";
 import { createDefaultPostPages } from "@/lib/postDefaults";
+import { buildMobileUserPath, buildUserPath } from "@/lib/nickname";
 
 export function MyCategorys({
   categoryCounts,
@@ -28,7 +29,9 @@ export function MyCategorys({
     ? "/m/post/create"
     : "/post/create";
   const bibleReadingPath = nickName
-    ? `${isMobilePath ? "/m" : ""}/${nickName}/bible`
+    ? isMobilePath
+      ? buildMobileUserPath(nickName, "/bible")
+      : buildUserPath(nickName, "/bible")
     : createPostPath;
 
   const totalRecords = categoryCounts.reduce(

@@ -6,6 +6,7 @@ import FriendShipBtn from "../friends/FriendshipBtn";
 import { FriendData } from "@/types/Friends";
 import FriendIconWithBadge from "./FriendIconWithBadge";
 import PostCountBadge from "@/components/PostCountBadge";
+import { getDisplayNickName } from "@/lib/nickname";
 
 type Props = {
   user: User;
@@ -25,7 +26,9 @@ export function Profile({ user, currentUserId, currentUserFriends }: Props) {
       </div>
       <div className="flex-1 flex flex-col items-start justify-center gap-3">
         <div className="w-full flex items-center gap-10">
-          <h1 className="font-semibold text-2xl">{user.nickName}</h1>
+          <h1 className="font-semibold text-2xl">
+            {getDisplayNickName(user.nickName)}
+          </h1>
           {user.id === currentUserId ? (
             <Link
               href="/accounts/edit"
@@ -85,7 +88,9 @@ export default function MobileProfile({
           </div>
         </div>
         <div className="flex flex-col justify-center">
-          <h1 className="font-semibold text-2xl">{user.nickName}</h1>
+          <h1 className="font-semibold text-2xl">
+            {getDisplayNickName(user.nickName)}
+          </h1>
           <p className="text-[#7F7F7F]">{user.description}</p>
           {user.id === currentUserId ? (
             <Link

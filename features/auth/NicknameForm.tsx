@@ -13,11 +13,9 @@ export default function NicknameForm() {
 
   const [nickName, setNickName] = useState(user.nickName);
   const [error, setError] = useState("");
-  const [isChecking, setIsChecking] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (isChecking) return;
 
     const trimmedNickName = nickName.trim();
     const result = UserSchema.pick({ nickName: true }).safeParse({
@@ -30,39 +28,9 @@ export default function NicknameForm() {
       return;
     }
 
-    setIsChecking(true);
     setError("");
-
-    try {
-      const response = await fetch(
-        `/api/auth/checkNickname?nickname=${encodeURIComponent(trimmedNickName)}`,
-      );
-
-      if (response.ok) {
-        const { data } = await response.json();
-
-        if (!data.available) {
-          setError("이미 사용 중인 닉네임입니다.");
-          return;
-        }
-
-        setUser({ nickName: trimmedNickName });
-        handleNextStep();
-        return;
-      }
-
-      if (response.status === 409) {
-        setError("이미 사용 중인 닉네임입니다.");
-        return;
-      }
-
-      throw new Error("닉네임 확인 중 오류가 발생했습니다.");
-    } catch (err) {
-      console.error(err);
-      alert("문제가 발생했습니다. 다시 시도해 주세요.");
-    } finally {
-      setIsChecking(false);
-    }
+    setUser({ nickName: trimmedNickName });
+    handleNextStep();
   }
 
   return (
@@ -111,18 +79,15 @@ export default function NicknameForm() {
         </div>
 
         <div className="space-y-3">
-          <div
-            aria-live="polite"
-            className={`min-h-6 text-center text-sm font-light ${
-              isChecking ? "text-[#7B6D6D]" : "text-theme-red"
-            }`}
-          >
-            {isChecking ? "닉네임을 확인하고 있어요..." : error}
-          </div>
+        <div
+          aria-live="polite"
+          className="min-h-6 text-center text-sm font-light text-theme-red"
+        >
+          {error}
+        </div>
           <NextStepButton
             type="submit"
-            isLoading={isChecking}
-            disabled={!nickName.trim() || isChecking}
+            disabled={!nickName.trim()}
           >
             다음
           </NextStepButton>

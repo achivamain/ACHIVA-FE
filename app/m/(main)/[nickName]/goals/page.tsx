@@ -3,6 +3,7 @@ import Logout from "@/components/Logout";
 import MobileGoalPage from "@/features/user/goals/MobileGoalPage";
 import { getAuthSession } from "@/lib/getAuthSession";
 import { isOwner } from "@/lib/getUser";
+import { buildUserPath, normalizeNickName } from "@/lib/nickname";
 
 export default async function MobileGoalsPage({
   params,
@@ -16,10 +17,8 @@ export default async function MobileGoalsPage({
 
   // 백엔드 API로 실제 유저 닉네임을 조회하여 본인 확인
   if (!(await isOwner(nickName, token))) {
-    redirect(`/${nickName}`);
+    redirect(buildUserPath(nickName));
   }
 
-  const decodedNickName = decodeURIComponent(nickName);
-
-  return <MobileGoalPage nickName={decodedNickName} />;
+  return <MobileGoalPage nickName={normalizeNickName(nickName)} />;
 }

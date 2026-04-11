@@ -10,6 +10,7 @@ import WeeklyCalendar from "@/features/user/WeeklyCalendar";
 import { looksLikeStaticAssetPathSegment } from "@/lib/routeGuards";
 import MyAchievementsSummary from "@/features/user/MyAchievementsSummary";
 import { getMemberDetail } from "@/lib/server/getMemberDetail";
+import { isSameNickName } from "@/lib/nickname";
 
 export default async function Page({
   params,
@@ -72,7 +73,7 @@ export default async function Page({
 
   const user = await getUser(nickName, token!);
   const isMyProfile =
-    decodeURIComponent(nickName) === user.nickName && currentUser?.id === user.id;
+    isSameNickName(nickName, user.nickName) && currentUser?.id === user.id;
 
   const [myFriends, myPendingFriends, memberDetail] = await Promise.all([
     getMyFriends(),

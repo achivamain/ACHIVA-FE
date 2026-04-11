@@ -13,6 +13,7 @@ import {
 } from "./Icons";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { buildUserPath } from "@/lib/nickname";
 
 type NavItem =
   | {
@@ -79,7 +80,7 @@ export default function Sidebar() {
   const navItems: NavItem[] = [
     {
       label: "홈",
-      href: `/${user?.nickName}/home`,
+      href: user ? buildUserPath(user.nickName, "/home") : "/",
       Icon: HomeIcon,
     },
     {
@@ -99,7 +100,7 @@ export default function Sidebar() {
     },
     {
       label: "MY",
-      href: `/${user?.nickName}`,
+      href: user ? buildUserPath(user.nickName) : "/",
       Icon: MyPageIcon,
     },
   ];

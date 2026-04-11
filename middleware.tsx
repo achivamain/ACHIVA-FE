@@ -60,6 +60,10 @@ export default auth((req) => {
   // 3. 모바일이면 모든 경로를 /m/... 로 rewrite
   // -------------------------
   if (isMobile) {
+    if (pathname === "/m" || pathname.startsWith("/m/")) {
+      return NextResponse.next();
+    }
+
     const url = req.nextUrl.clone();
     if (!url.pathname.startsWith("/callback")) {
       url.pathname = `/m${pathname}`;

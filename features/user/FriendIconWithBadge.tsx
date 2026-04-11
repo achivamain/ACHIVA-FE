@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { FollowerIcon } from "@/components/Icons";
+import { buildUserPath } from "@/lib/nickname";
 
 type Props = {
   nickName: string;
@@ -29,7 +30,7 @@ export default function FriendIconWithBadge({ nickName, isMe }: Props) {
     isMe && data !== undefined && data.friends.length > 0;
 
   return (
-    <Link href={`/${nickName}/friends`} className="relative inline-flex">
+    <Link href={buildUserPath(nickName, "/friends")} className="relative inline-flex">
       <FollowerIcon />
       {hasPendingRequests && (
         <div className="absolute top-0 right-0 w-2 h-2 bg-[#FF0000] rounded-full" />

@@ -8,6 +8,7 @@ import { useQueries, useMutation, useQueryClient } from "@tanstack/react-query";
 import FriendsSkeleton from "./FriendsSkeleton";
 import { useState } from "react";
 import { defaultProfileImg } from "@/features/user/defaultProfileImg";
+import { buildUserPath, encodeNickNameValue, getDisplayNickName } from "@/lib/nickname";
 
 type Props = {
   nickName: string;
@@ -83,9 +84,12 @@ export default function Friends({ nickName, isMe }: Props) {
       {
         queryKey: ["friends", nickName],
         queryFn: async (): Promise<FriendsResponse> => {
-          const res = await fetch(`/api/friendships/?nickName=${nickName}`, {
+          const res = await fetch(
+            `/api/friendships/?nickName=${encodeNickNameValue(nickName)}`,
+            {
             method: "GET",
-          });
+            },
+          );
 
           if (!res.ok) {
             throw new Error("Failed to fetch friends with cache");
@@ -135,14 +139,16 @@ export default function Friends({ nickName, isMe }: Props) {
 
             return (
               <li key={i} className="flex items-center gap-5">
-                <Link href={`/${user.nickName}`}>
+                <Link href={buildUserPath(user.nickName)}>
                   <ProfileImg
                     url={user.profileImageUrl ?? defaultProfileImg}
                     size={60}
                   />
                 </Link>
-                <Link href={`/${user.nickName}`}>
-                  <p className="font-medium text-lg">{user.nickName}</p>
+                <Link href={buildUserPath(user.nickName)}>
+                  <p className="font-medium text-lg">
+                    {getDisplayNickName(user.nickName)}
+                  </p>
                 </Link>
                 <div className="ml-auto cursor-pointer">
                   {isMe && (
@@ -185,14 +191,16 @@ export default function Friends({ nickName, isMe }: Props) {
 
             return (
               <li key={i} className="flex items-center gap-5">
-                <Link href={`/${user.nickName}`}>
+                <Link href={buildUserPath(user.nickName)}>
                   <ProfileImg
                     url={user.profileImageUrl ?? defaultProfileImg}
                     size={60}
                   />
                 </Link>
-                <Link href={`/${user.nickName}`}>
-                  <p className="font-medium text-lg">{user.nickName}</p>
+                <Link href={buildUserPath(user.nickName)}>
+                  <p className="font-medium text-lg">
+                    {getDisplayNickName(user.nickName)}
+                  </p>
                 </Link>
                 <div className="ml-auto flex gap-2">
                   <button
