@@ -157,7 +157,7 @@ export default function Posts({
           {posts.map((post) => {
             return (
               <Link key={post.id} href={`/post/${post.id}`} scroll={false}>
-                <div className="border-l border-t border-gray-800">
+                <div className="border-l border-t border-gray-100">
                   <TitlePage size={size} post={post} />
                 </div>
               </Link>

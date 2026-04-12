@@ -2,10 +2,6 @@ import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import { Pagination, Navigation } from "swiper/modules";
-
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
 import { useDraftPostStore } from "@/store/CreatePostStore";
 import { getPostPageSurface, getPostPageTone } from "@/lib/postPageTheme";
 
@@ -17,7 +13,7 @@ type Props = {
 export default function Slides({ currentPage, setCurrentPage }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
-  const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 456;
+  const size = containerWidth ? Math.min(containerWidth, 456) : 456;
 
   const draft = useDraftPostStore.use.post();
   const setPost = useDraftPostStore.use.setPost();
@@ -89,7 +85,7 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
           width: "3rem",
           color: "white",
         }}
-        className={`z-10 right-5 sm:right-12 absolute bg-black/35 text-sm flex items-center justify-center text-white py-1 rounded-full`}
+        className="z-10 right-5 sm:right-12 absolute bg-black/35 text-sm flex items-center justify-center text-white py-1 rounded-full"
       ></div>
       <div className="sm:px-7">
         <Swiper
@@ -97,7 +93,7 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
             el: pageRef.current,
             type: "fraction",
           }}
-          watchOverflow={false} // 1장이어도 pagination 보이게
+          watchOverflow={false}
           navigation={{ prevEl: null, nextEl: null }}
           modules={[Pagination, Navigation]}
           onBeforeInit={(swiper) => {
@@ -125,9 +121,9 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
           className="mySwiper"
         >
           {draft.pages?.map((page) => {
-            // 소제목 있을 시 7줄, 없을 시 10줄
             const maxHeight = page.subtitle ? 168 : 240;
             const tone = getPostPageTone(draft.backgroundColor);
+
             return (
               <SwiperSlide key={page.id}>
                 <div
@@ -140,18 +136,18 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                       transformOrigin: "top left",
                       ...getPostPageSurface(draft.backgroundColor),
                     }}
-                    className={`relative overflow-hidden aspect-square w-[430px] h-[430px] py-[95px] px-[20px] ${tone.shellTextClassName}`}
+                    className={`relative overflow-hidden aspect-square w-[430px] h-[430px] px-[20px] pt-[92px] pb-[30px] ${tone.shellTextClassName}`}
                   >
                     <div
-                      className="absolute left-[20px] right-[20px] top-[78px] h-px"
+                      className="absolute left-[20px] right-[20px] top-[70px] h-px"
                       style={{ background: tone.accentLineColor }}
                     />
                     <div
                       className="absolute w-[160px] h-[160px] rounded-full blur-[42px] -top-[48px] -left-[20px]"
                       style={{ background: tone.ornamentColor }}
                     />
-                    <div className="relative z-10">
-                      {page.subtitle !== undefined && (
+                    {page.subtitle !== undefined && (
+                      <div className="absolute left-[20px] right-[20px] top-[20px] z-10">
                         <input
                           maxLength={14}
                           onChange={(e) => {
@@ -164,13 +160,15 @@ export default function Slides({ currentPage, setCurrentPage }: Props) {
                             }));
                           }}
                           value={page.subtitle}
-                          className={`w-full font-semibold text-[32px] mb-[24px] leading-[50px] bg-transparent ${tone.subtitleClassName}`}
+                          className={`w-full overflow-hidden text-ellipsis whitespace-nowrap bg-transparent text-[24px] leading-[34px] font-medium tracking-[-0.01em] outline-none ${tone.subtitleClassName}`}
                         />
-                      )}
+                      </div>
+                    )}
 
+                    <div className="relative z-10 h-full">
                       <textarea
                         style={{ maxHeight: maxHeight }}
-                        className={`w-full text-[16px] font-[inherit] ${tone.contentClassName} bg-transparent resize-none outline-none overflow-hidden placeholder:text-current placeholder:opacity-55`}
+                        className={`w-full bg-transparent text-[15px] leading-[24px] font-[inherit] ${tone.contentClassName} resize-none outline-none overflow-hidden placeholder:text-current placeholder:opacity-55`}
                         value={page.content ?? ""}
                         onChange={(e) => {
                           if (e.target.scrollHeight <= maxHeight) {

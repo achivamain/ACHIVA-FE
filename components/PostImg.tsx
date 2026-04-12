@@ -6,10 +6,8 @@ const DEFAULT_BG = "/default-post-bg.png";
 
 export default function PostImg({
   url,
-  filtered = false,
 }: {
   url: string | null;
-  filtered?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
   const src = url || DEFAULT_BG;
@@ -27,9 +25,6 @@ export default function PostImg({
         fill
         onLoad={() => setLoaded(true)}
       />
-      {filtered && (
-        <div className="absolute inset-0 w-full h-full bg-black/70" />
-      )}
     </div>
   );
 }

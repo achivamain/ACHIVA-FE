@@ -11,9 +11,12 @@ import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useRouter } from "next/navigation";
 import MobileHeader from "@/components/MobileHeader";
 import { usePrepareDraftPostStats } from "./usePrepareDraftPostStats";
+import { useDraftPostStore } from "@/store/CreatePostStore";
+import { isAlbumCategory } from "@/lib/postPageTheme";
 
 export default function MobileCreatePostPage() {
   const router = useRouter();
+  const draftCategory = useDraftPostStore.use.post().category;
   const currentStep = useCreatePostStepStore.use.currentStep();
   const handlePrevStep = useCreatePostStepStore.use.handlePrevStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
@@ -39,7 +42,9 @@ export default function MobileCreatePostPage() {
       break;
 
     case 1:
-      headerTitle = "표지 사진 선택";
+      headerTitle = isAlbumCategory(draftCategory)
+        ? "표지 사진 선택"
+        : "사진 선택";
       content = (
         <div className="px-5">
           <ImageUploader />
