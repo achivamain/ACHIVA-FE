@@ -11,6 +11,8 @@ import TitleEditor from "./TitleEditor";
 import ModalWithoutCloseBtn from "@/components/ModalWithoutCloseBtn";
 import { useRouter } from "next/navigation";
 import { usePrepareDraftPostStats } from "./usePrepareDraftPostStats";
+import { useDraftPostStore } from "@/store/CreatePostStore";
+import { isAlbumCategory } from "@/lib/postPageTheme";
 
 export default function CreatePostPage(/*{
   categoryCounts,
@@ -18,6 +20,7 @@ export default function CreatePostPage(/*{
   categoryCounts: CategoryCount[];
 }*/) {
   const router = useRouter();
+  const draftCategory = useDraftPostStore.use.post().category;
   const currentStep = useCreatePostStepStore.use.currentStep();
   const resetStep = useCreatePostStepStore.use.resetStep();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
@@ -45,7 +48,7 @@ export default function CreatePostPage(/*{
       break;
 
     case 1:
-      title = "표지 사진 선택";
+      title = isAlbumCategory(draftCategory) ? "표지 사진 선택" : "사진 선택";
       content = <ImageUploader />;
       break;
 
@@ -70,7 +73,7 @@ export default function CreatePostPage(/*{
           )
         }
       >
-        <div className="w-lg mt-8">{content}</div>
+        <div className="w-full max-w-lg mt-8">{content}</div>
       </Modal>
       {isCloseModalOpen && (
         <ModalWithoutCloseBtn

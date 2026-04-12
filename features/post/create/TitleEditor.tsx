@@ -1,14 +1,16 @@
-import PostImg from "@/components/PostImg";
-import { useDraftPostStore } from "@/store/CreatePostStore";
-import { NextStepButton } from "./Buttons";
-import { format } from "date-fns";
-import { useState, useRef, useLayoutEffect } from "react";
-import { User } from "@/types/User";
-import { useQuery } from "@tanstack/react-query";
-import { DraftPost } from "@/types/Post";
+import PaperTitleCover from "@/features/post/PaperTitleCover";
+import PhotoTitleCover from "@/features/post/PhotoTitleCover";
 import { getDefaultPostTitle } from "@/lib/postDefaults";
+import { isAlbumCategory } from "@/lib/postPageTheme";
 import { buildUserPath } from "@/lib/nickname";
 import { queueToast } from "@/lib/queuedToast";
+import { useDraftPostStore } from "@/store/CreatePostStore";
+import { DraftPost } from "@/types/Post";
+import { User } from "@/types/User";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { useLayoutEffect, useRef, useState } from "react";
+import { NextStepButton } from "./Buttons";
 
 export default function TitleEditor() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -32,7 +34,9 @@ export default function TitleEditor() {
 
   const setPost = useDraftPostStore.use.setPost();
   const [isLoading, setIsLoading] = useState(false);
-  const size = window.innerWidth < 640 ? (containerWidth ?? 0) : 480;
+  const size = containerWidth ? Math.min(containerWidth, 480) : 480;
+  const coverPhotoUrl = draft.photoUrls?.[0] || null;
+  const usePhotoCover = isAlbumCategory(draft.category) && !!coverPhotoUrl;
 
   useLayoutEffect(() => {
     if (containerRef.current) {
@@ -41,6 +45,11 @@ export default function TitleEditor() {
   }, []);
 
   const createNewPost = async (draft: DraftPost) => {
+    if (isAlbumCategory(draft.category) && !(draft.photoUrls?.length)) {
+      alert("교회 앨범 게시글은 표지 사진이 필요합니다.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const {
@@ -80,141 +89,59 @@ export default function TitleEditor() {
 
   return (
     <div className="flex flex-col items-center">
-      <div ref={containerRef} className="w-full sm:w-120 aspect-square">
+      <div ref={containerRef} className="w-full max-w-[480px]">
         <div
-          style={{
-            transform: `scale(${size / 390})`,
-            transformOrigin: "top left",
-          }}
-          className="aspect-square w-[390px] h-[390px] relative overflow-hidden"
+          style={{ width: size, height: size }}
+          className="mx-auto"
         >
-          <PostImg url={draft.photoUrls?.[0] || null} filtered />
-
-          {/* 그라디언트 오버레이 */}
           <div
-            className="absolute inset-0"
             style={{
-              background:
-                "linear-gradient(to bottom, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.18) 65%, rgba(0,0,0,0.45) 100%)",
+              transform: `scale(${size / 390})`,
+              transformOrigin: "top left",
             }}
-          />
-
-          {/* 상단: 날짜 + 카테고리 태그 */}
-          <div className="absolute top-[22px] left-[22px] right-[22px] flex items-center justify-between">
-            <span
-              className="text-[13px] font-medium tracking-[0.12em] uppercase"
-              style={{ color: "rgba(255,255,255,0.75)" }}
-            >
-              {format(new Date(), "yyyy · MM · dd")}
-            </span>
-            <span
-              className="text-[11px] font-semibold tracking-[0.08em] px-[10px] py-[4px] rounded-full border"
-              style={{
-                color: "rgba(255,255,255,0.85)",
-                borderColor: "rgba(255,255,255,0.3)",
-                background: "rgba(255,255,255,0.12)",
-                backdropFilter: "blur(6px)",
-              }}
-            >
-              {draft.category}
-            </span>
-          </div>
-
-          {/* 상단 구분선 */}
-          <div
-            className="absolute left-[22px] right-[22px]"
-            style={{
-              top: "56px",
-              height: "1px",
-              background: "rgba(255,255,255,0.18)",
-            }}
-          />
-
-          {/* 하단 콘텐츠 */}
-          <div className="absolute bottom-[22px] left-[22px] right-[22px]">
-            {/* 통계 배지 */}
-            {draft.weeklyWorkoutCount !== undefined &&
-              draft.weeklyWorkoutCount > 0 && (
-                <div className="flex items-center gap-[8px] mb-[14px] flex-wrap">
-                  <div
-                    className="flex items-center gap-[6px] px-[11px] py-[5px] rounded-full"
-                    style={{
-                      background: "rgba(255,255,255,0.15)",
-                      backdropFilter: "blur(10px)",
-                      border: "1px solid rgba(255,255,255,0.25)",
+            className="aspect-square w-[390px] h-[390px] relative overflow-hidden"
+          >
+            {usePhotoCover ? (
+              <PhotoTitleCover
+                photoUrl={coverPhotoUrl}
+                dateLabel={format(new Date(), "yyyy · MM · dd")}
+                metaLabel={`${draft.category} · ${(draft.categoryCount ?? 0) + 1}번째 이야기`}
+                title={
+                  <input
+                    maxLength={18}
+                    className="w-full bg-transparent text-[38px] font-bold leading-[1.15] tracking-[-0.01em] text-white/[0.97] outline-none placeholder:text-white/70"
+                    style={{ textShadow: "0 4px 18px rgba(0,0,0,0.22)" }}
+                    type="text"
+                    placeholder={getDefaultPostTitle(draft.category)}
+                    autoFocus
+                    value={draft.title ?? ""}
+                    onChange={(e) => {
+                      setPost({ title: e.target.value });
                     }}
-                  >
-                    <span className="text-[13px] leading-none">
-                      {Array.from(
-                        { length: Math.min(draft.weeklyWorkoutCount, 7) },
-                        (_, i) => (
-                          <span key={i}>🔥</span>
-                        ),
-                      )}
-                    </span>
-                    <span
-                      className="text-[12px] font-semibold tracking-[0.03em]"
-                      style={{ color: "rgba(255,255,255,0.95)" }}
-                    >
-                      이번 주 {draft.weeklyWorkoutCount}회
-                    </span>
-                  </div>
-
-                  {draft.continuousGoalWeeks !== undefined &&
-                    draft.continuousGoalWeeks >= 2 && (
-                      <div
-                        className="flex items-center gap-[5px] px-[11px] py-[5px] rounded-full"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, rgba(251,146,60,0.85) 0%, rgba(239,68,68,0.75) 100%)",
-                          backdropFilter: "blur(10px)",
-                          border: "1px solid rgba(255,200,100,0.35)",
-                        }}
-                      >
-                        <span className="text-[13px] leading-none">⚡</span>
-                        <span
-                          className="text-[12px] font-bold tracking-[0.02em]"
-                          style={{ color: "rgba(255,255,255,1)" }}
-                        >
-                          {draft.continuousGoalWeeks}주 연속 달성
-                        </span>
-                      </div>
-                    )}
-                </div>
-              )}
-
-            {/* 구분선 */}
-            <div
-              className="mb-[12px]"
-              style={{ height: "1px", background: "rgba(255,255,255,0.2)" }}
-            />
-
-            {/* 제목 */}
-            <input
-              maxLength={18}
-              className="w-full font-bold leading-[1.15] outline-none bg-transparent mb-[10px]"
-              style={{
-                fontSize: "38px",
-                color: "rgba(255,255,255,0.95)",
-                textShadow: "0 2px 12px rgba(0,0,0,0.4)",
-                letterSpacing: "-0.01em",
-              }}
-              type="text"
-              placeholder={getDefaultPostTitle(draft.category)}
-              autoFocus
-              value={draft.title ?? ""}
-              onChange={(e) => {
-                setPost({ title: e.target.value });
-              }}
-            />
-
-            {/* 서브텍스트 */}
-            <p
-              className="text-[14px] font-medium tracking-[0.06em]"
-              style={{ color: "rgba(255,255,255,0.55)" }}
-            >
-              {draft.category} · {(draft.categoryCount ?? 0) + 1}번째 이야기
-            </p>
+                  />
+                }
+              />
+            ) : (
+              <PaperTitleCover
+                dateLabel={format(new Date(), "yyyy · MM · dd")}
+                metaLabel={`${draft.category} · ${(draft.categoryCount ?? 0) + 1}번째 이야기`}
+                weeklyCount={draft.weeklyWorkoutCount}
+                streakWeeks={draft.continuousGoalWeeks}
+                title={
+                  <input
+                    maxLength={18}
+                    className="w-full bg-transparent text-[38px] font-bold leading-[1.15] tracking-[-0.01em] text-[#4A312B] outline-none placeholder:text-[#8E837A]"
+                    type="text"
+                    placeholder={getDefaultPostTitle(draft.category)}
+                    autoFocus
+                    value={draft.title ?? ""}
+                    onChange={(e) => {
+                      setPost({ title: e.target.value });
+                    }}
+                  />
+                }
+              />
+            )}
           </div>
         </div>
       </div>

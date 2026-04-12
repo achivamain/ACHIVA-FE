@@ -10,10 +10,14 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import { Pagination, Navigation } from "swiper/modules";
+import { isAlbumCategory } from "@/lib/postPageTheme";
 
 export default function ImageUploader() {
-  const isMobile = window.innerWidth < 640;
-  const size = isMobile ? window.innerWidth - 40 : 480;
+  const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+  const isMobile = viewportWidth !== null && viewportWidth < 640;
+  const size = viewportWidth !== null ? Math.min(viewportWidth - 40, 480) : 480;
+  const draftCategory = useDraftPostStore.use.post().category;
+  const isAlbumPost = isAlbumCategory(draftCategory);
   const setPost = useDraftPostStore.use.setPost();
   const handleNextStep = useCreatePostStepStore.use.handleNextStep();
   const input = useRef<HTMLInputElement | null>(null);
@@ -53,6 +57,16 @@ export default function ImageUploader() {
       swiperRef.current.slideTo(images.length - 1);
     }
   }, [images.length]);
+
+  useEffect(() => {
+    const updateViewportWidth = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    updateViewportWidth();
+    window.addEventListener("resize", updateViewportWidth);
+    return () => window.removeEventListener("resize", updateViewportWidth);
+  }, []);
 
   const openFilePicker = () => {
     if (window.ReactNativeWebView) {
@@ -115,12 +129,18 @@ export default function ImageUploader() {
 
             <div className="text-center">
               <p className="text-[18px] font-bold text-[#412A2A] mb-1">
-                {isMobile
-                  ? "표지에 넣을 사진 선택"
-                  : "표지에 넣을 사진을 업로드하세요"}
+                {isAlbumPost
+                  ? isMobile
+                    ? "표지 사진 선택"
+                    : "표지 사진을 업로드하세요"
+                  : isMobile
+                    ? "게시글 사진 선택"
+                    : "게시글에 넣을 사진을 업로드하세요"}
               </p>
               <p className="text-[13px] text-[#7A5040]/70 font-medium">
-                최대 5장 · 표지에 어울리게 정사각형으로 편집됩니다
+                {isAlbumPost
+                  ? "첫 번째 사진이 표지로 보여지고, 최대 5장까지 담을 수 있어요"
+                  : "최대 5장 · 게시글 마지막에 사진으로 함께 보여져요"}
               </p>
             </div>
           </div>
@@ -266,17 +286,31 @@ export default function ImageUploader() {
         </div>
       ) : (
         <div className="w-full">
-          <button
-            className="flex items-center justify-center
-              w-full h-11 rounded-xl
-              font-medium text-[15px] text-[#7A5040]/70
-              bg-transparent hover:bg-[#f0e8e0]
-              border border-[#C0A898]/40
-              transition-all duration-200"
-            onClick={handleNextStep}
-          >
-            사진 없이 계속하기
-          </button>
+          {isAlbumPost ? (
+            <button
+              className="flex items-center justify-center
+                w-full h-11 rounded-xl
+                font-medium text-[15px] text-[#b3b3b3]
+                bg-[#f2f2f2]
+                border border-[#e6e6e6]
+                cursor-not-allowed"
+              disabled
+            >
+              앨범은 사진 등록이 필수입니다
+            </button>
+          ) : (
+            <button
+              className="flex items-center justify-center
+                w-full h-11 rounded-xl
+                font-medium text-[15px] text-[#7A5040]/70
+                bg-transparent hover:bg-[#f0e8e0]
+                border border-[#C0A898]/40
+                transition-all duration-200"
+              onClick={handleNextStep}
+            >
+              사진 없이 계속하기
+            </button>
+          )}
         </div>
       )}
 
